@@ -17,12 +17,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
+import com.lczarny.lsnplanner.presentation.components.DropDownItem
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.InfoField
 import com.lczarny.lsnplanner.presentation.components.LabeledCheckbox
@@ -34,6 +36,7 @@ import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.navigation.HomeRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.LessonPlanState
+import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.toLessonPlanTypeLabelMap
 
 @Composable
 fun LessonPlanScreen(
@@ -71,14 +74,21 @@ fun LessonPlanScreen(
 
 @Composable
 fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewModel()) {
+    val lessonPlanId by remember { viewModel.lessonPlanId }
     var planName by remember { viewModel.planName }
     var planNameError by remember { viewModel.planNameError }
     var planType by remember { viewModel.planType }
     var planIsDefault by remember { viewModel.planIsDefault }
     var planIsDefaultEnabled by remember { viewModel.planIsDefaultEnabled }
 
+    val toLessonPlanTypeLabelMap = toLessonPlanTypeLabelMap(LocalContext.current)
+
     Scaffold(
-        topBar = { AppNavBar(title = stringResource(R.string.route_new_lesson_plan)) },
+        topBar = {
+            AppNavBar(
+                title = stringResource(if (lessonPlanId >= 0) R.string.route_edit_lesson_plan else R.string.route_new_lesson_plan)
+            )
+        },
         bottomBar = {
             PrimaryButton(
                 modifier = Modifier
@@ -115,9 +125,9 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewMod
             OutlinedDropDown(
                 modifier = Modifier.padding(bottom = AppPadding.lgInputSpacerPadding),
                 label = stringResource(R.string.plan_type),
-                value = planType.raw,
-                onValueChange = { typeRaw -> viewModel.updatePlanType(LessonPlanType.from(typeRaw)) },
-                items = LessonPlanType.entries.map { it.raw }
+                value = DropDownItem(planType, toLessonPlanTypeLabelMap.getValue(planType)),
+                onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
+                items = LessonPlanType.entries.map { DropDownItem(it, toLessonPlanTypeLabelMap.getValue(it)) }
             )
             LabeledCheckbox(
                 label = stringResource(R.string.plan_make_default),

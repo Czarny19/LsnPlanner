@@ -195,16 +195,21 @@ fun OutlinedDateTimePicker(modifier: Modifier = Modifier, label: String, initial
     }
 }
 
+data class DropDownItem(
+    val value: Any,
+    val description: String
+)
+
 @Composable
 fun OutlinedDropDown(
     modifier: Modifier = Modifier,
     label: String,
-    items: List<String>,
-    value: String?,
-    onValueChange: (String) -> Unit
+    items: List<DropDownItem>,
+    value: DropDownItem,
+    onValueChange: (DropDownItem) -> Unit
 ) {
     var fieldSize by remember { mutableStateOf(Size.Zero) }
-    var seleced by remember { mutableStateOf(value ?: "") }
+    var seleced by remember { mutableStateOf<DropDownItem>(value) }
     var expanded by remember { mutableStateOf(false) }
 
     val icon = when (expanded) {
@@ -214,15 +219,15 @@ fun OutlinedDropDown(
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            value = seleced,
-            onValueChange = onValueChange,
             modifier = modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates -> fieldSize = coordinates.size.toSize() },
+            value = seleced.description,
+            onValueChange = { },
             label = { Text(text = label) },
             trailingIcon = {
                 Icon(
-                    modifier = Modifier.clickable { expanded = !expanded },
+                    modifier = Modifier.clickable { expanded = expanded.not() },
                     imageVector = icon,
                     contentDescription = stringResource(R.string.show_options),
                 )
@@ -240,7 +245,7 @@ fun OutlinedDropDown(
                         seleced = item
                         expanded = false
                     },
-                    text = { Text(text = item) }
+                    text = { Text(text = item.description) }
                 )
             }
         }

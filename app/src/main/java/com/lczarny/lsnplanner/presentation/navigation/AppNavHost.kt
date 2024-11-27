@@ -36,7 +36,7 @@ fun AppNavHost(
 
         composable<ToDoRoute> { backStackEntry ->
             val toDo: ToDoRoute = backStackEntry.toRoute()
-            ToDoScreen(navController, toDo.lessonPlanId, toDo.toDoId)
+            ToDoScreen(navController, lessonPlanId = toDo.lessonPlanId, toDoId = toDo.toDoId)
         }
     }
 }

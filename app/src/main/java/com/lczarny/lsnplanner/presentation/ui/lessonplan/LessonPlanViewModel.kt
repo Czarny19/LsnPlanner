@@ -1,9 +1,10 @@
 package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.entity.LessonPlan
+import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.LessonPlanState
@@ -11,11 +12,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toKotlinInstant
-import kotlinx.datetime.toLocalDateTime
 import java.util.Calendar
 import javax.inject.Inject
 
@@ -25,9 +24,11 @@ class LessonPlanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<LessonPlanState>(LessonPlanState.Loading)
-    private val _planToEdit = MutableStateFlow<LessonPlan?>(null)
 
     val screenState = _screenState.asStateFlow()
+
+    var lessonPlanId = mutableLongStateOf(-1L)
+        private set
 
     var planName = mutableStateOf("")
         private set
@@ -44,20 +45,6 @@ class LessonPlanViewModel @Inject constructor(
     var planIsDefaultEnabled = mutableStateOf(false)
         private set
 
-    fun initializePlan(firstLaunch: Boolean, planId: Long?) {
-        when (planId) {
-            null -> {
-                _screenState.update { LessonPlanState.Edit }
-                planIsDefault.value = firstLaunch
-                planIsDefaultEnabled.value = !firstLaunch
-            }
-
-            else -> {
-                _screenState.update { LessonPlanState.Edit }
-            }
-        }
-    }
-
     fun updatePlanName(value: String) {
         planName.value = value
         planNameError.value = false
@@ -71,6 +58,30 @@ class LessonPlanViewModel @Inject constructor(
         planIsDefault.value = value
     }
 
+    fun initializePlan(firstLaunch: Boolean, lessonPlanId: Long?) {
+        when (lessonPlanId) {
+            null -> {
+                _screenState.update { LessonPlanState.Edit }
+                planIsDefault.value = firstLaunch
+                planIsDefaultEnabled.value = firstLaunch.not()
+            }
+
+            else -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    lessonPlanRepository.lessonPlan(lessonPlanId).flowOn(Dispatchers.IO).collect { plan ->
+                        this@LessonPlanViewModel.lessonPlanId.longValue = plan.id!!
+                        planName.value = plan.name
+                        planType.value = plan.type
+                        planIsDefault.value = plan.isDefault
+                        planIsDefaultEnabled.value = true
+                    }
+                }.invokeOnCompletion {
+                    _screenState.update { LessonPlanState.Edit }
+                }
+            }
+        }
+    }
+
     fun savePlan() {
         if (planName.value.isEmpty()) {
             planNameError.value = true
@@ -80,14 +91,28 @@ class LessonPlanViewModel @Inject constructor(
         _screenState.value = LessonPlanState.Saving
 
         viewModelScope.launch(Dispatchers.IO) {
-            val lessonPlan = _planToEdit.value ?: LessonPlan(
-                name = planName.value,
-                type = planType.value,
-                isDefault = planIsDefault.value,
-                createDate = Calendar.getInstance().toInstant().toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault())
-            )
-
-            lessonPlanRepository.insert(lessonPlan)
+            if (lessonPlanId.longValue >= 0) {
+                LessonPlanModel(
+                    id = lessonPlanId.longValue,
+                    name = planName.value,
+                    type = planType.value,
+                    isDefault = planIsDefault.value,
+                    createDate = Calendar.getInstance().timeInMillis
+                ).run {
+                    // TODO update
+                    // TODO is default zdjąć z innych
+                }
+            } else {
+                LessonPlanModel(
+                    name = planName.value,
+                    type = planType.value,
+                    isDefault = planIsDefault.value,
+                    createDate = Calendar.getInstance().timeInMillis
+                ).run {
+                    // TODO is default zdjąć z innych
+                    lessonPlanRepository.insert(this)
+                }
+            }
         }.invokeOnCompletion {
             _screenState.value = LessonPlanState.Finished
         }

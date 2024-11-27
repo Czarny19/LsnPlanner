@@ -1,15 +1,17 @@
 package com.lczarny.lsnplanner.data.local.repository
 
 import com.lczarny.lsnplanner.data.local.dao.ToDoDao
-import com.lczarny.lsnplanner.data.local.entity.ToDo
+import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.data.local.model.VarArgsId
+import com.lczarny.lsnplanner.data.local.model.mapToModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ToDoRepository(private val toDoDao: ToDoDao) {
 
-    fun allToDos(lessonPlanId: Long): Flow<List<ToDo>> = toDoDao.getAllToDos(lessonPlanId)
+    fun allToDos(lessonPlanId: Long): Flow<List<ToDoModel>> = toDoDao.getAllToDos(lessonPlanId).map { it.map { it.mapToModel() } }
 
-    suspend fun insert(toDo: ToDo) {
+    suspend fun insert(toDo: ToDoModel) {
         toDoDao.insertToDo(toDo)
     }
 

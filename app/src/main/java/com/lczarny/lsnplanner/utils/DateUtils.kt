@@ -3,11 +3,15 @@ package com.lczarny.lsnplanner.utils
 import android.content.Context
 import android.text.format.DateFormat
 import com.lczarny.lsnplanner.R
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
+import java.time.ZoneId
 import java.util.Calendar
 
 fun getDayOfWeekDisplayValue(context: Context): String {
@@ -29,3 +33,7 @@ fun convertMillisToSystemDateTime(context: Context, milis: Long): String {
     val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(milis)
     return "$date $time"
 }
+
+fun LocalDateTime.toMillis(zone: ZoneId = ZoneId.systemDefault()) = toJavaLocalDateTime().atZone(zone)?.toInstant()?.toEpochMilli()
+
+fun Long.toLocalDateTime(zone: TimeZone = TimeZone.currentSystemDefault()) = Instant.fromEpochMilliseconds(this).toLocalDateTime(zone)

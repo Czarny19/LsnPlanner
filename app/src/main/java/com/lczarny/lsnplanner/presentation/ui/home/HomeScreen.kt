@@ -1,8 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.home
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -45,7 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClasses
+import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
@@ -84,12 +82,12 @@ fun HomeScreen(navController: NavController, firstLaunch: Boolean, viewModel: Ho
 }
 
 @Composable
-fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: LessonPlanWithClasses, viewModel: HomeViewModel) {
+fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: LessonPlanWithClassesModel, viewModel: HomeViewModel) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val firstLaunchDone by viewModel.firstLaunchDone.collectAsState()
 
-    if (firstLaunch && !firstLaunchDone) {
+    if (firstLaunch && firstLaunchDone.not()) {
         LaunchedEffect(true) {
             snackbarHostState.showSnackbar(
                 message = context.getString(R.string.snackbar_create_first_plan),
@@ -138,32 +136,27 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
 
             if (currentRoute == toDoTab.id) {
                 FloatingActionButton(
-                    onClick = { navController.navigate(ToDoRoute(lessonPlan.plan.id)) },
+                    onClick = { navController.navigate(ToDoRoute(lessonPlan.plan.id!!)) },
                     content = { Icon(Icons.Filled.Add, stringResource(R.string.todo_add)) }
                 )
             }
         },
         floatingActionButtonPosition = FabPosition.End,
         content = { padding ->
-            Column(
-                modifier = Modifier.padding(padding),
-                content = {
-                    NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
-                        composable(classesTab.id) {
-                            Text(classesTab.id)
-                        }
-                        composable(calendarTab.id) {
-                            Text(calendarTab.id)
-                        }
-                        composable(toDoTab.id) {
-                            ToDosTab()
-                        }
-                        composable(moreTab.id) {
-                            Text(moreTab.id)
-                        }
-                    }
+            NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
+                composable(classesTab.id) {
+                    Text(classesTab.id)
                 }
-            )
+                composable(calendarTab.id) {
+                    Text(calendarTab.id)
+                }
+                composable(toDoTab.id) {
+                    ToDosTab(padding)
+                }
+                composable(moreTab.id) {
+                    Text(moreTab.id)
+                }
+            }
         }
     )
 }

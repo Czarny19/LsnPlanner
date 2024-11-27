@@ -24,10 +24,10 @@ class StartViewModel @Inject constructor(
     val screenState = _screenState.asStateFlow()
 
     init {
-        getDefaultLessonPlan()
+        checkIfDefaultPlanExists()
     }
 
-    private fun getDefaultLessonPlan() {
+    private fun checkIfDefaultPlanExists() {
         viewModelScope.launch(Dispatchers.Main) {
             delay(1000)
 

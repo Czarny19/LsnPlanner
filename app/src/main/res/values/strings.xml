@@ -15,7 +15,7 @@
 
     <!-- Routes -->
     <string name="route_new_lesson_plan">New lesson plan</string>
-    <string name="route_lesson_plan">Lesson plan</string>
+    <string name="route_edit_lesson_plan">Edit lesson plan</string>
     <string name="route_new_todo">New to-do</string>
     <string name="route_edit_todo">Edit to-do</string>
 
@@ -54,14 +54,20 @@
     <string name="plan_type">Plan type</string>
     <string name="plan_make_default">Set this plan as the default plan</string>
     <string name="plan_save">Save plan</string>
+    <string name="plan_type_school">School</string>
+    <string name="plan_type_uni">University</string>
 
     <!-- ToDos  -->
     <string name="todo_add">Add a ToDo</string>
     <string name="todo_list_empty_hint">No to-dos left ☺️.\n Use the \'+\' button to create a new to-do.</string>
     <string name="todo_content">To-do text</string>
     <string name="todo_due_date">Due date</string>
-    <string name="todo_due_date_info">To-dos with the most recent due date will appear at the top of the to-do list.</string>
+    <string name="todo_details_info">To-dos with the highest importance and the most recent due date will appear at the top of the to-do list.</string>
     <string name="todo_details">Details</string>
     <string name="todo_save">Save to-do</string>
+    <string name="todo_importance">Importance</string>
+    <string name="todo_importance_low">Low</string>
+    <string name="todo_importance_medium">Medium</string>
+    <string name="todo_importance_high">High</string>
 
 </resources>

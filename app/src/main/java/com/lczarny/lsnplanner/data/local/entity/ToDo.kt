@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import kotlinx.datetime.LocalDateTime
+import com.lczarny.lsnplanner.data.local.model.ToDoImportance
 import kotlinx.serialization.Required
 
 @Entity(
@@ -26,11 +26,11 @@ import kotlinx.serialization.Required
     ]
 )
 data class ToDo(
-    @PrimaryKey(autoGenerate = true) val id: Long = 1,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     @Required val content: String,
-    val historical: Boolean = false,
-//    val importance: ,
-    @ColumnInfo(name = "due_date") val dueDate: LocalDateTime? = null,
-    @ColumnInfo(name = "class_id", index = true) val classId: Long? = null,
+    @ColumnInfo(defaultValue = "false") val historical: Boolean,
+    @ColumnInfo(defaultValue = "3") val importance: ToDoImportance,
+    @ColumnInfo(name = "due_date", defaultValue = "NULL") val dueDate: Long?,
+    @ColumnInfo(name = "class_id", index = true, defaultValue = "NULL") val classId: Long?,
     @ColumnInfo(name = "lesson_plan_id", index = true) val lessonPlanId: Long,
 )

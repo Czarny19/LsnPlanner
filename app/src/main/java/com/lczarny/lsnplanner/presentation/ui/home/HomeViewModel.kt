@@ -2,8 +2,8 @@ package com.lczarny.lsnplanner.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.entity.ToDo
-import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClasses
+import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
+import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.repository.ToDoRepository
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
@@ -25,8 +25,8 @@ class HomeViewModel @Inject constructor(
     private val _screenState = MutableStateFlow<HomeState>(HomeState.Loading)
     private val _firstLaunchDone = MutableStateFlow<Boolean>(false)
 
-    private val _lessonPlan = MutableStateFlow<LessonPlanWithClasses?>(null)
-    private val _todos = MutableStateFlow<List<ToDo>>(emptyList<ToDo>())
+    private val _lessonPlan = MutableStateFlow<LessonPlanWithClassesModel?>(null)
+    private val _todos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
 
     val screenState = _screenState.asStateFlow()
     val firstLaunchDone = _firstLaunchDone.asStateFlow()
@@ -44,16 +44,16 @@ class HomeViewModel @Inject constructor(
 
     private fun getDefaultLessonPlan() {
         viewModelScope.launch(Dispatchers.IO) {
-            lessonPlanRepository.defaultLessonPlanWithClasses().flowOn(Dispatchers.IO).collect { lessonPlan: LessonPlanWithClasses ->
-                _lessonPlan.update { lessonPlan }
-                getToDos(lessonPlan.plan.id)
+            lessonPlanRepository.defaultLessonPlanWithClasses().flowOn(Dispatchers.IO).collect { plan ->
+                _lessonPlan.update { plan }
+                getToDos(plan.plan.id!!)
             }
         }
     }
 
     private fun getToDos(lessonPlanId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            toDoRepository.allToDos(lessonPlanId).flowOn(Dispatchers.IO).collect { toDos: List<ToDo> ->
+            toDoRepository.allToDos(lessonPlanId).flowOn(Dispatchers.IO).collect { toDos ->
                 _todos.update { toDos }
                 _screenState.update { HomeState.Ready }
             }

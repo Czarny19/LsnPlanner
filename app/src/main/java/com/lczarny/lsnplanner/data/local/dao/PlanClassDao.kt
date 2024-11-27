@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.lczarny.lsnplanner.data.local.entity.PlanClass
+import com.lczarny.lsnplanner.data.local.model.PlanClassModel
 import com.lczarny.lsnplanner.data.local.model.PlanClassWithToDos
 import com.lczarny.lsnplanner.data.local.model.VarArgsId
 import kotlinx.coroutines.flow.Flow
@@ -18,8 +19,8 @@ interface PlanClassDao {
     @Query("SELECT * FROM plan_class WHERE id = :id")
     fun getClassWithToDos(id: Long): Flow<PlanClassWithToDos>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertClass(lesson: PlanClass)
+    @Insert(entity = PlanClass::class, onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertClass(lesson: PlanClassModel)
 
     @Delete(entity = PlanClass::class)
     suspend fun deleteClass(vararg id: VarArgsId)
