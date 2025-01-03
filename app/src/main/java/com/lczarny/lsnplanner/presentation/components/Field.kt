@@ -173,6 +173,7 @@ fun OutlinedDateTimePicker(modifier: Modifier = Modifier, label: String, initial
     if (showDateDialog) {
         AppDatePickerDialog(
             initialValue = initialValue,
+            futureDatesOnly = true,
             onDismiss = { showDateDialog = false },
             onConfirm = { selectedDateMillis ->
                 dateTimeMilis = selectedDateMillis ?: 0

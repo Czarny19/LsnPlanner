@@ -13,9 +13,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -31,6 +33,8 @@ import androidx.compose.ui.window.Dialog
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.Calendar
 import java.util.Date
 
@@ -102,9 +106,26 @@ fun ConfirmationDialog(visible: Boolean, state: ConfirmationDialogState) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+object FutureSelectableDates : SelectableDates {
+    private val now = LocalDate.now()
+    private val dayStart = now.atTime(0, 0, 0, 0).toEpochSecond(ZoneOffset.UTC) * 1000
+
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        return utcTimeMillis >= dayStart
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return year >= now.year
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDatePickerDialog(initialValue: Long?, onDismiss: () -> Unit, onConfirm: (Long?) -> Unit) {
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = initialValue)
+fun AppDatePickerDialog(initialValue: Long?, futureDatesOnly: Boolean = false, onDismiss: () -> Unit, onConfirm: (Long?) -> Unit) {
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = initialValue,
+        selectableDates = if (futureDatesOnly) FutureSelectableDates else DatePickerDefaults.AllDates
+    )
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
