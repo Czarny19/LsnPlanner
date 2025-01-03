@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavBar(title: String, navIcon: @Composable (() -> Unit) = {}, actions: @Composable (RowScope.() -> Unit) = {}) {
+fun AppNavBar(title: String, navIcon: @Composable () -> Unit = {}, actions: @Composable RowScope.() -> Unit = {}) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     TopAppBar(

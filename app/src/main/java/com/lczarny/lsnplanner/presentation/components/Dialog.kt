@@ -73,6 +73,34 @@ fun SavingDialog(show: Boolean) {
     }
 }
 
+data class ConfirmationDialogState(
+    var title: String,
+    var text: String,
+    var onDismiss: () -> Unit,
+    var onConfirm: () -> Unit
+)
+
+val closedConfirmationDialogState = ConfirmationDialogState(
+    title = "",
+    text = "",
+    onDismiss = {},
+    onConfirm = {}
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ConfirmationDialog(visible: Boolean, state: ConfirmationDialogState) {
+    if (visible) {
+        AlertDialog(
+            title = { Text(state.title) },
+            text = { Text(state.text) },
+            onDismissRequest = state.onDismiss,
+            confirmButton = { TextButton(onClick = state.onConfirm) { Text(stringResource(R.string.confirm)) } },
+            dismissButton = { TextButton(onClick = state.onDismiss) { Text(stringResource(R.string.cancel)) } }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDatePickerDialog(initialValue: Long?, onDismiss: () -> Unit, onConfirm: (Long?) -> Unit) {

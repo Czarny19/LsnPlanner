@@ -152,7 +152,7 @@ fun OutlinedDateTimePicker(modifier: Modifier = Modifier, label: String, initial
     var showTimeDialog by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        value = initialValue?.let { convertMillisToSystemDateTime(context, it) } ?: "",
+        value = initialValue?.convertMillisToSystemDateTime(context) ?: "",
         onValueChange = { },
         label = { Text(label) },
         placeholder = { Text("MM/DD/YYYY") },

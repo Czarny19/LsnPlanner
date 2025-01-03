@@ -1,19 +1,23 @@
 package com.lczarny.lsnplanner.presentation.ui.home
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Class
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.Class
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -50,8 +54,11 @@ import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.navigation.ToDoRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
+import com.lczarny.lsnplanner.presentation.ui.home.more.MoreTab
 import com.lczarny.lsnplanner.presentation.ui.home.todos.ToDosTab
 import com.lczarny.lsnplanner.utils.getDayOfWeekDisplayValue
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 data class TabBarItem(
     val id: String,
@@ -59,6 +66,11 @@ data class TabBarItem(
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 )
+
+enum class HomeScreenSnackbar {
+    FirstLaunch,
+    DeleteHistoricalToDos,
+}
 
 @Composable
 fun HomeScreen(navController: NavController, firstLaunch: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
@@ -84,16 +96,31 @@ fun HomeScreen(navController: NavController, firstLaunch: Boolean, viewModel: Ho
 @Composable
 fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: LessonPlanWithClassesModel, viewModel: HomeViewModel) {
     val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
+
     val firstLaunchDone by viewModel.firstLaunchDone.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarChannel = remember { Channel<HomeScreenSnackbar>(Channel.CONFLATED) }
+
+    LaunchedEffect(snackbarChannel) {
+        snackbarChannel.receiveAsFlow().collect {
+            when (it) {
+                HomeScreenSnackbar.FirstLaunch -> snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.snackbar_create_first_plan),
+                    withDismissAction = true
+                )
+
+                HomeScreenSnackbar.DeleteHistoricalToDos -> snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.todo_delete_all_historical_snackbar),
+                    withDismissAction = true
+                )
+            }
+        }
+    }
 
     if (firstLaunch && firstLaunchDone.not()) {
         LaunchedEffect(true) {
-            snackbarHostState.showSnackbar(
-                message = context.getString(R.string.snackbar_create_first_plan),
-                withDismissAction = true
-            )
-
+            snackbarChannel.trySend(HomeScreenSnackbar.FirstLaunch)
             viewModel.setFirstLaunchDone()
         }
     }
@@ -126,9 +153,37 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
     val tabBarItems = listOf(classesTab, calendarTab, toDoTab, moreTab)
     val bottomBarNavController = rememberNavController()
 
+    val showHistoricalToDos by viewModel.showHistoricalToDos.collectAsState()
+
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
-        topBar = { AppNavBar("${lessonPlan.plan.name} (${getDayOfWeekDisplayValue(context)})") },
+        topBar = {
+            val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+
+            AppNavBar(
+                title = when (currentRoute) {
+                    classesTab.id -> "${getDayOfWeekDisplayValue(context)} (${lessonPlan.plan.name})"
+                    calendarTab.id -> stringResource(R.string.home_tab_calendar)
+                    toDoTab.id -> stringResource(R.string.home_tab_to_dos)
+                    else -> stringResource(R.string.home_tab_more)
+                },
+                actions = {
+                    when (currentRoute) {
+                        toDoTab.id -> Row {
+                            IconButton(onClick = { viewModel.switchShowHistoricalToDos() }) {
+                                Icon(
+                                    imageVector = if (showHistoricalToDos) Icons.Filled.CheckBox else Icons.Outlined.CheckBox,
+                                    contentDescription = stringResource(R.string.todo_show_done)
+                                )
+                            }
+                        }
+
+                        else -> null
+                    }
+                }
+            )
+        },
         bottomBar = { TabView(tabBarItems, bottomBarNavController) },
         floatingActionButton = {
             val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
@@ -151,10 +206,11 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
                     Text(calendarTab.id)
                 }
                 composable(toDoTab.id) {
-                    ToDosTab(padding)
+                    val toDos by viewModel.toDos.collectAsState()
+                    ToDosTab(padding, viewModel, navController, lessonPlan.plan.id!!, toDos, showHistoricalToDos)
                 }
                 composable(moreTab.id) {
-                    Text(moreTab.id)
+                    MoreTab(padding, viewModel, snackbarChannel)
                 }
             }
         }

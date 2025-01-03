@@ -12,6 +12,9 @@
     <string name="show_options">Show options</string>
     <string name="card_animation">Card animation</string>
     <string name="drop_down_arrow">Drop-Down Arrow</string>
+    <string name="done">Done</string>
+    <string name="delete">Delete</string>
+    <string name="confirm">Confirm</string>
 
     <!-- Routes -->
     <string name="route_new_lesson_plan">New lesson plan</string>
@@ -69,5 +72,10 @@
     <string name="todo_importance_low">Low</string>
     <string name="todo_importance_medium">Medium</string>
     <string name="todo_importance_high">High</string>
+    <string name="todo_done">To-do done</string>
+    <string name="todo_show_done">Show done</string>
+    <string name="todo_delete_all_historical">Delete all historical To-dos</string>
+    <string name="todo_delete_all_historical_msg">Are you sure you want to delete all of the historical to-dos?</string>
+    <string name="todo_delete_all_historical_snackbar">Deleted all historical To-dos!</string>
 
 </resources>

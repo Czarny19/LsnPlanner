@@ -91,7 +91,7 @@ class ToDoViewModel @Inject constructor(
                     lessonPlanId = lessonPlanId.longValue,
                     classId = classId.value
                 ).run {
-                    // TODO update
+                    toDoRepository.update(this)
                 }
             } else {
                 ToDoModel(

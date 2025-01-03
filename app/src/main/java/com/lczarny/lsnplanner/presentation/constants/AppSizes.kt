@@ -8,5 +8,9 @@ class AppSizes {
 
         val xlIcon = 64.dp
         val lgIcon = 48.dp
+        val mdIcon = 32.dp
+        val smIcon = 16.dp
+
+        val chipHeight = 28.dp
     }
 }

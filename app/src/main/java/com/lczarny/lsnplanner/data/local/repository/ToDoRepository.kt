@@ -15,7 +15,19 @@ class ToDoRepository(private val toDoDao: ToDoDao) {
         toDoDao.insertToDo(toDo)
     }
 
+    suspend fun update(toDo: ToDoModel) {
+        toDoDao.updateToDo(toDo)
+    }
+
     suspend fun delete(id: Long) {
         toDoDao.deleteToDo(VarArgsId(id))
+    }
+
+    suspend fun deleteAllHistorical() {
+        toDoDao.deleteHistoricalToDos()
+    }
+
+    suspend fun markAsComplete(id: Long) {
+        toDoDao.markToDoAsComplete(id)
     }
 }

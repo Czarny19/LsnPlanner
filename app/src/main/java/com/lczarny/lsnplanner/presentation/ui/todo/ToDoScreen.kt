@@ -61,7 +61,7 @@ fun ToDoScreen(
     viewModel: ToDoViewModel = hiltViewModel(),
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    val toDosList by homeViewModel.todos.collectAsState()
+    val toDosList by homeViewModel.toDos.collectAsState()
     viewModel.intializeToDo(lessonPlanId, classId, toDosList.find { toDo -> toDo.id == toDoId })
 
     val screenState by viewModel.screenState.collectAsState()

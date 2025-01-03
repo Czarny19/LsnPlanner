@@ -15,8 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.presentation.constants.AppPadding
+import com.lczarny.lsnplanner.presentation.constants.AppSizes
 
 @Composable
 fun EmptyList(label: String) {
@@ -26,13 +27,13 @@ fun EmptyList(label: String) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(AppSizes.xlIcon),
             imageVector = Icons.Outlined.ContentPasteOff,
             contentDescription = stringResource(R.string.no_items_available),
         )
         Text(
             text = label,
-            modifier = Modifier.padding(top = 24.dp),
+            modifier = Modifier.padding(top = AppPadding.lgPadding),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )

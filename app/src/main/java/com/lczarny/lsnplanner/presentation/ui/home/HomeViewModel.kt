@@ -6,6 +6,8 @@ import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
 import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.repository.ToDoRepository
+import com.lczarny.lsnplanner.presentation.components.ConfirmationDialogState
+import com.lczarny.lsnplanner.presentation.components.closedConfirmationDialogState
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -25,14 +27,21 @@ class HomeViewModel @Inject constructor(
     private val _screenState = MutableStateFlow<HomeState>(HomeState.Loading)
     private val _firstLaunchDone = MutableStateFlow<Boolean>(false)
 
+    private val _confirmDialogState = MutableStateFlow<ConfirmationDialogState>(closedConfirmationDialogState.copy())
+
     private val _lessonPlan = MutableStateFlow<LessonPlanWithClassesModel?>(null)
-    private val _todos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
+
+    private val _showHistoricalToDos = MutableStateFlow<Boolean>(false)
+    private val _toDos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
 
     val screenState = _screenState.asStateFlow()
     val firstLaunchDone = _firstLaunchDone.asStateFlow()
+    val confirmDialogState = _confirmDialogState.asStateFlow()
 
     val lessonPlan = _lessonPlan.asStateFlow()
-    val todos = _todos.asStateFlow()
+
+    val showHistoricalToDos = _showHistoricalToDos.asStateFlow()
+    val toDos = _toDos.asStateFlow()
 
     init {
         getDefaultLessonPlan()
@@ -40,6 +49,24 @@ class HomeViewModel @Inject constructor(
 
     fun setFirstLaunchDone() {
         _firstLaunchDone.update { true }
+    }
+
+    fun switchShowHistoricalToDos() {
+        _showHistoricalToDos.update { !_showHistoricalToDos.value }
+    }
+
+    fun setConfirmationDialogState(title: String, text: String, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+        _confirmDialogState.update {
+            _confirmDialogState.value.apply {
+                this.title = title
+                this.text = text
+                this.onDismiss = {
+                    onDismiss.invoke()
+                    _confirmDialogState.update { closedConfirmationDialogState.copy() }
+                }
+                this.onConfirm = onConfirm
+            }
+        }
     }
 
     private fun getDefaultLessonPlan() {
@@ -54,9 +81,34 @@ class HomeViewModel @Inject constructor(
     private fun getToDos(lessonPlanId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             toDoRepository.allToDos(lessonPlanId).flowOn(Dispatchers.IO).collect { toDos ->
-                _todos.update { toDos }
+                _toDos.update { toDos }
                 _screenState.update { HomeState.Ready }
             }
+        }
+    }
+
+    fun markToDoAsComplete(toDoId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            toDoRepository.markAsComplete(toDoId)
+        }.invokeOnCompletion {
+            getToDos(_lessonPlan.value!!.plan.id!!)
+        }
+    }
+
+    fun deleteToDo(toDoId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            toDoRepository.delete(toDoId)
+        }.invokeOnCompletion {
+            getToDos(_lessonPlan.value!!.plan.id!!)
+        }
+    }
+
+    fun deleteAllHistoricalToDos(onComplete: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            toDoRepository.deleteAllHistorical()
+        }.invokeOnCompletion {
+            getToDos(_lessonPlan.value!!.plan.id!!)
+            onComplete.invoke()
         }
     }
 }
