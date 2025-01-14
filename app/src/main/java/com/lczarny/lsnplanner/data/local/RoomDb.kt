@@ -6,18 +6,21 @@ import androidx.room.TypeConverters
 import com.lczarny.lsnplanner.data.local.coverters.EnumConverter
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
 import com.lczarny.lsnplanner.data.local.dao.PlanClassDao
+import com.lczarny.lsnplanner.data.local.dao.SettingDao
 import com.lczarny.lsnplanner.data.local.dao.ToDoDao
 import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 import com.lczarny.lsnplanner.data.local.entity.PlanClass
+import com.lczarny.lsnplanner.data.local.entity.Setting
 import com.lczarny.lsnplanner.data.local.entity.ToDo
 
 @Database(
-    version = 12,
+    version = 13,
     exportSchema = false,
     entities = [
         LessonPlan::class,
         PlanClass::class,
-        ToDo::class
+        ToDo::class,
+        Setting::class
     ]
 )
 @TypeConverters(EnumConverter::class)
@@ -26,4 +29,5 @@ abstract class RoomDb : RoomDatabase() {
     abstract fun lessonPlanDao(): LessonPlanDao
     abstract fun planClassDao(): PlanClassDao
     abstract fun toDoDao(): ToDoDao
+    abstract fun settingDao(): SettingDao
 }

@@ -13,3 +13,6 @@ data class LessonPlanRoute(val firstLaunch: Boolean = false, val lessonPlanId: L
 
 @Serializable
 data class ToDoRoute(val lessonPlanId: Long, val toDoId: Long? = null)
+
+@Serializable
+data class PlanClassRoute(val lessonPlanId: Long, val planClassId: Long? = null)

@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.lczarny.lsnplanner.presentation.ui.home.HomeScreen
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanScreen
+import com.lczarny.lsnplanner.presentation.ui.planclass.PlanClassScreen
 import com.lczarny.lsnplanner.presentation.ui.start.StartScreen
 import com.lczarny.lsnplanner.presentation.ui.todo.ToDoScreen
 
@@ -32,6 +33,11 @@ fun AppNavHost(
         composable<LessonPlanRoute> { backStackEntry ->
             val lessonPlan: LessonPlanRoute = backStackEntry.toRoute()
             LessonPlanScreen(navController, lessonPlan.firstLaunch, lessonPlan.lessonPlanId)
+        }
+
+        composable<PlanClassRoute> { backStackEntry ->
+            val planClass: PlanClassRoute = backStackEntry.toRoute()
+            PlanClassScreen(navController, planClass.lessonPlanId, planClass.planClassId)
         }
 
         composable<ToDoRoute> { backStackEntry ->

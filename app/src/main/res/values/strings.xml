@@ -7,6 +7,7 @@
     <string name="saving">Saving…</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="got_it">Got it</string>
     <string name="go_back">Wróc</string>
     <string name="write_here">Write here…</string>
     <string name="show_options">Show options</string>
@@ -15,6 +16,13 @@
     <string name="done">Done</string>
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial">Tutorial</string>
+    <string name="reset_tutorials">Reset tutorials</string>
+    <string name="reset_tutorials_done">Tutorials reset!</string>
+    <string name="reset_tutorials_msg">Are you sure you want to reset all of the tutorial messages?</string>
+    <string name="tutorial_todo_swipe">Swipe any to-do item below to the left to show more options.</string>
 
     <!-- Routes -->
     <string name="route_new_lesson_plan">New lesson plan</string>
@@ -60,13 +68,14 @@
     <string name="plan_type_school">School</string>
     <string name="plan_type_uni">University</string>
 
-    <!-- ToDos  -->
+    <!-- Classes -->
+    <string name="class_add">Add a Class</string>
+
+    <!-- ToDos -->
     <string name="todo_add">Add a ToDo</string>
     <string name="todo_list_empty_hint">No to-dos left ☺️.\n Use the \'+\' button to create a new to-do.</string>
-    <string name="todo_content">To-do text</string>
     <string name="todo_due_date">Due date</string>
     <string name="todo_details_info">To-dos with the highest importance and the most recent due date will appear at the top of the to-do list.</string>
-    <string name="todo_details">Details</string>
     <string name="todo_save">Save to-do</string>
     <string name="todo_importance">Importance</string>
     <string name="todo_importance_low">Low</string>

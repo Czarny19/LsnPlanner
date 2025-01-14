@@ -1,5 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.todo
 
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.ToDoImportance
+import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
@@ -85,70 +87,69 @@ fun ToDoScreen(
 
 @Composable
 fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewModel) {
-    val toDoId by remember { viewModel.lessonPlanId }
-    var content by remember { viewModel.content }
+    val toDoData by viewModel.toDoData.collectAsState()
 
     var detailsExpanded by remember { mutableStateOf(false) }
-
     val rotationState by animateFloatAsState(
         targetValue = if (detailsExpanded) 180f else 0f,
         label = stringResource(R.string.card_animation)
     )
 
-    Scaffold(
-        topBar = {
-            AppNavBar(
-                title = stringResource(if (toDoId >= 0) R.string.route_edit_todo else R.string.route_new_todo),
-                navIcon = { AppBarBackIconButton(navController) },
-                actions = {
-                    IconButton(
-                        modifier = Modifier.rotate(rotationState),
-                        onClick = { detailsExpanded = detailsExpanded.not() },
-                        content = {
-                            Icon(
-                                imageVector = Icons.Outlined.ArrowDropDownCircle,
-                                contentDescription = stringResource(R.string.drop_down_arrow),
-                            )
-                        }
-                    )
-                    IconButton(
-                        onClick = { viewModel.saveToDo() },
-                        enabled = content.isEmpty().not(),
-                        content = {
-                            Icon(
-                                imageVector = Icons.Outlined.Check,
-                                contentDescription = stringResource(R.string.todo_save),
-                            )
-                        }
-                    )
-                }
-            )
-        }
-    ) { padding ->
-        SavingDialog(saving)
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-        ) {
-            ToDoDetails(viewModel, detailsExpanded)
-            FullScreenTextArea(
-                placeholder = stringResource(R.string.write_here),
-                value = content,
-                onValueChange = { name -> viewModel.updateContent(name) },
-            )
+    Log.d("Test", toDoData.toString())
+
+    toDoData?.let { toDoData ->
+        Scaffold(
+            topBar = {
+                AppNavBar(
+                    title = stringResource(if (toDoData.id != null) R.string.route_edit_todo else R.string.route_new_todo),
+                    navIcon = { AppBarBackIconButton(navController) },
+                    actions = {
+                        IconButton(
+                            modifier = Modifier.rotate(rotationState),
+                            onClick = { detailsExpanded = detailsExpanded.not() },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Outlined.ArrowDropDownCircle,
+                                    contentDescription = stringResource(R.string.drop_down_arrow),
+                                )
+                            }
+                        )
+                        IconButton(
+                            onClick = { viewModel.saveToDo() },
+                            enabled = toDoData.content.isEmpty().not(),
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Outlined.Check,
+                                    contentDescription = stringResource(R.string.todo_save),
+                                )
+                            }
+                        )
+                    }
+                )
+            }
+        ) { padding ->
+            SavingDialog(saving)
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+            ) {
+                ToDoDetails(viewModel, toDoData, detailsExpanded)
+                FullScreenTextArea(
+                    placeholder = stringResource(R.string.write_here),
+                    value = toDoData.content,
+                    onValueChange = { name -> viewModel.updateContent(name) },
+                )
+            }
         }
     }
 }
 
 @Composable
-fun ToDoDetails(viewModel: ToDoViewModel, visible: Boolean) {
-    val dueDate by remember { viewModel.dueDate }
-    val importance by remember { viewModel.importance }
-
+fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean) {
     if (visible.not()) {
         return
     }
@@ -178,14 +179,14 @@ fun ToDoDetails(viewModel: ToDoViewModel, visible: Boolean) {
             )
             OutlinedDateTimePicker(
                 modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
-                initialValue = dueDate,
+                initialValue = toDoData.dueDate,
                 label = stringResource(R.string.todo_due_date),
                 onDateTimeSelected = { dateMilis -> viewModel.updateDueDate(dateMilis) }
             )
             OutlinedDropDown(
                 modifier = Modifier.padding(bottom = AppPadding.smPadding),
                 label = stringResource(R.string.todo_importance),
-                value = DropDownItem(importance, toDoImportanceLabelMap.getValue(importance)),
+                value = DropDownItem(toDoData.importance, toDoImportanceLabelMap.getValue(toDoData.importance)),
                 onValueChange = { importance -> viewModel.updateImportance(importance.value as ToDoImportance) },
                 items = ToDoImportance.entries.map { DropDownItem(it, toDoImportanceLabelMap.getValue(it)) }
             )

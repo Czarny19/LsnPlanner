@@ -7,17 +7,17 @@ import com.lczarny.lsnplanner.data.local.entity.PlanClass
 import com.lczarny.lsnplanner.data.local.entity.ToDo
 
 data class PlanClassModel(
-    val id: Long? = null,
-    val name: String,
-    @ColumnInfo(name = "is_cyclical") val isCyclical: Boolean,
-    val note: String? = null,
-    @ColumnInfo(name = "week_day") val weekDay: Int? = null,
-    @ColumnInfo(name = "start_time") val startTime: Long? = null,
-    @ColumnInfo(name = "end_time") val endTime: Long? = null,
-    @ColumnInfo(name = "single_date") val singleDate: Long? = null,
-    @ColumnInfo(name = "class_address") val classAddress: String? = null,
-    @ColumnInfo(name = "class_number") val classNumber: String? = null,
-    @ColumnInfo(name = "lesson_plan_id") val lessonPlanId: Long,
+    var id: Long? = null,
+    var name: String,
+    @ColumnInfo(name = "is_cyclical") var isCyclical: Boolean,
+    var note: String? = null,
+    @ColumnInfo(name = "week_day") var weekDay: Int? = null,
+    @ColumnInfo(name = "start_time") var startTime: Long? = null,
+    @ColumnInfo(name = "end_time") var endTime: Long? = null,
+    @ColumnInfo(name = "single_date") var singleDate: Long? = null,
+    @ColumnInfo(name = "class_address") var classAddress: String? = null,
+    @ColumnInfo(name = "class_number") var classNumber: String? = null,
+    @ColumnInfo(name = "lesson_plan_id") var lessonPlanId: Long,
 )
 
 fun PlanClass.mapToModel() = PlanClassModel(

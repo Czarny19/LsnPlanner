@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.android.material)
-    implementation(libs.android.accompanist)
 
     implementation(libs.androidx.compose.runtime)
     implementation(platform(libs.androidx.compose.bom))
@@ -80,6 +79,12 @@ dependencies {
     implementation(libs.okhttp.logging.interceptor)
 
     testImplementation(libs.junit)
+    testImplementation(libs.mockito.inline)
 
+    androidTestImplementation(libs.androidx.compose.test.junit4)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.testng)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.compose.test.manifest)
 }

@@ -1,7 +1,5 @@
 package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
@@ -24,97 +22,76 @@ class LessonPlanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<LessonPlanState>(LessonPlanState.Loading)
+    private val _lessonPlanData = MutableStateFlow<LessonPlanModel?>(null)
+
+    private val _planNameError = MutableStateFlow(false)
+
+    private val _planIsDefault = MutableStateFlow(false)
+    private val _planIsDefaultEnabled = MutableStateFlow(false)
 
     val screenState = _screenState.asStateFlow()
-
-    var lessonPlanId = mutableLongStateOf(-1L)
-        private set
-
-    var planName = mutableStateOf("")
-        private set
-
-    var planNameError = mutableStateOf(false)
-        private set
-
-    var planType = mutableStateOf(LessonPlanType.School)
-        private set
-
-    var planIsDefault = mutableStateOf(false)
-        private set
-
-    var planIsDefaultEnabled = mutableStateOf(false)
-        private set
+    val lessonPlanData = _lessonPlanData.asStateFlow()
+    val planNameError = _planNameError.asStateFlow()
+    val planIsDefaultEnabled = _planIsDefaultEnabled.asStateFlow()
 
     fun updatePlanName(value: String) {
-        planName.value = value
-        planNameError.value = false
+        _lessonPlanData.update { _lessonPlanData.value?.copy(name = value) }
+        _planNameError.update { false }
     }
 
     fun updatePlanType(value: LessonPlanType) {
-        planType.value = value
+        _lessonPlanData.update { _lessonPlanData.value?.copy(type = value) }
     }
 
     fun updatePlanIsDefault(value: Boolean) {
-        planIsDefault.value = value
+        _lessonPlanData.update { _lessonPlanData.value?.copy(isDefault = value) }
     }
 
     fun initializePlan(firstLaunch: Boolean, lessonPlanId: Long?) {
-        when (lessonPlanId) {
-            null -> {
-                _screenState.update { LessonPlanState.Edit }
-                planIsDefault.value = firstLaunch
-                planIsDefaultEnabled.value = firstLaunch.not()
+        if (lessonPlanId == null) {
+            _planIsDefault.update { firstLaunch }
+            _planIsDefaultEnabled.update { firstLaunch.not() }
+            _lessonPlanData.update {
+                LessonPlanModel(
+                    name = "",
+                    type = LessonPlanType.School,
+                    isDefault = firstLaunch,
+                    createDate = Calendar.getInstance().timeInMillis
+                )
             }
 
-            else -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    lessonPlanRepository.lessonPlan(lessonPlanId).flowOn(Dispatchers.IO).collect { plan ->
-                        this@LessonPlanViewModel.lessonPlanId.longValue = plan.id!!
-                        planName.value = plan.name
-                        planType.value = plan.type
-                        planIsDefault.value = plan.isDefault
-                        planIsDefaultEnabled.value = true
-                    }
-                }.invokeOnCompletion {
-                    _screenState.update { LessonPlanState.Edit }
+            _screenState.update { LessonPlanState.Edit }
+        } else {
+            viewModelScope.launch(Dispatchers.IO) {
+                lessonPlanRepository.lessonPlan(lessonPlanId).flowOn(Dispatchers.IO).collect { plan ->
+                    _lessonPlanData.update { plan }
+                    _planIsDefaultEnabled.update { true }
                 }
+            }.invokeOnCompletion {
+                _screenState.update { LessonPlanState.Edit }
             }
         }
     }
 
     fun savePlan() {
-        if (planName.value.isEmpty()) {
-            planNameError.value = true
-            return
-        }
-
-        _screenState.value = LessonPlanState.Saving
-
-        viewModelScope.launch(Dispatchers.IO) {
-            if (lessonPlanId.longValue >= 0) {
-                LessonPlanModel(
-                    id = lessonPlanId.longValue,
-                    name = planName.value,
-                    type = planType.value,
-                    isDefault = planIsDefault.value,
-                    createDate = Calendar.getInstance().timeInMillis
-                ).run {
-                    // TODO update
-                    // TODO is default zdjąć z innych
-                }
-            } else {
-                LessonPlanModel(
-                    name = planName.value,
-                    type = planType.value,
-                    isDefault = planIsDefault.value,
-                    createDate = Calendar.getInstance().timeInMillis
-                ).run {
-                    // TODO is default zdjąć z innych
-                    lessonPlanRepository.insert(this)
-                }
+        _lessonPlanData.value?.let {
+            if (it.name.isEmpty()) {
+                _planNameError.update { true }
+                return
             }
-        }.invokeOnCompletion {
-            _screenState.value = LessonPlanState.Finished
+
+            _screenState.update { LessonPlanState.Saving }
+
+            viewModelScope.launch(Dispatchers.IO) {
+                if (it.id != null) {
+//                    TODO test
+//                    lessonPlanRepository.update(it)
+                } else {
+                    lessonPlanRepository.insert(it)
+                }
+            }.invokeOnCompletion {
+                _screenState.update { LessonPlanState.Finished }
+            }
         }
     }
 }

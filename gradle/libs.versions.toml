@@ -1,45 +1,49 @@
 [versions]
 kotlin = "2.0.21"
+kotlinSerialization = "1.9.24"
+androidGradlePlugin = "8.7.3"
+
+kotlinxCoroutines = "1.10.1"
+kotlinxDatetime = "0.6.1"
+kotlinxSerializationJson = "1.8.0"
+
 coreKtx = "1.15.0"
 appcompat = "1.7.0"
-material = "1.12.0"
-accompanist = "0.27.0"
+
 activityCompose = "1.9.3"
-
-serialization = "1.9.24"
-
 composeBom = "2024.12.01"
-navigation = "2.8.5"
 material3 = "1.3.1"
 googleFonts = "1.7.6"
 
 lifecycle = "2.8.7"
 
+navigation = "2.8.5"
+
+material = "1.12.0"
+
 ksp = "2.0.21-1.0.28"
-hilt = "2.52"
+hilt = "2.55"
 androidxHilt = "1.2.0"
-
-kotlinxCoroutines = "1.9.0"
-kotlinxDatetime = "0.6.1"
-kotlinxSerializationJson = "1.7.3"
-
-androidGradlePlugin = "8.7.3"
 
 room = "2.6.1"
 
-retrofit = "2.11.0"
 okhttp = "5.0.0-alpha.14"
+retrofit = "2.11.0"
+
 
 junit = "4.13.2"
-junitVersion = "1.2.1"
+junitAndroid = "1.2.1"
+testng = "7.10.2"
+mockito = "5.15.2"
 
 [libraries]
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-
-android-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-android-accompanist = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
 
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -50,19 +54,18 @@ androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-material = { group = "androidx.compose.material", name = "material" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "googleFonts" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
 androidx-lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewModelCompose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+
+android-material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 androidx-hilt = { group = "androidx.hilt", name = "hilt-navigation", version.ref = "androidxHilt" }
 androidx-hilt-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
-
-kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -73,16 +76,28 @@ okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-i
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
-androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitAndroid" }
+androidx-compose-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+testng = { group = "org.testng", name = "testng", version.ref = "testng" }
+mockito-android = { group = "org.mockito", name = "mockito-android", version.ref = "mockito" }
+mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockito" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization"}
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinSerialization" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 
 [bundles]
-compose = ["androidx-lifecycle-runtimeCompose", "android-material", "androidx-compose-material-iconsExtended",
-    "androidx-compose-material3", "androidx-compose-ui", "androidx-navigation-compose", "androidx-activity-compose"]
+compose = [
+    "androidx-lifecycle-runtimeCompose",
+    "android-material",
+    "androidx-compose-material-iconsExtended",
+    "androidx-compose-material3",
+    "androidx-compose-ui",
+    "androidx-navigation-compose",
+    "androidx-activity-compose"
+]

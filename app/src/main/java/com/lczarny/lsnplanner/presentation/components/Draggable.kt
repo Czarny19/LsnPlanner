@@ -1,6 +1,5 @@
 package com.lczarny.lsnplanner.presentation.components
 
-import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -154,10 +153,7 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                 modifier = Modifier
                     .width(150.dp)
                     .height(height)
-                    .clickable {
-                        Log.d("TEST", "click inside")
-                        it.onClick.invoke()
-                    },
+                    .clickable { it.onClick.invoke() },
                 elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
                 colors = CardDefaults.cardColors(containerColor = it.color)
             ) {

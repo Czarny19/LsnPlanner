@@ -13,8 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -74,67 +72,66 @@ fun LessonPlanScreen(
 
 @Composable
 fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewModel()) {
-    val lessonPlanId by remember { viewModel.lessonPlanId }
-    var planName by remember { viewModel.planName }
-    var planNameError by remember { viewModel.planNameError }
-    var planType by remember { viewModel.planType }
-    var planIsDefault by remember { viewModel.planIsDefault }
-    var planIsDefaultEnabled by remember { viewModel.planIsDefaultEnabled }
+    val lessonPlanData by viewModel.lessonPlanData.collectAsState()
+    val planIsDefaultEnabled by viewModel.planIsDefaultEnabled.collectAsState()
+    val planNameError by viewModel.planNameError.collectAsState()
 
     val toLessonPlanTypeLabelMap = toLessonPlanTypeLabelMap(LocalContext.current)
 
-    Scaffold(
-        topBar = {
-            AppNavBar(
-                title = stringResource(if (lessonPlanId >= 0) R.string.route_edit_lesson_plan else R.string.route_new_lesson_plan)
-            )
-        },
-        bottomBar = {
-            PrimaryButton(
+    lessonPlanData?.let { lessonPlanData ->
+        Scaffold(
+            topBar = {
+                AppNavBar(
+                    title = stringResource(if (lessonPlanData.id != null) R.string.route_edit_lesson_plan else R.string.route_new_lesson_plan)
+                )
+            },
+            bottomBar = {
+                PrimaryButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AppPadding.screenPadding),
+                    text = stringResource(R.string.plan_save),
+                    onClick = { viewModel.savePlan() }
+                )
+            }
+        ) { padding ->
+            SavingDialog(saving)
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(AppPadding.screenPadding),
-                text = stringResource(R.string.plan_save),
-                onClick = { viewModel.savePlan() }
-            )
-        }
-    ) { padding ->
-        SavingDialog(saving)
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(AppPadding.screenPadding)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-        ) {
-            InfoField(
-                modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
-                text = stringResource(R.string.plan_form_info)
-            )
-            OutlinedInputField(
-                modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
-                label = stringResource(R.string.plan_name),
-                value = planName,
-                onValueChange = { name -> viewModel.updatePlanName(name) },
-                maxLines = 1,
-                maxLength = 32,
-                isError = planNameError,
-                errorMsg = stringResource(R.string.field_required)
-            )
-            OutlinedDropDown(
-                modifier = Modifier.padding(bottom = AppPadding.lgInputSpacerPadding),
-                label = stringResource(R.string.plan_type),
-                value = DropDownItem(planType, toLessonPlanTypeLabelMap.getValue(planType)),
-                onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
-                items = LessonPlanType.entries.map { DropDownItem(it, toLessonPlanTypeLabelMap.getValue(it)) }
-            )
-            LabeledCheckbox(
-                label = stringResource(R.string.plan_make_default),
-                checked = planIsDefault,
-                onCheckedChange = { checked -> viewModel.updatePlanIsDefault(checked) },
-                enabled = planIsDefaultEnabled
-            )
+                    .padding(padding)
+                    .padding(AppPadding.screenPadding)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+            ) {
+                InfoField(
+                    modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
+                    text = stringResource(R.string.plan_form_info)
+                )
+                OutlinedInputField(
+                    modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
+                    label = stringResource(R.string.plan_name),
+                    value = lessonPlanData.name,
+                    onValueChange = { name -> viewModel.updatePlanName(name) },
+                    maxLines = 1,
+                    maxLength = 32,
+                    isError = planNameError,
+                    errorMsg = stringResource(R.string.field_required)
+                )
+                OutlinedDropDown(
+                    modifier = Modifier.padding(bottom = AppPadding.lgInputSpacerPadding),
+                    label = stringResource(R.string.plan_type),
+                    value = DropDownItem(lessonPlanData.type, toLessonPlanTypeLabelMap.getValue(lessonPlanData.type)),
+                    onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
+                    items = LessonPlanType.entries.map { DropDownItem(it, toLessonPlanTypeLabelMap.getValue(it)) }
+                )
+                LabeledCheckbox(
+                    label = stringResource(R.string.plan_make_default),
+                    checked = lessonPlanData.isDefault,
+                    onCheckedChange = { checked -> viewModel.updatePlanIsDefault(checked) },
+                    enabled = planIsDefaultEnabled
+                )
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.lczarny.lsnplanner.data.local.entity.PlanClass
 import com.lczarny.lsnplanner.data.local.model.PlanClassModel
 import com.lczarny.lsnplanner.data.local.model.PlanClassWithToDos
@@ -20,7 +21,10 @@ interface PlanClassDao {
     fun getClassWithToDos(id: Long): Flow<PlanClassWithToDos>
 
     @Insert(entity = PlanClass::class, onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertClass(lesson: PlanClassModel)
+    suspend fun insertClass(planClass: PlanClassModel)
+
+    @Update(entity = PlanClass::class)
+    suspend fun updateClass(vararg planClass: PlanClassModel)
 
     @Delete(entity = PlanClass::class)
     suspend fun deleteClass(vararg id: VarArgsId)

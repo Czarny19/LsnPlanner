@@ -7,11 +7,11 @@ import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 import com.lczarny.lsnplanner.data.local.entity.PlanClass
 
 data class LessonPlanModel(
-    val id: Long? = null,
-    val name: String,
-    val type: LessonPlanType,
-    @ColumnInfo(name = "create_date") val createDate: Long,
-    @ColumnInfo(name = "isDefault") val isDefault: Boolean,
+    var id: Long? = null,
+    var name: String,
+    var type: LessonPlanType,
+    @ColumnInfo(name = "create_date") var createDate: Long,
+    @ColumnInfo(name = "isDefault") var isDefault: Boolean,
 )
 
 fun LessonPlan.mapToModel() = LessonPlanModel(

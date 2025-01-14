@@ -20,7 +20,11 @@ fun AppNavBar(title: String, navIcon: @Composable () -> Unit = {}, actions: @Com
         actions = actions,
         scrollBehavior = scrollBehavior,
         navigationIcon = navIcon,
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+        )
     )
 }
 

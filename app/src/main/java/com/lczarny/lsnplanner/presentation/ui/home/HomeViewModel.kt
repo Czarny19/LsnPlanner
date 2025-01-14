@@ -2,9 +2,13 @@ package com.lczarny.lsnplanner.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lczarny.lsnplanner.data.local.model.AppSetting
 import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
+import com.lczarny.lsnplanner.data.local.model.PlanClassModel
+import com.lczarny.lsnplanner.data.local.model.SettingModel
 import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.local.repository.SettingRepository
 import com.lczarny.lsnplanner.data.local.repository.ToDoRepository
 import com.lczarny.lsnplanner.presentation.components.ConfirmationDialogState
 import com.lczarny.lsnplanner.presentation.components.closedConfirmationDialogState
@@ -20,6 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val settingRepository: SettingRepository,
     private val lessonPlanRepository: LessonPlanRepository,
     private val toDoRepository: ToDoRepository
 ) : ViewModel() {
@@ -31,8 +36,12 @@ class HomeViewModel @Inject constructor(
 
     private val _lessonPlan = MutableStateFlow<LessonPlanWithClassesModel?>(null)
 
+    private val _planClasses = MutableStateFlow<List<PlanClassModel>>(emptyList<PlanClassModel>())
+
     private val _showHistoricalToDos = MutableStateFlow<Boolean>(false)
     private val _toDos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
+
+    private val _todoListSwipeTutorialDone = MutableStateFlow<Boolean>(false)
 
     val screenState = _screenState.asStateFlow()
     val firstLaunchDone = _firstLaunchDone.asStateFlow()
@@ -40,11 +49,16 @@ class HomeViewModel @Inject constructor(
 
     val lessonPlan = _lessonPlan.asStateFlow()
 
+    val planClasses = _planClasses.asStateFlow()
+
     val showHistoricalToDos = _showHistoricalToDos.asStateFlow()
     val toDos = _toDos.asStateFlow()
 
+    val todoListSwipeTutorialDone = _todoListSwipeTutorialDone.asStateFlow()
+
     init {
         getDefaultLessonPlan()
+        getSettings()
     }
 
     fun setFirstLaunchDone() {
@@ -73,7 +87,19 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             lessonPlanRepository.defaultLessonPlanWithClasses().flowOn(Dispatchers.IO).collect { plan ->
                 _lessonPlan.update { plan }
+                _planClasses.update { plan.classes }
+
                 getToDos(plan.plan.id!!)
+
+                _screenState.update { HomeState.Ready }
+            }
+        }
+    }
+
+    private fun getSettings() {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingRepository.settingValue(AppSetting.TodoListSwipeTutorialDone).flowOn(Dispatchers.IO).collect { setting ->
+                _todoListSwipeTutorialDone.update { setting.toBoolean() }
             }
         }
     }
@@ -82,7 +108,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             toDoRepository.allToDos(lessonPlanId).flowOn(Dispatchers.IO).collect { toDos ->
                 _toDos.update { toDos }
-                _screenState.update { HomeState.Ready }
             }
         }
     }
@@ -108,6 +133,20 @@ class HomeViewModel @Inject constructor(
             toDoRepository.deleteAllHistorical()
         }.invokeOnCompletion {
             getToDos(_lessonPlan.value!!.plan.id!!)
+            onComplete.invoke()
+        }
+    }
+
+    fun markTodoListSwipeTutorialDone() {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingRepository.insert(SettingModel(name = AppSetting.TodoListSwipeTutorialDone.raw, value = "true"))
+        }
+    }
+
+    fun resetTutorials(onComplete: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            settingRepository.resetTutorialSettings()
+        }.invokeOnCompletion {
             onComplete.invoke()
         }
     }

@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.ui.home.todos
+package com.lczarny.lsnplanner.presentation.ui.home.tab
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteForever
@@ -23,6 +23,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,6 +37,7 @@ import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.presentation.components.DraggableCard
 import com.lczarny.lsnplanner.presentation.components.DraggableCardAction
 import com.lczarny.lsnplanner.presentation.components.EmptyList
+import com.lczarny.lsnplanner.presentation.components.TutorialCard
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.navigation.ToDoRoute
@@ -54,15 +57,17 @@ fun ToDosTab(
     toDos: List<ToDoModel>,
     showHistorical: Boolean
 ) {
+    val todoListSwipeTutorialDone by viewModel.todoListSwipeTutorialDone.collectAsState()
+
     toDos
         .filter { if (showHistorical) true else !it.historical }
         .sortedBy { it.dueDate }
         .sortedBy { it.importance }
         .sortedBy { it.historical }
-        .let { items ->
+        .let { toDos ->
             val toDoImportanceLabelMap = toDoImportanceLabelMap(LocalContext.current)
 
-            if (items.isEmpty()) {
+            if (toDos.isEmpty()) {
                 EmptyList(stringResource(R.string.todo_list_empty_hint))
             } else {
                 LazyColumn(
@@ -72,7 +77,15 @@ fun ToDosTab(
                     contentPadding = PaddingValues(AppPadding.screenPadding),
                     verticalArrangement = Arrangement.spacedBy(AppPadding.listItemPadding)
                 ) {
-                    itemsIndexed(items = items, key = { index, toDo -> toDo.id!! }) { _, toDo ->
+                    if (todoListSwipeTutorialDone.not()) {
+                        item {
+                            TutorialCard(msg = stringResource(R.string.tutorial_todo_swipe)) {
+                                viewModel.markTodoListSwipeTutorialDone()
+                            }
+                        }
+                    }
+
+                    items(items = toDos) { toDo ->
                         ToDosListItem(
                             viewModel,
                             navController,
@@ -132,10 +145,10 @@ fun ToDosListItem(
                     AssistChip(
                         modifier = Modifier.height(AppSizes.chipHeight),
                         onClick = { },
-                        label = { Text(toDoImportanceLabelMap.getValue(toDo.importance)) },
+                        label = { Text(toDoImportanceLabelMap.getValue(toDo.importance), color = MaterialTheme.colorScheme.onPrimary) },
                         colors = AssistChipDefaults.assistChipColors(
                             containerColor = toDoImportanceColorMap.getValue(toDo.importance),
-                            leadingIconContentColor = MaterialTheme.colorScheme.onSurface,
+                            leadingIconContentColor = MaterialTheme.colorScheme.onPrimary,
                         ),
                         border = null,
                         leadingIcon = {

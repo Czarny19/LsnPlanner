@@ -1,7 +1,5 @@
 package com.lczarny.lsnplanner.presentation.ui.todo
 
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.local.model.ToDoImportance
@@ -22,91 +20,56 @@ class ToDoViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<ToDoState>(ToDoState.Loading)
+    private val _lessonPlanId = MutableStateFlow<Long>(-1L)
+    private val _toDoData = MutableStateFlow<ToDoModel?>(null)
 
     val screenState = _screenState.asStateFlow()
-
-    var lessonPlanId = mutableLongStateOf(-1L)
-        private set
-
-    var classId = mutableStateOf<Long?>(null)
-        private set
-
-    var toDoId = mutableLongStateOf(-1L)
-        private set
-
-    var content = mutableStateOf("")
-        private set
-
-    var dueDate = mutableStateOf<Long?>(null)
-        private set
-
-    var importance = mutableStateOf<ToDoImportance>(ToDoImportance.Low)
-        private set
+    val lessonPlanId = _lessonPlanId.asStateFlow()
+    val toDoData = _toDoData.asStateFlow()
 
     fun updateContent(value: String) {
-        content.value = value
+        _toDoData.update { _toDoData.value?.copy(content = value) }
     }
 
     fun updateDueDate(value: Long?) {
-        dueDate.value = value
+        _toDoData.update { _toDoData.value?.copy(dueDate = value) }
     }
 
     fun updateImportance(value: ToDoImportance) {
-        importance.value = value
+        _toDoData.update { _toDoData.value?.copy(importance = value) }
     }
 
     fun intializeToDo(lessonPlanId: Long, classId: Long?, toDo: ToDoModel?) {
-        this.lessonPlanId.longValue = lessonPlanId
-        this.classId.value = classId
+        _lessonPlanId.update { lessonPlanId }
 
-        when (toDo) {
-            null -> {
-                _screenState.update { ToDoState.Edit }
-            }
-
-            else -> {
-                toDo.let {
-                    toDoId.longValue = it.id!!
-                    content.value = it.content
-                    dueDate.value = it.dueDate
-                    importance.value = it.importance
-                }
-
-                _screenState.update { ToDoState.Edit }
+        if (toDo != null) {
+            _toDoData.update { toDo }
+        } else {
+            _toDoData.update {
+                ToDoModel(
+                    lessonPlanId = lessonPlanId,
+                    classId = classId,
+                    content = "",
+                )
             }
         }
+
+        _screenState.update { ToDoState.Edit }
     }
 
     fun saveToDo() {
-        _screenState.value = ToDoState.Saving
+        _screenState.update { ToDoState.Saving }
 
         viewModelScope.launch(Dispatchers.IO) {
-            if (toDoId.longValue >= 0) {
-                ToDoModel(
-                    id = toDoId.longValue,
-                    content = content.value,
-                    dueDate = dueDate.value,
-                    historical = false,
-                    importance = importance.value,
-                    lessonPlanId = lessonPlanId.longValue,
-                    classId = classId.value
-                ).run {
-                    toDoRepository.update(this)
-                }
-            } else {
-                ToDoModel(
-                    content = content.value,
-                    dueDate = dueDate.value,
-                    importance = importance.value,
-                    historical = false,
-                    lessonPlanId = lessonPlanId.longValue,
-                    classId = classId.value
-                ).run {
-                    toDoRepository.insert(this)
+            _toDoData.value?.let {
+                if (it.id != null) {
+                    toDoRepository.update(it)
+                } else {
+                    toDoRepository.insert(it)
                 }
             }
         }.invokeOnCompletion {
-            _screenState.value = ToDoState.Finished
+            _screenState.update { ToDoState.Finished }
         }
     }
 }

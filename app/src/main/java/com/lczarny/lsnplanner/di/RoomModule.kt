@@ -5,9 +5,11 @@ import androidx.room.Room
 import com.lczarny.lsnplanner.data.local.RoomDb
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
 import com.lczarny.lsnplanner.data.local.dao.PlanClassDao
+import com.lczarny.lsnplanner.data.local.dao.SettingDao
 import com.lczarny.lsnplanner.data.local.dao.ToDoDao
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.repository.PlanClassRepository
+import com.lczarny.lsnplanner.data.local.repository.SettingRepository
 import com.lczarny.lsnplanner.data.local.repository.ToDoRepository
 import dagger.Module
 import dagger.Provides
@@ -48,4 +50,12 @@ class RoomModule {
     @Provides
     @Singleton
     fun provideToDoRepository(toDoDao: ToDoDao): ToDoRepository = ToDoRepository(toDoDao)
+
+    @Provides
+    @Singleton
+    fun provideSettingDao(db: RoomDb): SettingDao = db.settingDao()
+
+    @Provides
+    @Singleton
+    fun provideSettingRepository(settingDao: SettingDao): SettingRepository = SettingRepository(settingDao)
 }

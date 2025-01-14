@@ -16,6 +16,10 @@ class PlanClassRepository(private val planClassDao: PlanClassDao) {
         planClassDao.insertClass(planClass)
     }
 
+    suspend fun update(planClass: PlanClassModel) {
+        planClassDao.updateClass(planClass)
+    }
+
     suspend fun delete(id: Long) {
         planClassDao.deleteClass(VarArgsId(id))
     }

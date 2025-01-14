@@ -51,12 +51,13 @@ import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
+import com.lczarny.lsnplanner.presentation.navigation.PlanClassRoute
 import com.lczarny.lsnplanner.presentation.navigation.ToDoRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
+import com.lczarny.lsnplanner.presentation.ui.home.tab.ClassesTab
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
-import com.lczarny.lsnplanner.presentation.ui.home.more.MoreTab
-import com.lczarny.lsnplanner.presentation.ui.home.todos.ToDosTab
-import com.lczarny.lsnplanner.utils.getDayOfWeekDisplayValue
+import com.lczarny.lsnplanner.presentation.ui.home.tab.MoreTab
+import com.lczarny.lsnplanner.presentation.ui.home.tab.ToDosTab
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -70,6 +71,7 @@ data class TabBarItem(
 enum class HomeScreenSnackbar {
     FirstLaunch,
     DeleteHistoricalToDos,
+    ResetTutorials
 }
 
 @Composable
@@ -112,6 +114,11 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
 
                 HomeScreenSnackbar.DeleteHistoricalToDos -> snackbarHostState.showSnackbar(
                     message = context.getString(R.string.todo_delete_all_historical_snackbar),
+                    withDismissAction = true
+                )
+
+                HomeScreenSnackbar.ResetTutorials -> snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.reset_tutorials_done),
                     withDismissAction = true
                 )
             }
@@ -163,7 +170,7 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
 
             AppNavBar(
                 title = when (currentRoute) {
-                    classesTab.id -> "${getDayOfWeekDisplayValue(context)} (${lessonPlan.plan.name})"
+                    classesTab.id -> lessonPlan.plan.name
                     calendarTab.id -> stringResource(R.string.home_tab_calendar)
                     toDoTab.id -> stringResource(R.string.home_tab_to_dos)
                     else -> stringResource(R.string.home_tab_more)
@@ -189,10 +196,15 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
             val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route
 
-            if (currentRoute == toDoTab.id) {
-                FloatingActionButton(
+            when (currentRoute) {
+                toDoTab.id -> FloatingActionButton(
                     onClick = { navController.navigate(ToDoRoute(lessonPlan.plan.id!!)) },
                     content = { Icon(Icons.Filled.Add, stringResource(R.string.todo_add)) }
+                )
+
+                classesTab.id -> FloatingActionButton(
+                    onClick = { navController.navigate(PlanClassRoute(lessonPlan.plan.id!!)) },
+                    content = { Icon(Icons.Filled.Add, stringResource(R.string.class_add)) }
                 )
             }
         },
@@ -200,7 +212,8 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
         content = { padding ->
             NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
                 composable(classesTab.id) {
-                    Text(classesTab.id)
+                    val classes by viewModel.planClasses.collectAsState()
+                    ClassesTab(padding, viewModel, classes)
                 }
                 composable(calendarTab.id) {
                     Text(calendarTab.id)

@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.ui.home.more
+package com.lczarny.lsnplanner.presentation.ui.home.tab
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,47 +38,51 @@ import kotlinx.coroutines.channels.Channel
 
 @Composable
 fun MoreTab(padding: PaddingValues, viewModel: HomeViewModel, snackbarChannel: Channel<HomeScreenSnackbar>) {
-    var confirmationDialogOpen by remember { mutableStateOf(false) }
-    val confirmDialogState by viewModel.confirmDialogState.collectAsState()
-
-    val deleteHistToDosLabel = stringResource(R.string.todo_delete_all_historical)
-    val deleteHistToDosMsg = stringResource(R.string.todo_delete_all_historical_msg)
-
-    ConfirmationDialog(confirmationDialogOpen, confirmDialogState)
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
     ) {
         MoreTabButton(
+            viewModel = viewModel,
+            icon = Icons.Filled.SettingsBackupRestore,
+            label = stringResource(R.string.reset_tutorials),
+            dialogMsg = stringResource(R.string.reset_tutorials_msg),
+            onClick = { viewModel.resetTutorials { snackbarChannel.trySend(HomeScreenSnackbar.ResetTutorials) } }
+        )
+        MoreTabButton(
+            viewModel = viewModel,
             icon = Icons.Filled.DeleteForever,
-            label = deleteHistToDosLabel,
-            onClick = {
-                confirmationDialogOpen = true
-
-                viewModel.setConfirmationDialogState(
-                    title = deleteHistToDosLabel,
-                    text = deleteHistToDosMsg,
-                    onConfirm = {
-                        confirmationDialogOpen = false
-                        viewModel.deleteAllHistoricalToDos {
-                            snackbarChannel.trySend(HomeScreenSnackbar.DeleteHistoricalToDos)
-                        }
-                    },
-                    onDismiss = { confirmationDialogOpen = false }
-                )
-            }
+            label = stringResource(R.string.todo_delete_all_historical),
+            dialogMsg = stringResource(R.string.todo_delete_all_historical_msg),
+            onClick = { viewModel.deleteAllHistoricalToDos { snackbarChannel.trySend(HomeScreenSnackbar.DeleteHistoricalToDos) } }
         )
     }
 }
 
 @Composable
-fun MoreTabButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+fun MoreTabButton(viewModel: HomeViewModel, icon: ImageVector, label: String, dialogMsg: String, onClick: () -> Unit) {
+    var confirmationDialogOpen by remember { mutableStateOf(false) }
+    val confirmDialogState by viewModel.confirmDialogState.collectAsState()
+
+    ConfirmationDialog(confirmationDialogOpen, confirmDialogState)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick.invoke() }
+            .clickable {
+                confirmationDialogOpen = true
+
+                viewModel.setConfirmationDialogState(
+                    title = label,
+                    text = dialogMsg,
+                    onConfirm = {
+                        confirmationDialogOpen = false
+                        onClick.invoke()
+                    },
+                    onDismiss = { confirmationDialogOpen = false }
+                )
+            }
     ) {
         Row(
             modifier = Modifier
