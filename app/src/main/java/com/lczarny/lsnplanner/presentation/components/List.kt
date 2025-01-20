@@ -20,17 +20,19 @@ import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 
 @Composable
-fun EmptyList(label: String) {
+fun EmptyList(label: String, showIcon: Boolean = true) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            modifier = Modifier.size(AppSizes.xlIcon),
-            imageVector = Icons.Outlined.ContentPasteOff,
-            contentDescription = stringResource(R.string.no_items_available),
-        )
+        if (showIcon) {
+            Icon(
+                modifier = Modifier.size(AppSizes.xlIcon),
+                imageVector = Icons.Outlined.ContentPasteOff,
+                contentDescription = stringResource(R.string.no_items_available),
+            )
+        }
         Text(
             text = label,
             modifier = Modifier.padding(top = AppPadding.lgPadding),

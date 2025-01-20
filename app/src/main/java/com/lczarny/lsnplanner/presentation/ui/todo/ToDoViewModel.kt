@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,11 +21,9 @@ class ToDoViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow<ToDoState>(ToDoState.Loading)
-    private val _lessonPlanId = MutableStateFlow<Long>(-1L)
     private val _toDoData = MutableStateFlow<ToDoModel?>(null)
 
     val screenState = _screenState.asStateFlow()
-    val lessonPlanId = _lessonPlanId.asStateFlow()
     val toDoData = _toDoData.asStateFlow()
 
     fun updateContent(value: String) {
@@ -39,19 +38,15 @@ class ToDoViewModel @Inject constructor(
         _toDoData.update { _toDoData.value?.copy(importance = value) }
     }
 
-    fun intializeToDo(lessonPlanId: Long, classId: Long?, toDo: ToDoModel?) {
-        _lessonPlanId.update { lessonPlanId }
-
-        if (toDo != null) {
-            _toDoData.update { toDo }
-        } else {
-            _toDoData.update {
-                ToDoModel(
-                    lessonPlanId = lessonPlanId,
-                    classId = classId,
-                    content = "",
-                )
+    fun intializeToDo(lessonPlanId: Long, classId: Long?, toDoId: Long?) {
+        if (toDoId != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                toDoRepository.toDo(toDoId).flowOn(Dispatchers.IO).collect { toDo ->
+                    _toDoData.update { toDo }
+                }
             }
+        } else {
+            _toDoData.update { ToDoModel(lessonPlanId = lessonPlanId, classId = classId) }
         }
 
         _screenState.update { ToDoState.Edit }

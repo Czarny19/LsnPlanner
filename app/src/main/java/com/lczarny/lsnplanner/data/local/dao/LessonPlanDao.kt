@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 interface LessonPlanDao {
 
     @Transaction
-    @Query("SELECT EXISTS(SELECT 1 FROM lesson_plan WHERE isDefault = 1 LIMIT 1)")
+    @Query("SELECT EXISTS(SELECT 1 FROM lesson_plan WHERE is_default = 1 LIMIT 1)")
     fun checkIfDefaultPlanExists(): Flow<Boolean>
 
     @Transaction
@@ -24,7 +24,7 @@ interface LessonPlanDao {
     fun getLessonPlan(id: Long): Flow<LessonPlan>
 
     @Transaction
-    @Query("SELECT * FROM lesson_plan WHERE isDefault = 1 LIMIT 1")
+    @Query("SELECT * FROM lesson_plan WHERE is_default = 1 LIMIT 1")
     fun getDefaultLessonPlanWithClasses(): Flow<LessonPlanWithClasses>
 
     @Transaction

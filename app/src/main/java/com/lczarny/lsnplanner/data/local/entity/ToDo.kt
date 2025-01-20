@@ -27,9 +27,9 @@ import kotlinx.serialization.Required
 )
 data class ToDo(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @Required val content: String,
-    @ColumnInfo(defaultValue = "false") val historical: Boolean,
-    @ColumnInfo(defaultValue = "3") val importance: ToDoImportance,
+    @Required @ColumnInfo(name = "content") val content: String,
+    @Required @ColumnInfo(name = "historical", defaultValue = "false") val historical: Boolean,
+    @Required @ColumnInfo(name = "importance", defaultValue = "3") val importance: ToDoImportance,
     @ColumnInfo(name = "due_date", defaultValue = "NULL") val dueDate: Long?,
     @ColumnInfo(name = "class_id", index = true, defaultValue = "NULL") val classId: Long?,
     @ColumnInfo(name = "lesson_plan_id", index = true) val lessonPlanId: Long,

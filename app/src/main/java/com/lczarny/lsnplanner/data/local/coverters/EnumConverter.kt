@@ -2,6 +2,7 @@ package com.lczarny.lsnplanner.data.local.coverters
 
 import androidx.room.TypeConverter
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
+import com.lczarny.lsnplanner.data.local.model.PlanClassType
 import com.lczarny.lsnplanner.data.local.model.ToDoImportance
 
 class EnumConverter {
@@ -17,4 +18,10 @@ class EnumConverter {
 
     @TypeConverter
     fun fromToDoImportance(value: ToDoImportance): Int = value.raw
+
+    @TypeConverter
+    fun toPlanClassType(value: String): PlanClassType = PlanClassType.from(value)
+
+    @TypeConverter
+    fun fromPlanClassType(value: PlanClassType): String = value.raw
 }

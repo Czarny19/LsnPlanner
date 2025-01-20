@@ -53,7 +53,6 @@ class LessonPlanViewModel @Inject constructor(
             _planIsDefaultEnabled.update { firstLaunch.not() }
             _lessonPlanData.update {
                 LessonPlanModel(
-                    name = "",
                     type = LessonPlanType.School,
                     isDefault = firstLaunch,
                     createDate = Calendar.getInstance().timeInMillis

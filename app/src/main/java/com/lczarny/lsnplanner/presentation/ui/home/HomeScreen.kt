@@ -2,7 +2,10 @@ package com.lczarny.lsnplanner.presentation.ui.home
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckBox
@@ -32,7 +35,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -48,18 +53,23 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
+import com.lczarny.lsnplanner.presentation.components.AppDatePickerDialog
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.navigation.PlanClassRoute
 import com.lczarny.lsnplanner.presentation.navigation.ToDoRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.home.tab.ClassesTab
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
+import com.lczarny.lsnplanner.presentation.ui.home.tab.ClassesTab
 import com.lczarny.lsnplanner.presentation.ui.home.tab.MoreTab
 import com.lczarny.lsnplanner.presentation.ui.home.tab.ToDosTab
+import com.lczarny.lsnplanner.utils.getDayOfWeekNum
+import com.lczarny.lsnplanner.utils.getMonthName
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import java.util.Calendar
 
 data class TabBarItem(
     val id: String,
@@ -160,7 +170,13 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
     val tabBarItems = listOf(classesTab, calendarTab, toDoTab, moreTab)
     val bottomBarNavController = rememberNavController()
 
+    val currentClassesDate by viewModel.planClassesCurrentDate.collectAsState()
     val showHistoricalToDos by viewModel.showHistoricalToDos.collectAsState()
+
+    val classesCurrentDate by viewModel.planClassesCurrentDate.collectAsState()
+    val classesPagerState = rememberPagerState(initialPage = classesCurrentDate.getDayOfWeekNum() - 1) { 7 }
+    val animationScope = rememberCoroutineScope()
+    var showClassesDateDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
@@ -170,7 +186,7 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
 
             AppNavBar(
                 title = when (currentRoute) {
-                    classesTab.id -> lessonPlan.plan.name
+                    classesTab.id -> "${currentClassesDate.getMonthName(context)} ${currentClassesDate.get(Calendar.YEAR)}"
                     calendarTab.id -> stringResource(R.string.home_tab_calendar)
                     toDoTab.id -> stringResource(R.string.home_tab_to_dos)
                     else -> stringResource(R.string.home_tab_more)
@@ -182,6 +198,39 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
                                 Icon(
                                     imageVector = if (showHistoricalToDos) Icons.Filled.CheckBox else Icons.Outlined.CheckBox,
                                     contentDescription = stringResource(R.string.todo_show_done)
+                                )
+                            }
+                        }
+
+                        classesTab.id -> Row {
+                            IconButton(onClick = { showClassesDateDialog = true }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.CalendarMonth,
+                                    contentDescription = stringResource(R.string.class_change_date)
+                                )
+                            }
+
+                            IconButton(onClick = {
+                                animationScope.launch {
+                                    viewModel.changeCurrentClassesWeek(false)
+                                    classesPagerState.animateScrollToPage(0)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+                                    contentDescription = stringResource(R.string.class_prev_week)
+                                )
+                            }
+
+                            IconButton(onClick = {
+                                animationScope.launch {
+                                    viewModel.changeCurrentClassesWeek(true)
+                                    classesPagerState.animateScrollToPage(0)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                                    contentDescription = stringResource(R.string.class_next_week)
                                 )
                             }
                         }
@@ -203,24 +252,46 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
                 )
 
                 classesTab.id -> FloatingActionButton(
-                    onClick = { navController.navigate(PlanClassRoute(lessonPlan.plan.id!!)) },
+                    onClick = {
+                        navController.navigate(
+                            PlanClassRoute(
+                                lessonPlan.plan.id!!,
+                                lessonPlan.plan.type,
+                                classesPagerState.currentPage + 1
+                            )
+                        )
+                    },
                     content = { Icon(Icons.Filled.Add, stringResource(R.string.class_add)) }
                 )
             }
         },
         floatingActionButtonPosition = FabPosition.End,
         content = { padding ->
+            if (showClassesDateDialog) {
+                AppDatePickerDialog(
+                    initialValue = currentClassesDate.timeInMillis,
+                    onDismiss = { showClassesDateDialog = false },
+                    onConfirm = { selectedDateMillis ->
+                        animationScope.launch {
+                            Calendar.getInstance().apply { timeInMillis = selectedDateMillis!! }.let {
+                                viewModel.changeCurrentClassesDate(it)
+                                classesPagerState.animateScrollToPage(it.getDayOfWeekNum() - 1)
+                                showClassesDateDialog = false
+                            }
+                        }
+                    }
+                )
+            }
+
             NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
                 composable(classesTab.id) {
-                    val classes by viewModel.planClasses.collectAsState()
-                    ClassesTab(padding, viewModel, classes)
+                    ClassesTab(padding, viewModel, classesPagerState)
                 }
                 composable(calendarTab.id) {
                     Text(calendarTab.id)
                 }
                 composable(toDoTab.id) {
-                    val toDos by viewModel.toDos.collectAsState()
-                    ToDosTab(padding, viewModel, navController, lessonPlan.plan.id!!, toDos, showHistoricalToDos)
+                    ToDosTab(padding, viewModel, navController, lessonPlan.plan.id!!)
                 }
                 composable(moreTab.id) {
                     MoreTab(padding, viewModel, snackbarChannel)

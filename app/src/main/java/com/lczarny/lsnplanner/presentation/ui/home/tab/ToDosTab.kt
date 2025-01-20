@@ -54,9 +54,9 @@ fun ToDosTab(
     viewModel: HomeViewModel,
     navController: NavController,
     lessonPlanId: Long,
-    toDos: List<ToDoModel>,
-    showHistorical: Boolean
 ) {
+    val showHistorical by viewModel.showHistoricalToDos.collectAsState()
+    val toDos by viewModel.toDos.collectAsState()
     val todoListSwipeTutorialDone by viewModel.todoListSwipeTutorialDone.collectAsState()
 
     toDos

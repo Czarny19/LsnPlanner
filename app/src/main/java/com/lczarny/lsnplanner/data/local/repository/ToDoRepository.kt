@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.map
 
 class ToDoRepository(private val toDoDao: ToDoDao) {
 
+    fun toDo(toDoId: Long): Flow<ToDoModel> = toDoDao.getToDo(toDoId).map { it.mapToModel() }
+
     fun allToDos(lessonPlanId: Long): Flow<List<ToDoModel>> = toDoDao.getAllToDos(lessonPlanId).map { it.map { it.mapToModel() } }
 
     suspend fun insert(toDo: ToDoModel) {

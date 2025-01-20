@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,6 +38,7 @@ class HomeViewModel @Inject constructor(
     private val _lessonPlan = MutableStateFlow<LessonPlanWithClassesModel?>(null)
 
     private val _planClasses = MutableStateFlow<List<PlanClassModel>>(emptyList<PlanClassModel>())
+    private val _planClassesCurrentDate = MutableStateFlow(Calendar.getInstance())
 
     private val _showHistoricalToDos = MutableStateFlow<Boolean>(false)
     private val _toDos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
@@ -50,6 +52,7 @@ class HomeViewModel @Inject constructor(
     val lessonPlan = _lessonPlan.asStateFlow()
 
     val planClasses = _planClasses.asStateFlow()
+    val planClassesCurrentDate = _planClassesCurrentDate.asStateFlow()
 
     val showHistoricalToDos = _showHistoricalToDos.asStateFlow()
     val toDos = _toDos.asStateFlow()
@@ -63,6 +66,20 @@ class HomeViewModel @Inject constructor(
 
     fun setFirstLaunchDone() {
         _firstLaunchDone.update { true }
+    }
+
+    fun changeCurrentClassesDate(date: Calendar) {
+        _planClassesCurrentDate.update { Calendar.getInstance().apply { timeInMillis = date.timeInMillis } }
+    }
+
+    fun changeCurrentClassesWeek(goForward: Boolean) {
+        _planClassesCurrentDate.update {
+            Calendar.getInstance().apply {
+                timeInMillis = _planClassesCurrentDate.value.timeInMillis
+                set(Calendar.WEEK_OF_YEAR, get(Calendar.WEEK_OF_YEAR) + (if (goForward) 1 else -1))
+                set(Calendar.DAY_OF_WEEK, 2)
+            }
+        }
     }
 
     fun switchShowHistoricalToDos() {

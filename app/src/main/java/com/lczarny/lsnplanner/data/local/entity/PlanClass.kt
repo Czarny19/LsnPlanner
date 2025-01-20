@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.lczarny.lsnplanner.data.local.model.PlanClassType
 import kotlinx.serialization.Required
 
 @Entity(
@@ -19,14 +20,15 @@ import kotlinx.serialization.Required
 )
 data class PlanClass(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @Required val name: String,
-    @Required @ColumnInfo(name = "is_cyclical", defaultValue = "true") val isCyclical: Boolean,
-    @ColumnInfo(defaultValue = "NULL") val note: String?,
+    @Required @ColumnInfo(name = "name") val name: String,
+    @Required @ColumnInfo(name = "type") val type: PlanClassType,
+    @Required @ColumnInfo(name = "color") val color: String,
+    @ColumnInfo(name = "note", defaultValue = "NULL") val note: String?,
     @ColumnInfo(name = "week_day", defaultValue = "NULL") val weekDay: Int?,
-    @ColumnInfo(name = "start_time", defaultValue = "NULL") val startTime: Long?,
-    @ColumnInfo(name = "end_time", defaultValue = "NULL") val endTime: Long?,
-    @ColumnInfo(name = "single_date", defaultValue = "NULL") val singleDate: Long?,
-    @ColumnInfo(name = "class_address", defaultValue = "NULL") val classAddress: String?,
-    @ColumnInfo(name = "class_number", defaultValue = "NULL") val classNumber: String?,
+    @ColumnInfo(name = "start_date", defaultValue = "NULL") val startDate: Long?,
+    @ColumnInfo(name = "start_hour") val startHour: Int,
+    @ColumnInfo(name = "start_minute") val startMinute: Int,
+    @Required @ColumnInfo(name = "duration_minutes", defaultValue = "45") val durationMinutes: Int,
+    @Required @ColumnInfo(name = "classroom") val classroom: String,
     @ColumnInfo(name = "lesson_plan_id", index = true) val lessonPlanId: Long,
 )

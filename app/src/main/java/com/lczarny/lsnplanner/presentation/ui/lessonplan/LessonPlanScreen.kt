@@ -25,7 +25,7 @@ import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.InfoField
-import com.lczarny.lsnplanner.presentation.components.LabeledCheckbox
+import com.lczarny.lsnplanner.presentation.components.OutlinedLabeledCheckbox
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
@@ -55,7 +55,8 @@ fun LessonPlanScreen(
                 content = {
                     when (screenState) {
                         LessonPlanState.Loading -> FullScreenLoading()
-                        LessonPlanState.Edit, LessonPlanState.Saving -> LessonPlanForm(screenState == LessonPlanState.Saving)
+                        LessonPlanState.Edit -> LessonPlanForm(false, viewModel)
+                        LessonPlanState.Saving -> LessonPlanForm(true, viewModel)
                         LessonPlanState.Finished -> {
                             navController.navigate(HomeRoute(firstLaunch = true)) {
                                 popUpTo(navController.graph.id) {
@@ -71,7 +72,7 @@ fun LessonPlanScreen(
 }
 
 @Composable
-fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewModel()) {
+fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
     val lessonPlanData by viewModel.lessonPlanData.collectAsState()
     val planIsDefaultEnabled by viewModel.planIsDefaultEnabled.collectAsState()
     val planNameError by viewModel.planNameError.collectAsState()
@@ -105,11 +106,10 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewMod
                 verticalArrangement = Arrangement.Top,
             ) {
                 InfoField(
-                    modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
+                    modifier = Modifier.padding(bottom = AppPadding.inputBottomPadding),
                     text = stringResource(R.string.plan_form_info)
                 )
                 OutlinedInputField(
-                    modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
                     label = stringResource(R.string.plan_name),
                     value = lessonPlanData.name,
                     onValueChange = { name -> viewModel.updatePlanName(name) },
@@ -119,13 +119,12 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel = hiltViewMod
                     errorMsg = stringResource(R.string.field_required)
                 )
                 OutlinedDropDown(
-                    modifier = Modifier.padding(bottom = AppPadding.lgInputSpacerPadding),
                     label = stringResource(R.string.plan_type),
                     value = DropDownItem(lessonPlanData.type, toLessonPlanTypeLabelMap.getValue(lessonPlanData.type)),
                     onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
                     items = LessonPlanType.entries.map { DropDownItem(it, toLessonPlanTypeLabelMap.getValue(it)) }
                 )
-                LabeledCheckbox(
+                OutlinedLabeledCheckbox(
                     label = stringResource(R.string.plan_make_default),
                     checked = lessonPlanData.isDefault,
                     onCheckedChange = { checked -> viewModel.updatePlanIsDefault(checked) },

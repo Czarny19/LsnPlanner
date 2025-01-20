@@ -8,10 +8,10 @@ import com.lczarny.lsnplanner.data.local.entity.PlanClass
 
 data class LessonPlanModel(
     var id: Long? = null,
-    var name: String,
-    var type: LessonPlanType,
+    @ColumnInfo(name = "name") var name: String = "",
+    @ColumnInfo(name = "type") var type: LessonPlanType,
     @ColumnInfo(name = "create_date") var createDate: Long,
-    @ColumnInfo(name = "isDefault") var isDefault: Boolean,
+    @ColumnInfo(name = "is_default") var isDefault: Boolean,
 )
 
 fun LessonPlan.mapToModel() = LessonPlanModel(

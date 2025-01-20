@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NotStarted
+import androidx.compose.material.icons.outlined.WavingHand
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -86,7 +86,7 @@ fun FirstLaunchInfo(navController: NavController) {
                 modifier = Modifier
                     .padding(AppPadding.mdPadding)
                     .size(AppSizes.xlIcon),
-                imageVector = Icons.Outlined.NotStarted,
+                imageVector = Icons.Outlined.WavingHand,
                 contentDescription = stringResource(R.string.information),
                 tint = MaterialTheme.colorScheme.primary,
             )

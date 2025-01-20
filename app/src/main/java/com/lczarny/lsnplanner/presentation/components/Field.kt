@@ -1,10 +1,12 @@
 package com.lczarny.lsnplanner.presentation.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -27,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -45,12 +49,16 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDateTime
+import com.lczarny.lsnplanner.utils.formatTime
+import java.util.Calendar
 
 @Composable
 fun InfoField(modifier: Modifier = Modifier, text: String) {
@@ -79,7 +87,7 @@ fun InfoField(modifier: Modifier = Modifier, text: String) {
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
-                textAlign = TextAlign.Justify,
+                textAlign = TextAlign.Start,
             )
         }
     }
@@ -90,7 +98,10 @@ fun OutlinedInputField(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
+    hint: String = "",
     isError: Boolean = false,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
     errorMsg: String? = null,
     onValueChange: (String) -> Unit,
     minLines: Int = 1,
@@ -98,13 +109,17 @@ fun OutlinedInputField(
     maxLength: Int
 ) {
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .padding(bottom = AppPadding.inputBottomPadding)
+            .fillMaxWidth(),
         value = value,
-        onValueChange = { name -> if (name.length <= maxLength) onValueChange.invoke(name) },
+        onValueChange = { value -> if (value.length <= maxLength) onValueChange.invoke(value) },
         label = { Text(text = label) },
         minLines = minLines,
         maxLines = maxLines,
         isError = isError,
+        readOnly = readOnly,
+        enabled = enabled,
         supportingText = {
             when (isError) {
                 true -> Text(
@@ -115,9 +130,56 @@ fun OutlinedInputField(
                 )
 
                 false -> Text(
-                    text = "${value.length} / $maxLength",
+                    text = if (hint.isNotEmpty()) {
+                        "$hint | ${value.length} / $maxLength"
+                    } else {
+                        "${value.length} / $maxLength"
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+fun OutlinedNumberInputField(
+    modifier: Modifier = Modifier,
+    label: String,
+    value: Int,
+    readOnly: Boolean = false,
+    enabled: Boolean = true,
+    onValueChange: (Int) -> Unit,
+    minValue: Int,
+    maxValue: Int
+) {
+    OutlinedTextField(
+        modifier = modifier
+            .padding(bottom = AppPadding.inputBottomPadding)
+            .fillMaxWidth(),
+        value = value.toString(),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+        onValueChange = { value ->
+            if (value.isEmpty()) {
+                onValueChange.invoke(0)
+            } else if (value.toInt() >= minValue && value.toInt() <= maxValue) {
+                onValueChange.invoke(value.toInt())
+            }
+        },
+        label = { Text(text = label) },
+        minLines = 1,
+        maxLines = 1,
+        isError = value < minValue || value > maxValue,
+        readOnly = readOnly,
+        enabled = enabled,
+        supportingText = {
+            if (value < minValue || value > maxValue) {
+                Text(
+                    text = stringResource(R.string.number_not_in_range_error, minValue, maxValue),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.error
                 )
             }
         },
@@ -144,7 +206,65 @@ fun FullScreenTextArea(placeholder: String, value: String, onValueChange: (Strin
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OutlinedDateTimePicker(modifier: Modifier = Modifier, label: String, initialValue: Long?, onDateTimeSelected: (Long?) -> Unit) {
+fun OutlinedTimePicker(
+    modifier: Modifier = Modifier,
+    label: String,
+    initialHours: Int?,
+    intitialMinutes: Int?,
+    onTimeSelected: (Int, Int) -> Unit
+) {
+    val context = LocalContext.current
+
+    var showTimeDialog by remember { mutableStateOf(false) }
+
+    val displayTime = formatTime(context, initialHours, intitialMinutes)
+
+    OutlinedTextField(
+        value = displayTime,
+        onValueChange = { },
+        label = { Text(label) },
+        placeholder = { Text("MM/DD/YYYY") },
+        trailingIcon = {
+            Icon(Icons.Default.DateRange, contentDescription = "Select date")
+        },
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = AppPadding.inputBottomPadding)
+            .pointerInput(displayTime) {
+                awaitEachGesture {
+                    awaitFirstDown(pass = PointerEventPass.Initial)
+                    val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                    if (upEvent != null) showTimeDialog = true
+                }
+            }
+    )
+
+    if (showTimeDialog) {
+        AppTimePickerDialog(
+            initialValue = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, initialHours ?: 0)
+                set(Calendar.MINUTE, intitialMinutes ?: 0)
+            }.timeInMillis,
+            onDismiss = { showTimeDialog = false },
+            onConfirm = { selectedDateTimeMillis ->
+                val time = Calendar.getInstance().apply { timeInMillis = selectedDateTimeMillis }
+                onTimeSelected(time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE))
+                showTimeDialog = false
+            }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun OutlinedDateTimePicker(
+    modifier: Modifier = Modifier,
+    label: String,
+    initialValue: Long?,
+    isError: Boolean = false,
+    errorMsg: String? = null,
+    onDateTimeSelected: (Long?) -> Unit
+) {
     val context = LocalContext.current
 
     var dateTimeMilis by remember { mutableLongStateOf(0L) }
@@ -159,15 +279,27 @@ fun OutlinedDateTimePicker(modifier: Modifier = Modifier, label: String, initial
         trailingIcon = {
             Icon(Icons.Default.DateRange, contentDescription = "Select date")
         },
+        isError = isError,
         modifier = modifier
             .fillMaxWidth()
+            .padding(bottom = AppPadding.inputBottomPadding)
             .pointerInput(initialValue) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)
                     val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
                     if (upEvent != null) showDateDialog = true
                 }
+            },
+        supportingText = {
+            if (isError) {
+                Text(
+                    text = errorMsg ?: "",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
+        },
     )
 
     if (showDateDialog) {
@@ -220,15 +352,24 @@ fun OutlinedDropDown(
 
     Column(modifier = modifier) {
         OutlinedTextField(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
+                .padding(bottom = AppPadding.inputBottomPadding)
+                .pointerInput(value) {
+                    awaitEachGesture {
+                        awaitFirstDown(pass = PointerEventPass.Initial)
+                        val upEvent = waitForUpOrCancellation(pass = PointerEventPass.Initial)
+                        if (upEvent != null) expanded = true
+                    }
+                }
                 .onGloballyPositioned { coordinates -> fieldSize = coordinates.size.toSize() },
             value = seleced.description,
             onValueChange = { },
             label = { Text(text = label) },
+            readOnly = true,
             trailingIcon = {
                 Icon(
-                    modifier = Modifier.clickable { expanded = expanded.not() },
+                    modifier = Modifier.clickable { expanded = true },
                     imageVector = icon,
                     contentDescription = stringResource(R.string.show_options),
                 )
@@ -254,19 +395,32 @@ fun OutlinedDropDown(
 }
 
 @Composable
-fun LabeledCheckbox(
+fun OutlinedLabeledCheckbox(
     modifier: Modifier = Modifier,
     label: String,
     checked: Boolean,
     enabled: Boolean = true,
     onCheckedChange: ((Boolean) -> Unit)?
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = AppPadding.inputBottomPadding)
+            .border(
+                width = 1.dp,
+                color = OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor,
+                shape = OutlinedTextFieldDefaults.shape
+            )
     ) {
-        Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-        Text(text = label)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = AppPadding.xsmPadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+            Text(text = label)
+        }
     }
 }

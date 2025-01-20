@@ -1,6 +1,5 @@
 package com.lczarny.lsnplanner.presentation.ui.todo
 
-import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,7 +49,6 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.SavingDialog
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.presentation.ui.todo.model.ToDoState
 import com.lczarny.lsnplanner.presentation.ui.todo.model.toDoImportanceLabelMap
 
@@ -60,11 +58,9 @@ fun ToDoScreen(
     lessonPlanId: Long,
     classId: Long? = null,
     toDoId: Long?,
-    viewModel: ToDoViewModel = hiltViewModel(),
-    homeViewModel: HomeViewModel = hiltViewModel()
+    viewModel: ToDoViewModel = hiltViewModel()
 ) {
-    val toDosList by homeViewModel.toDos.collectAsState()
-    viewModel.intializeToDo(lessonPlanId, classId, toDosList.find { toDo -> toDo.id == toDoId })
+    viewModel.intializeToDo(lessonPlanId, classId, toDoId)
 
     val screenState by viewModel.screenState.collectAsState()
 
@@ -76,7 +72,8 @@ fun ToDoScreen(
                 content = {
                     when (screenState) {
                         ToDoState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
-                        ToDoState.Edit, ToDoState.Saving -> ToDoForm(navController, screenState == ToDoState.Saving, viewModel)
+                        ToDoState.Edit -> ToDoForm(navController, false, viewModel)
+                        ToDoState.Saving -> ToDoForm(navController, true, viewModel)
                         ToDoState.Finished -> navController.popBackStack()
                     }
                 }
@@ -94,8 +91,6 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
         targetValue = if (detailsExpanded) 180f else 0f,
         label = stringResource(R.string.card_animation)
     )
-
-    Log.d("Test", toDoData.toString())
 
     toDoData?.let { toDoData ->
         Scaffold(
@@ -174,11 +169,10 @@ fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean)
                 .padding(AppPadding.screenPadding)
         ) {
             InfoField(
-                modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
+                modifier = Modifier.padding(bottom = AppPadding.inputBottomPadding),
                 text = stringResource(R.string.todo_details_info)
             )
             OutlinedDateTimePicker(
-                modifier = Modifier.padding(bottom = AppPadding.mdInputSpacerPadding),
                 initialValue = toDoData.dueDate,
                 label = stringResource(R.string.todo_due_date),
                 onDateTimeSelected = { dateMilis -> viewModel.updateDueDate(dateMilis) }

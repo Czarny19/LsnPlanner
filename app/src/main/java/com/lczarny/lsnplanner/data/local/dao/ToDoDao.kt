@@ -14,6 +14,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ToDoDao {
 
+    @Query("SELECT * FROM todo WHERE id = :toDoId")
+    fun getToDo(toDoId: Long): Flow<ToDo>
+
     @Query("SELECT * FROM todo WHERE lesson_plan_id = :lessonPlanId")
     fun getAllToDos(lessonPlanId: Long): Flow<List<ToDo>>
 

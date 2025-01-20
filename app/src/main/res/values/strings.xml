@@ -16,6 +16,10 @@
     <string name="done">Done</string>
     <string name="delete">Delete</string>
     <string name="confirm">Confirm</string>
+    <string name="minutes">Minutes</string>
+
+    <!-- Errors  -->
+    <string name="number_not_in_range_error">The field value must be beetween: %1$d and %2$d</string>
 
     <!-- Tutorial -->
     <string name="tutorial">Tutorial</string>
@@ -27,6 +31,8 @@
     <!-- Routes -->
     <string name="route_new_lesson_plan">New lesson plan</string>
     <string name="route_edit_lesson_plan">Edit lesson plan</string>
+    <string name="route_new_plan_class">New class</string>
+    <string name="route_edit_plan_class">Edit class</string>
     <string name="route_new_todo">New to-do</string>
     <string name="route_edit_todo">Edit to-do</string>
 
@@ -60,7 +66,7 @@
     <string name="home_tab_more">More</string>
 
     <!-- Lesson plan -->
-    <string name="plan_form_info">This new lesson plan will be available to choose from the home screen. If the plan is set as default, the app will start with this plan open.</string>
+    <string name="plan_form_info">This new lesson plan will be available to select from the application menu. If the plan is set as default, the app will start with this plan open.</string>
     <string name="plan_name">Name</string>
     <string name="plan_type">Plan type</string>
     <string name="plan_make_default">Set this plan as the default plan</string>
@@ -70,10 +76,36 @@
 
     <!-- Classes -->
     <string name="class_add">Add a Class</string>
+    <string name="class_list_empty_hint">No classes for the day ☺️</string>
+    <string name="class_save">Save class</string>
+    <string name="class_basic_info">Class info</string>
+    <string name="class_time_info">Class time</string>
+    <string name="class_name">Name</string>
+    <string name="class_type">Class type</string>
+    <string name="class_note">Note</string>
+    <string name="class_duration">Duration (minutes)</string>
+    <string name="class_is_cyclical">Occurs every week?</string>
+    <string name="class_week_day">Week day</string>
+    <string name="class_time">Time</string>
+    <string name="class_date">Date</string>
+    <string name="class_prev_week">Prevoius week</string>
+    <string name="class_next_week">Next week</string>
+    <string name="class_change_date">Change date</string>
+    <string name="class_classroom">Classroom</string>
+    <string name="class_address">Building address</string>
+    <string name="class_address_hint">Optional classroom address</string>
+    <string name="class_type_class">Class</string>
+    <string name="class_type_pe">PE</string>
+    <string name="class_type_lecture">Lecture</string>
+    <string name="class_type_practical">Practical</string>
+    <string name="class_type_laboratory">Laboratory</string>
+    <string name="class_type_seminar">Seminar</string>
+    <string name="class_type_workshop">Workshop</string>
+    <string name="class_type_other">Other</string>
 
     <!-- ToDos -->
     <string name="todo_add">Add a ToDo</string>
-    <string name="todo_list_empty_hint">No to-dos left ☺️.\n Use the \'+\' button to create a new to-do.</string>
+    <string name="todo_list_empty_hint">No to-dos left ☺️\n Use the \'+\' button to create a new to-do.</string>
     <string name="todo_due_date">Due date</string>
     <string name="todo_details_info">To-dos with the highest importance and the most recent due date will appear at the top of the to-do list.</string>
     <string name="todo_save">Save to-do</string>

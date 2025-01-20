@@ -5,9 +5,9 @@ import com.lczarny.lsnplanner.data.local.entity.ToDo
 
 data class ToDoModel(
     var id: Long? = null,
-    var content: String,
-    var historical: Boolean = false,
-    var importance: ToDoImportance = ToDoImportance.Low,
+    @ColumnInfo(name = "content") var content: String = "",
+    @ColumnInfo(name = "historical") var historical: Boolean = false,
+    @ColumnInfo(name = "importance") var importance: ToDoImportance = ToDoImportance.Low,
     @ColumnInfo(name = "due_date") var dueDate: Long? = null,
     @ColumnInfo(name = "class_id") var classId: Long? = null,
     @ColumnInfo(name = "lesson_plan_id") var lessonPlanId: Long,

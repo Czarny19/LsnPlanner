@@ -8,29 +8,31 @@ import com.lczarny.lsnplanner.data.local.entity.ToDo
 
 data class PlanClassModel(
     var id: Long? = null,
-    var name: String,
-    @ColumnInfo(name = "is_cyclical") var isCyclical: Boolean,
-    var note: String? = null,
+    @ColumnInfo(name = "name") var name: String = "",
+    @ColumnInfo(name = "type") var type: PlanClassType,
+    @ColumnInfo(name = "color") var color: String = "0xFF394E85",
+    @ColumnInfo(name = "note") var note: String? = null,
     @ColumnInfo(name = "week_day") var weekDay: Int? = null,
-    @ColumnInfo(name = "start_time") var startTime: Long? = null,
-    @ColumnInfo(name = "end_time") var endTime: Long? = null,
-    @ColumnInfo(name = "single_date") var singleDate: Long? = null,
-    @ColumnInfo(name = "class_address") var classAddress: String? = null,
-    @ColumnInfo(name = "class_number") var classNumber: String? = null,
+    @ColumnInfo(name = "start_date") var startDate: Long? = null,
+    @ColumnInfo(name = "start_hour") var startHour: Int = 8,
+    @ColumnInfo(name = "start_minute") var startMinute: Int = 0,
+    @ColumnInfo(name = "duration_minutes") var durationMinutes: Int = 45,
+    @ColumnInfo(name = "classroom") var classroom: String? = null,
     @ColumnInfo(name = "lesson_plan_id") var lessonPlanId: Long,
 )
 
 fun PlanClass.mapToModel() = PlanClassModel(
     id = this.id,
     name = this.name,
-    isCyclical = this.isCyclical,
+    type = this.type,
+    color = this.color,
     note = this.note,
     weekDay = this.weekDay,
-    startTime = this.startTime,
-    endTime = this.endTime,
-    singleDate = this.singleDate,
-    classAddress = this.classAddress,
-    classNumber = this.classNumber,
+    startDate = this.startDate,
+    startHour = this.startHour,
+    startMinute = this.startMinute,
+    durationMinutes = this.durationMinutes,
+    classroom = this.classroom,
     lessonPlanId = this.lessonPlanId
 )
 
@@ -48,3 +50,40 @@ fun PlanClassWithToDos.mapToModel() = PlanClassWithToDosModel(
     planClass = planClass.mapToModel(),
     toDos = toDos.map { it.mapToModel() },
 )
+
+enum class PlanClassType(val raw: String) {
+    Class("Class"),
+    PE("PE"),
+    Lecture("Lecture"),
+    Practical("Practical"),
+    Laboratory("Laboratory"),
+    Seminar("Seminar"),
+    Workshop("Workshop"),
+    Other("Other");
+
+    companion object {
+        fun from(find: String): PlanClassType = PlanClassType.entries.find { it.raw == find } ?: Other
+    }
+}
+
+fun LessonPlanType.planClassTypes(): List<PlanClassType> = when (this) {
+    LessonPlanType.School -> listOf<PlanClassType>(
+        PlanClassType.Class,
+        PlanClassType.PE,
+        PlanClassType.Other
+    )
+
+    LessonPlanType.University -> listOf<PlanClassType>(
+        PlanClassType.Lecture,
+        PlanClassType.Practical,
+        PlanClassType.Laboratory,
+        PlanClassType.Seminar,
+        PlanClassType.Workshop,
+        PlanClassType.Other
+    )
+}
+
+fun LessonPlanType.defaultClassType() = when (this) {
+    LessonPlanType.School -> PlanClassType.Class
+    LessonPlanType.University -> PlanClassType.Lecture
+}
