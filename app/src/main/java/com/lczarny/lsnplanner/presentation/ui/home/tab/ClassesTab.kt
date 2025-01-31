@@ -17,8 +17,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Room
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +33,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +46,7 @@ import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.utils.formatTime
+import com.lczarny.lsnplanner.utils.isSameDate
 import com.lczarny.lsnplanner.utils.mapAppDayOfWeekToCalendarDayOfWeek
 import com.lczarny.lsnplanner.utils.toDayOfWeekString
 import kotlinx.coroutines.launch
@@ -52,7 +61,16 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
     val classesPerWeekDay = mutableMapOf<Int, List<PlanClassModel>>()
 
     for (i in 1..7) {
-        classesPerWeekDay[i] = classes.filter { it.weekDay == i }
+        val currentDayDate = Calendar.getInstance().apply {
+            timeInMillis = currentDate.timeInMillis
+            set(Calendar.DAY_OF_WEEK, i.mapAppDayOfWeekToCalendarDayOfWeek())
+        }
+
+        classesPerWeekDay[i] = classes.filter {
+            it.weekDay == i || (it.startDate != null && currentDayDate.isSameDate(
+                Calendar.getInstance().apply { timeInMillis = it.startDate!! }
+            ))
+        }
     }
 
     Column(
@@ -149,27 +167,72 @@ fun ClassesWeekDayTopNavItem(index: Int, viewModel: HomeViewModel, date: Calenda
 fun ClassesTabItem(item: PlanClassModel) {
     val context = LocalContext.current
 
+    var startTime: String
+
     val classTime = if (item.weekDay != null) {
-        val startTime = formatTime(context, item.startHour, item.startMinute)
-        val endTime = formatTime(context, item.startHour + (item.durationMinutes / 60), item.startMinute + (item.durationMinutes % 60))
-        "$startTime - $endTime (${item.durationMinutes} ${stringResource(R.string.minutes)})"
+        val hour = item.startHour
+        val minute = item.startMinute
+
+        startTime = formatTime(context, hour, minute)
+        val endTime = formatTime(context, hour + (item.durationMinutes / 60), minute + (item.durationMinutes % 60))
+
+        "$startTime - $endTime"
     } else {
-        "aa"
+        val startDate = Calendar.getInstance().apply { timeInMillis = item.startDate!! }
+        val hour = startDate.get(Calendar.HOUR_OF_DAY)
+        val minute = startDate.get(Calendar.MINUTE)
+
+        startTime = formatTime(context, hour, minute)
+        val endTime = formatTime(context, hour + (item.durationMinutes / 60), minute + (item.durationMinutes % 60))
+
+        "$startTime - $endTime"
     }
 
-    Card(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
-        content = {
-            Column(
-                modifier = Modifier.padding(AppPadding.screenPadding),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top,
-            ) {
-                Text(item.name, modifier = Modifier.padding(bottom = AppPadding.smPadding), style = MaterialTheme.typography.titleSmall)
-                Text(classTime, style = MaterialTheme.typography.labelLarge)
-                Text(item.classroom ?: "")
-            }
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = AppPadding.smPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(startTime, style = MaterialTheme.typography.labelMedium)
+            HorizontalDivider(modifier = Modifier.padding(start = AppPadding.smPadding))
         }
-    )
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = AppPadding.timelineStartPadding),
+            elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+            colors = CardDefaults.cardColors(containerColor = Color(item.color)),
+            content = {
+                Column(
+                    modifier = Modifier.padding(AppPadding.screenPadding),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Top,
+                ) {
+                    Text(
+                        item.name,
+                        modifier = Modifier.padding(bottom = AppPadding.xsmPadding),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    ClassesTabItemField(classTime, Icons.Filled.Schedule)
+                    ClassesTabItemField("${item.durationMinutes} ${stringResource(R.string.minutes)}", Icons.Filled.Timer)
+                    if (item.classroom != null) {
+                        ClassesTabItemField("${stringResource(R.string.class_classroom)}: ${item.classroom}", Icons.Filled.Room)
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun ClassesTabItemField(value: String, img: ImageVector) {
+    Row(modifier = Modifier.padding(top = AppPadding.xsmPadding), verticalAlignment = Alignment.CenterVertically) {
+        Icon(modifier = Modifier.size(AppSizes.smIcon), imageVector = img, contentDescription = value)
+        Text(value, modifier = Modifier.padding(start = AppPadding.xsmPadding), style = MaterialTheme.typography.labelLarge)
+    }
 }

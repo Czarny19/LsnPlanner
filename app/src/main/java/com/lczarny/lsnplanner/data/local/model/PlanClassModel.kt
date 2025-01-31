@@ -10,7 +10,7 @@ data class PlanClassModel(
     var id: Long? = null,
     @ColumnInfo(name = "name") var name: String = "",
     @ColumnInfo(name = "type") var type: PlanClassType,
-    @ColumnInfo(name = "color") var color: String = "0xFF394E85",
+    @ColumnInfo(name = "color") var color: Long = 0xFF394E85,
     @ColumnInfo(name = "note") var note: String? = null,
     @ColumnInfo(name = "week_day") var weekDay: Int? = null,
     @ColumnInfo(name = "start_date") var startDate: Long? = null,

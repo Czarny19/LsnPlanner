@@ -13,6 +13,8 @@ class AppPadding {
         val lgPadding = 24.dp
         val xlPadding = 48.dp
 
+        val timelineStartPadding = 64.dp
+
         val inputBottomPadding = 16.dp
     }
 }

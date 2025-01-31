@@ -22,7 +22,7 @@ data class PlanClass(
     @PrimaryKey(autoGenerate = true) val id: Long,
     @Required @ColumnInfo(name = "name") val name: String,
     @Required @ColumnInfo(name = "type") val type: PlanClassType,
-    @Required @ColumnInfo(name = "color") val color: String,
+    @Required @ColumnInfo(name = "color") val color: Long,
     @ColumnInfo(name = "note", defaultValue = "NULL") val note: String?,
     @ColumnInfo(name = "week_day", defaultValue = "NULL") val weekDay: Int?,
     @ColumnInfo(name = "start_date", defaultValue = "NULL") val startDate: Long?,

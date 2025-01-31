@@ -53,7 +53,7 @@ class PlanClassViewModel @Inject constructor(
         _planClassData.update { _planClassData.value?.copy(type = value) }
     }
 
-    fun updateClassColor(value: String) {
+    fun updateClassColor(value: Long) {
         _planClassData.update { _planClassData.value?.copy(color = value) }
     }
 
@@ -62,7 +62,7 @@ class PlanClassViewModel @Inject constructor(
     }
 
     fun updateIsCyclical(value: Boolean) {
-        _planClassData.update { _planClassData.value?.copy(weekDay = _defaultWeekDay) }
+        _planClassData.update { _planClassData.value?.copy(weekDay = if (value) _defaultWeekDay else null) }
         _planClassData.update { _planClassData.value?.copy(startHour = 0, startMinute = 0) }
 
         _planStartDateError.update { false }

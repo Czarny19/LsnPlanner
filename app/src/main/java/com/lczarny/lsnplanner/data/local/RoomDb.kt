@@ -14,7 +14,7 @@ import com.lczarny.lsnplanner.data.local.entity.Setting
 import com.lczarny.lsnplanner.data.local.entity.ToDo
 
 @Database(
-    version = 16,
+    version = 17,
     exportSchema = false,
     entities = [
         LessonPlan::class,

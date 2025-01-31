@@ -39,14 +39,27 @@ fun Int.mapAppDayOfWeekToCalendarDayOfWeek() = when (this) {
     else -> 1
 }
 
+fun Calendar.isSameDate(date: Calendar): Boolean =
+    get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH) &&
+            get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
+            get(Calendar.YEAR) == date.get(Calendar.YEAR)
+
 fun Long.convertMillisToSystemDateTime(context: Context): String {
     val date = ((DateFormat.getDateFormat(context)) as SimpleDateFormat).format(this)
     val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(this)
     return "$date $time"
 }
 
-fun formatTime(context: Context, hour: Int?, minute: Int?): String =
-    ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(Calendar.getInstance().apply {
+fun formatTime(context: Context, hour: Int?, minute: Int?): String {
+    val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, hour ?: 0)
         set(Calendar.MINUTE, minute ?: 0)
     }.timeInMillis)
+
+    if (time.indexOf(":") == 1) {
+        return "0${time}"
+    }
+
+    return time
+}
+
