@@ -44,6 +44,8 @@ import com.lczarny.lsnplanner.presentation.components.EmptyList
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
+import com.lczarny.lsnplanner.presentation.ui.planclass.model.planClassTypeLabelMap
+import com.lczarny.lsnplanner.presentation.ui.planclass.model.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.utils.formatTime
 import com.lczarny.lsnplanner.utils.isSameDate
 import com.lczarny.lsnplanner.utils.mapAppDayOfWeekToCalendarDayOfWeek
@@ -112,7 +114,7 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
                     horizontalAlignment = Alignment.Start
                 ) {
                     items(items = classesPerWeekDay[page + 1]!!) { planClass ->
-                        ClassesTabItem(planClass)
+                        ClassesTabItem(viewModel, planClass)
                     }
                 }
             }
@@ -162,8 +164,11 @@ fun ClassesWeekDayTopNavItem(index: Int, viewModel: HomeViewModel, date: Calenda
 }
 
 @Composable
-fun ClassesTabItem(item: PlanClassModel) {
+fun ClassesTabItem(viewModel: HomeViewModel, item: PlanClassModel) {
     val context = LocalContext.current
+    val lessonPlan by viewModel.lessonPlan.collectAsState()
+
+    val planClassTypeLabelMap = lessonPlan!!.plan.type.planClassTypeLabelMap(context)
 
     val startTime: String
     val classTime: String
@@ -212,16 +217,19 @@ fun ClassesTabItem(item: PlanClassModel) {
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top,
                 ) {
-                    Text(
-                        item.name,
-                        modifier = Modifier.padding(bottom = AppPadding.xsmPadding),
-                        style = MaterialTheme.typography.titleSmall
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = AppPadding.xsmPadding),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        ClassesTabItemField(item.name)
+                        ClassesTabItemField(planClassTypeLabelMap[item.type]!!, item.type.toPlanClassTypeIcon())
+                    }
                     ClassesTabItemField(classTime, Icons.Filled.Schedule)
                     ClassesTabItemField("${item.durationMinutes} ${stringResource(R.string.minutes)}", Icons.Filled.Timer)
-                    if (item.classroom != null) {
-                        ClassesTabItemField("${stringResource(R.string.class_classroom)}: ${item.classroom}", Icons.Filled.Room)
-                    }
+                    item.classroom?.let { ClassesTabItemField("${stringResource(R.string.class_classroom)}: $it", Icons.Filled.Room) }
                 }
             }
         )
@@ -229,9 +237,9 @@ fun ClassesTabItem(item: PlanClassModel) {
 }
 
 @Composable
-fun ClassesTabItemField(value: String, img: ImageVector) {
+fun ClassesTabItemField(value: String, img: ImageVector? = null) {
     Row(modifier = Modifier.padding(top = AppPadding.xsmPadding), verticalAlignment = Alignment.CenterVertically) {
-        Icon(modifier = Modifier.size(AppSizes.smIcon), imageVector = img, contentDescription = value)
+        img?.let { Icon(modifier = Modifier.size(AppSizes.smIcon), imageVector = img, contentDescription = value) }
         Text(value, modifier = Modifier.padding(start = AppPadding.xsmPadding), style = MaterialTheme.typography.labelLarge)
     }
 }

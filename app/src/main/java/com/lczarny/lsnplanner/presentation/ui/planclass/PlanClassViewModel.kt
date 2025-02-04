@@ -97,7 +97,7 @@ class PlanClassViewModel @Inject constructor(
         _defaultWeekDay = defaultWeekDay
         _lessonPlanType.update { lessonPlanType }
 
-        if (planClassId != null) {
+        planClassId?.let {
             _isEdit.update { true }
 
             viewModelScope.launch(Dispatchers.IO) {
@@ -105,7 +105,7 @@ class PlanClassViewModel @Inject constructor(
                     _planClassData.update { planClassWithToDos.planClass }
                 }
             }
-        } else {
+        } ?: run {
             _isEdit.update { false }
             _planClassData.update {
                 PlanClassModel(
@@ -120,36 +120,30 @@ class PlanClassViewModel @Inject constructor(
     }
 
     fun savePlanClass() {
-        _planClassData.value?.let {
+        _planClassData.value?.let { planClass ->
             var error = false
 
-            if (it.name.isEmpty()) {
+            if (planClass.name.isEmpty()) {
                 error = true
                 _planNameError.update { true }
             }
 
-            if (it.classroom == null || it.classroom!!.isEmpty()) {
+            if (planClass.classroom == null || planClass.classroom!!.isEmpty()) {
                 error = true
                 _planClassroomError.update { true }
             }
 
-            if (_isCyclical.value.not() && it.startDate == null) {
+            if (_isCyclical.value.not() && planClass.startDate == null) {
                 error = true
                 _planStartDateError.update { true }
             }
 
-            if (error) {
-                return
-            }
+            if (error) return
 
             _screenState.update { PlanClassState.Saving }
 
             viewModelScope.launch(Dispatchers.IO) {
-                if (it.id != null) {
-                    planClassRepository.update(it)
-                } else {
-                    planClassRepository.insert(it)
-                }
+                planClass.id?.let { planClassRepository.update(planClass) } ?: run { planClassRepository.insert(planClass) }
             }.invokeOnCompletion {
                 _screenState.update { PlanClassState.Finished }
             }

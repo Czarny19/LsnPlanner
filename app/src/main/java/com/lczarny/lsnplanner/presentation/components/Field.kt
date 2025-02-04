@@ -163,7 +163,7 @@ fun OutlinedNumberInputField(
             if (text.isEmpty()) {
                 onValueChange.invoke(0)
             } else if (text.toInt() in minValue..maxValue) {
-                onValueChange.invoke(value)
+                onValueChange.invoke(text.toInt())
             }
         },
         label = { Text(text = label) },

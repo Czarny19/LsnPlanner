@@ -25,10 +25,12 @@ fun FullScreenLoading(label: String? = null) {
             color = MaterialTheme.colorScheme.secondary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
-        if (label != null) Text(
-            modifier = Modifier.padding(top = AppPadding.xlPadding),
-            text = label,
-            style = MaterialTheme.typography.titleLarge,
-        )
+        label?.let {
+            Text(
+                modifier = Modifier.padding(top = AppPadding.xlPadding),
+                text = it,
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
     }
 }

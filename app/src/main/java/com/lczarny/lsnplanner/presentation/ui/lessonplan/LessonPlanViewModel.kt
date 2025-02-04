@@ -73,8 +73,8 @@ class LessonPlanViewModel @Inject constructor(
     }
 
     fun savePlan() {
-        _lessonPlanData.value?.let {
-            if (it.name.isEmpty()) {
+        _lessonPlanData.value?.let { lessonPlan ->
+            if (lessonPlan.name.isEmpty()) {
                 _planNameError.update { true }
                 return
             }
@@ -82,12 +82,10 @@ class LessonPlanViewModel @Inject constructor(
             _screenState.update { LessonPlanState.Saving }
 
             viewModelScope.launch(Dispatchers.IO) {
-                if (it.id != null) {
+                lessonPlan.id?.let {
 //                    TODO test
 //                    lessonPlanRepository.update(it)
-                } else {
-                    lessonPlanRepository.insert(it)
-                }
+                } ?: run { lessonPlanRepository.insert(lessonPlan) }
             }.invokeOnCompletion {
                 _screenState.update { LessonPlanState.Finished }
             }

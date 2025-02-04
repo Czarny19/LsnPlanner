@@ -187,7 +187,12 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 OutlinedNumberInputField(
                     label = stringResource(R.string.class_duration),
                     value = data.durationMinutes,
-                    onValueChange = { duration -> viewModel.updateDuration(duration.toString().toInt()) },
+                    onValueChange = { duration ->
+                        try {
+                            viewModel.updateDuration(duration.toString().toInt())
+                        } catch (_: NumberFormatException) {
+                        }
+                    },
                     minValue = 1,
                     maxValue = 600,
                 )

@@ -32,13 +32,13 @@ fun LessonPlanType.planClassTypeLabelMap(context: Context): Map<PlanClassType, S
     )
 }
 
-val toPlanClassTypeIconMap: Map<PlanClassType, ImageVector> = mapOf(
-    PlanClassType.Class to Icons.Filled.Class,
-    PlanClassType.PE to Icons.Filled.Sports,
-    PlanClassType.Lecture to Icons.AutoMirrored.Filled.LibraryBooks,
-    PlanClassType.Practical to Icons.Filled.DesignServices,
-    PlanClassType.Laboratory to Icons.Filled.Science,
-    PlanClassType.Seminar to Icons.Filled.School,
-    PlanClassType.Workshop to Icons.Filled.Handyman,
-    PlanClassType.Other to Icons.Filled.Schedule
-)
+fun PlanClassType.toPlanClassTypeIcon(): ImageVector = when (this) {
+    PlanClassType.Class -> Icons.Filled.Class
+    PlanClassType.PE -> Icons.Filled.Sports
+    PlanClassType.Lecture -> Icons.AutoMirrored.Filled.LibraryBooks
+    PlanClassType.Practical -> Icons.Filled.DesignServices
+    PlanClassType.Laboratory -> Icons.Filled.Science
+    PlanClassType.Seminar -> Icons.Filled.School
+    PlanClassType.Workshop -> Icons.Filled.Handyman
+    PlanClassType.Other -> Icons.Filled.Schedule
+}

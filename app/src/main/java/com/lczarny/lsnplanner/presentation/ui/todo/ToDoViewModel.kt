@@ -39,13 +39,13 @@ class ToDoViewModel @Inject constructor(
     }
 
     fun intializeToDo(lessonPlanId: Long, classId: Long?, toDoId: Long?) {
-        if (toDoId != null) {
+        toDoId?.let {
             viewModelScope.launch(Dispatchers.IO) {
-                toDoRepository.toDo(toDoId).flowOn(Dispatchers.IO).collect { toDo ->
+                toDoRepository.toDo(it).flowOn(Dispatchers.IO).collect { toDo ->
                     _toDoData.update { toDo }
                 }
             }
-        } else {
+        } ?: run {
             _toDoData.update { ToDoModel(lessonPlanId = lessonPlanId, classId = classId) }
         }
 
@@ -56,12 +56,8 @@ class ToDoViewModel @Inject constructor(
         _screenState.update { ToDoState.Saving }
 
         viewModelScope.launch(Dispatchers.IO) {
-            _toDoData.value?.let {
-                if (it.id != null) {
-                    toDoRepository.update(it)
-                } else {
-                    toDoRepository.insert(it)
-                }
+            _toDoData.value?.let { toDo ->
+                toDo.id?.let { toDoRepository.update(toDo) } ?: run { toDoRepository.insert(toDo) }
             }
         }.invokeOnCompletion {
             _screenState.update { ToDoState.Finished }
