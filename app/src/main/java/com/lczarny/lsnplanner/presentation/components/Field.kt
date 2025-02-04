@@ -26,7 +26,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -113,7 +112,7 @@ fun OutlinedInputField(
             .padding(bottom = AppPadding.inputBottomPadding)
             .fillMaxWidth(),
         value = value,
-        onValueChange = { value -> if (value.length <= maxLength) onValueChange.invoke(value) },
+        onValueChange = { text -> if (text.length <= maxLength) onValueChange.invoke(text) },
         label = { Text(text = label) },
         minLines = minLines,
         maxLines = maxLines,
@@ -160,11 +159,11 @@ fun OutlinedNumberInputField(
             .fillMaxWidth(),
         value = value.toString(),
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-        onValueChange = { value ->
-            if (value.isEmpty()) {
+        onValueChange = { text ->
+            if (text.isEmpty()) {
                 onValueChange.invoke(0)
-            } else if (value.toInt() >= minValue && value.toInt() <= maxValue) {
-                onValueChange.invoke(value.toInt())
+            } else if (text.toInt() in minValue..maxValue) {
+                onValueChange.invoke(value)
             }
         },
         label = { Text(text = label) },
@@ -204,7 +203,6 @@ fun FullScreenTextArea(placeholder: String, value: String, onValueChange: (Strin
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedTimePicker(
     modifier: Modifier = Modifier,
@@ -255,7 +253,6 @@ fun OutlinedTimePicker(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedDateTimePicker(
     modifier: Modifier = Modifier,
@@ -342,7 +339,7 @@ fun OutlinedDropDown(
     onValueChange: (DropDownItem) -> Unit
 ) {
     var fieldSize by remember { mutableStateOf(Size.Zero) }
-    var seleced by remember { mutableStateOf<DropDownItem>(value) }
+    var seleced by remember { mutableStateOf(value) }
     var expanded by remember { mutableStateOf(false) }
 
     val icon = when (expanded) {

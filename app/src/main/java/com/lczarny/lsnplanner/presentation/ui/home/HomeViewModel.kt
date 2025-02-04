@@ -10,7 +10,6 @@ import com.lczarny.lsnplanner.data.local.model.ToDoModel
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.repository.SettingRepository
 import com.lczarny.lsnplanner.data.local.repository.ToDoRepository
-import com.lczarny.lsnplanner.presentation.components.ConfirmationDialogState
 import com.lczarny.lsnplanner.presentation.components.closedConfirmationDialogState
 import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,20 +29,20 @@ class HomeViewModel @Inject constructor(
     private val toDoRepository: ToDoRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<HomeState>(HomeState.Loading)
-    private val _firstLaunchDone = MutableStateFlow<Boolean>(false)
+    private val _screenState = MutableStateFlow(HomeState.Loading)
+    private val _firstLaunchDone = MutableStateFlow(false)
 
-    private val _confirmDialogState = MutableStateFlow<ConfirmationDialogState>(closedConfirmationDialogState.copy())
+    private val _confirmDialogState = MutableStateFlow(closedConfirmationDialogState.copy())
 
     private val _lessonPlan = MutableStateFlow<LessonPlanWithClassesModel?>(null)
 
-    private val _planClasses = MutableStateFlow<List<PlanClassModel>>(emptyList<PlanClassModel>())
+    private val _planClasses = MutableStateFlow(emptyList<PlanClassModel>())
     private val _planClassesCurrentDate = MutableStateFlow(Calendar.getInstance())
 
-    private val _showHistoricalToDos = MutableStateFlow<Boolean>(false)
-    private val _toDos = MutableStateFlow<List<ToDoModel>>(emptyList<ToDoModel>())
+    private val _showHistoricalToDos = MutableStateFlow(false)
+    private val _toDos = MutableStateFlow(emptyList<ToDoModel>())
 
-    private val _todoListSwipeTutorialDone = MutableStateFlow<Boolean>(false)
+    private val _todoListSwipeTutorialDone = MutableStateFlow(false)
 
     val screenState = _screenState.asStateFlow()
     val firstLaunchDone = _firstLaunchDone.asStateFlow()

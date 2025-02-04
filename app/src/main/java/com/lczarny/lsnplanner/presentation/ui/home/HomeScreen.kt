@@ -234,8 +234,6 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
                                 )
                             }
                         }
-
-                        else -> null
                     }
                 }
             )

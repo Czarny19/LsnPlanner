@@ -20,7 +20,7 @@ class ToDoViewModel @Inject constructor(
     private val toDoRepository: ToDoRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<ToDoState>(ToDoState.Loading)
+    private val _screenState = MutableStateFlow(ToDoState.Loading)
     private val _toDoData = MutableStateFlow<ToDoModel?>(null)
 
     val screenState = _screenState.asStateFlow()

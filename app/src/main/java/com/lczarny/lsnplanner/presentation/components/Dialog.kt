@@ -91,7 +91,6 @@ val closedConfirmationDialogState = ConfirmationDialogState(
     onConfirm = {}
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfirmationDialog(visible: Boolean, state: ConfirmationDialogState) {
     if (visible) {

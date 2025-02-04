@@ -22,17 +22,17 @@ class PlanClassViewModel @Inject constructor(
     private val planClassRepository: PlanClassRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<PlanClassState>(PlanClassState.Loading)
+    private val _screenState = MutableStateFlow(PlanClassState.Loading)
     private val _planClassData = MutableStateFlow<PlanClassModel?>(null)
-    private val _lessonPlanType = MutableStateFlow<LessonPlanType>(LessonPlanType.School)
-    private val _isEdit = MutableStateFlow<Boolean>(false)
-    private val _isCyclical = MutableStateFlow<Boolean>(true)
+    private val _lessonPlanType = MutableStateFlow(LessonPlanType.School)
+    private val _isEdit = MutableStateFlow(false)
+    private val _isCyclical = MutableStateFlow(true)
 
     private var _defaultWeekDay = 0
 
-    private val _planNameError = MutableStateFlow<Boolean>(false)
-    private val _planStartDateError = MutableStateFlow<Boolean>(false)
-    private val _planClassroomError = MutableStateFlow<Boolean>(false)
+    private val _planNameError = MutableStateFlow(false)
+    private val _planStartDateError = MutableStateFlow(false)
+    private val _planClassroomError = MutableStateFlow(false)
 
     val screenState = _screenState.asStateFlow()
     val planClassData = _planClassData.asStateFlow()

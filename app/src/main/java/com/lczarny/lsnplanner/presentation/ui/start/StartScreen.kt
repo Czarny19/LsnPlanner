@@ -68,7 +68,8 @@ fun FirstLaunchInfo(navController: NavController) {
             PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AppPadding.screenPadding),
+                    .padding(AppPadding.screenPadding)
+                    .padding(bottom = AppPadding.smPadding),
                 text = stringResource(R.string.first_launch_create_plan),
                 onClick = { navController.navigate(LessonPlanRoute(firstLaunch = true)) }
             )
@@ -76,7 +77,7 @@ fun FirstLaunchInfo(navController: NavController) {
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(AppPadding.screenPadding)
+                .padding(padding)
                 .padding(top = AppPadding.xlPadding)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,

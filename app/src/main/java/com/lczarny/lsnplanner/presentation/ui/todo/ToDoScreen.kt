@@ -92,11 +92,11 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
         label = stringResource(R.string.card_animation)
     )
 
-    toDoData?.let { toDoData ->
+    toDoData?.let { data ->
         Scaffold(
             topBar = {
                 AppNavBar(
-                    title = stringResource(if (toDoData.id != null) R.string.route_edit_todo else R.string.route_new_todo),
+                    title = stringResource(if (data.id != null) R.string.route_edit_todo else R.string.route_new_todo),
                     navIcon = { AppBarBackIconButton(navController) },
                     actions = {
                         IconButton(
@@ -111,7 +111,7 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
                         )
                         IconButton(
                             onClick = { viewModel.saveToDo() },
-                            enabled = toDoData.content.isEmpty().not(),
+                            enabled = data.content.isEmpty().not(),
                             content = {
                                 Icon(
                                     imageVector = Icons.Outlined.Check,
@@ -132,10 +132,10 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
-                ToDoDetails(viewModel, toDoData, detailsExpanded)
+                ToDoDetails(viewModel, data, detailsExpanded)
                 FullScreenTextArea(
                     placeholder = stringResource(R.string.write_here),
-                    value = toDoData.content,
+                    value = data.content,
                     onValueChange = { name -> viewModel.updateContent(name) },
                 )
             }

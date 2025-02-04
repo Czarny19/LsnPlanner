@@ -1,6 +1,5 @@
 package com.lczarny.lsnplanner.presentation.ui.home.tab
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,7 +51,6 @@ import com.lczarny.lsnplanner.utils.toDayOfWeekString
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: PagerState) {
     val classes by viewModel.planClasses.collectAsState()
@@ -167,16 +165,17 @@ fun ClassesWeekDayTopNavItem(index: Int, viewModel: HomeViewModel, date: Calenda
 fun ClassesTabItem(item: PlanClassModel) {
     val context = LocalContext.current
 
-    var startTime: String
+    val startTime: String
+    val classTime: String
 
-    val classTime = if (item.weekDay != null) {
+    if (item.weekDay != null) {
         val hour = item.startHour
         val minute = item.startMinute
 
         startTime = formatTime(context, hour, minute)
         val endTime = formatTime(context, hour + (item.durationMinutes / 60), minute + (item.durationMinutes % 60))
 
-        "$startTime - $endTime"
+        classTime = "$startTime - $endTime"
     } else {
         val startDate = Calendar.getInstance().apply { timeInMillis = item.startDate!! }
         val hour = startDate.get(Calendar.HOUR_OF_DAY)
@@ -185,7 +184,7 @@ fun ClassesTabItem(item: PlanClassModel) {
         startTime = formatTime(context, hour, minute)
         val endTime = formatTime(context, hour + (item.durationMinutes / 60), minute + (item.durationMinutes % 60))
 
-        "$startTime - $endTime"
+        classTime = "$startTime - $endTime"
     }
 
     Column(

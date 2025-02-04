@@ -1,6 +1,5 @@
 package com.lczarny.lsnplanner.presentation.ui.home.tab
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -47,7 +46,6 @@ import com.lczarny.lsnplanner.presentation.ui.todo.model.toDoImportanceIconMap
 import com.lczarny.lsnplanner.presentation.ui.todo.model.toDoImportanceLabelMap
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDateTime
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ToDosTab(
     padding: PaddingValues,
@@ -64,10 +62,10 @@ fun ToDosTab(
         .sortedBy { it.dueDate }
         .sortedBy { it.importance }
         .sortedBy { it.historical }
-        .let { toDos ->
+        .let { items ->
             val toDoImportanceLabelMap = toDoImportanceLabelMap(LocalContext.current)
 
-            if (toDos.isEmpty()) {
+            if (items.isEmpty()) {
                 EmptyList(stringResource(R.string.todo_list_empty_hint))
             } else {
                 LazyColumn(
@@ -85,7 +83,7 @@ fun ToDosTab(
                         }
                     }
 
-                    items(items = toDos) { toDo ->
+                    items(items = items) { toDo ->
                         ToDosListItem(
                             viewModel,
                             navController,

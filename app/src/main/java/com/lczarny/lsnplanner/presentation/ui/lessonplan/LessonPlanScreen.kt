@@ -79,11 +79,11 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
 
     val toLessonPlanTypeLabelMap = toLessonPlanTypeLabelMap(LocalContext.current)
 
-    lessonPlanData?.let { lessonPlanData ->
+    lessonPlanData?.let { data ->
         Scaffold(
             topBar = {
                 AppNavBar(
-                    title = stringResource(if (lessonPlanData.id != null) R.string.route_edit_lesson_plan else R.string.route_new_lesson_plan)
+                    title = stringResource(if (data.id != null) R.string.route_edit_lesson_plan else R.string.route_new_lesson_plan)
                 )
             },
             bottomBar = {
@@ -111,7 +111,7 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
                 )
                 OutlinedInputField(
                     label = stringResource(R.string.plan_name),
-                    value = lessonPlanData.name,
+                    value = data.name,
                     onValueChange = { name -> viewModel.updatePlanName(name) },
                     maxLines = 1,
                     maxLength = 32,
@@ -120,13 +120,13 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
                 )
                 OutlinedDropDown(
                     label = stringResource(R.string.plan_type),
-                    value = DropDownItem(lessonPlanData.type, toLessonPlanTypeLabelMap.getValue(lessonPlanData.type)),
+                    value = DropDownItem(data.type, toLessonPlanTypeLabelMap.getValue(data.type)),
                     onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
                     items = LessonPlanType.entries.map { DropDownItem(it, toLessonPlanTypeLabelMap.getValue(it)) }
                 )
                 OutlinedLabeledCheckbox(
                     label = stringResource(R.string.plan_make_default),
-                    checked = lessonPlanData.isDefault,
+                    checked = data.isDefault,
                     onCheckedChange = { checked -> viewModel.updatePlanIsDefault(checked) },
                     enabled = planIsDefaultEnabled
                 )

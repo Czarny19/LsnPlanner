@@ -21,7 +21,7 @@ class LessonPlanViewModel @Inject constructor(
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<LessonPlanState>(LessonPlanState.Loading)
+    private val _screenState = MutableStateFlow(LessonPlanState.Loading)
     private val _lessonPlanData = MutableStateFlow<LessonPlanModel?>(null)
 
     private val _planNameError = MutableStateFlow(false)

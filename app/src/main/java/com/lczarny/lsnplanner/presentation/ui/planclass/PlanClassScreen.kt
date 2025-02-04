@@ -88,11 +88,11 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
 
     val planClassTypeLabelMap = lessonPlanType.planClassTypeLabelMap(context)
 
-    planClassData?.let { planClassData ->
+    planClassData?.let { data ->
         Scaffold(
             topBar = {
                 AppNavBar(
-                    title = stringResource(if (planClassData.id != null) R.string.route_edit_plan_class else R.string.route_new_plan_class)
+                    title = stringResource(if (data.id != null) R.string.route_edit_plan_class else R.string.route_new_plan_class)
                 )
             },
             bottomBar = {
@@ -120,7 +120,7 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 )
                 OutlinedInputField(
                     label = stringResource(R.string.class_name),
-                    value = planClassData.name,
+                    value = data.name,
                     onValueChange = { name -> viewModel.updateName(name) },
                     maxLines = 2,
                     maxLength = 100,
@@ -131,13 +131,13 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 )
                 OutlinedDropDown(
                     label = stringResource(R.string.class_type),
-                    value = DropDownItem(planClassData.type, planClassTypeLabelMap.getValue(planClassData.type)),
+                    value = DropDownItem(data.type, planClassTypeLabelMap.getValue(data.type)),
                     onValueChange = { type -> viewModel.updateClassType(type.value as PlanClassType) },
                     items = lessonPlanType.planClassTypes().map { DropDownItem(it, planClassTypeLabelMap.getValue(it)) }
                 )
                 OutlinedInputField(
                     label = stringResource(R.string.class_classroom),
-                    value = planClassData.classroom ?: "",
+                    value = data.classroom ?: "",
                     onValueChange = { classroom -> viewModel.updateClassroom(classroom) },
                     minLines = 1,
                     maxLines = 1,
@@ -147,7 +147,7 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 )
                 OutlinedInputField(
                     label = stringResource(R.string.class_note),
-                    value = planClassData.note ?: "",
+                    value = data.note ?: "",
                     onValueChange = { name -> viewModel.updateNote(name) },
                     minLines = 3,
                     maxLines = 5,
@@ -165,19 +165,19 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 if (isCyclical) {
                     OutlinedDropDown(
                         label = stringResource(R.string.class_week_day),
-                        value = DropDownItem(planClassData.weekDay ?: 1, (planClassData.weekDay ?: 1).toDayOfWeekString(context)),
+                        value = DropDownItem(data.weekDay ?: 1, (data.weekDay ?: 1).toDayOfWeekString(context)),
                         onValueChange = { weekDay -> viewModel.updateWeekDay(weekDay.value.toString().toInt()) },
                         items = DayOfWeek.entries.map { DropDownItem(it.value, it.value.toDayOfWeekString(context)) }
                     )
                     OutlinedTimePicker(
                         label = stringResource(R.string.class_time),
-                        initialHours = planClassData.startHour,
-                        intitialMinutes = planClassData.startMinute,
+                        initialHours = data.startHour,
+                        intitialMinutes = data.startMinute,
                         onTimeSelected = { hour, minute -> viewModel.updateStartTime(hour, minute) }
                     )
                 } else {
                     OutlinedDateTimePicker(
-                        initialValue = planClassData.startDate,
+                        initialValue = data.startDate,
                         label = stringResource(R.string.class_date),
                         onDateTimeSelected = { dateMilis -> viewModel.updateStartDate(dateMilis) },
                         isError = planStartDateError,
@@ -186,7 +186,7 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 }
                 OutlinedNumberInputField(
                     label = stringResource(R.string.class_duration),
-                    value = planClassData.durationMinutes,
+                    value = data.durationMinutes,
                     onValueChange = { duration -> viewModel.updateDuration(duration.toString().toInt()) },
                     minValue = 1,
                     maxValue = 600,

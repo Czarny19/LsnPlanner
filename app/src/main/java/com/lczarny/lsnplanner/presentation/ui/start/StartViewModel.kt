@@ -19,7 +19,7 @@ class StartViewModel @Inject constructor(
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow<StartState>(StartState.Loading)
+    private val _screenState = MutableStateFlow(StartState.Loading)
 
     val screenState = _screenState.asStateFlow()
 

@@ -11,19 +11,19 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.ToDoImportance
 
 fun toDoImportanceLabelMap(context: Context): Map<ToDoImportance, String> = mapOf(
-    Pair(ToDoImportance.Low, context.getString(R.string.todo_importance_low)),
-    Pair(ToDoImportance.Medium, context.getString(R.string.todo_importance_medium)),
-    Pair(ToDoImportance.High, context.getString(R.string.todo_importance_high))
+    ToDoImportance.Low to context.getString(R.string.todo_importance_low),
+    ToDoImportance.Medium to context.getString(R.string.todo_importance_medium),
+    ToDoImportance.High to context.getString(R.string.todo_importance_high)
 )
 
 val toDoImportanceColorMap: Map<ToDoImportance, Color> = mapOf(
-    Pair(ToDoImportance.Low, Color(0xFF0C5B0F)),
-    Pair(ToDoImportance.Medium, Color(0xFF9F5F00)),
-    Pair(ToDoImportance.High, Color(0xFF7C0B0B))
+    ToDoImportance.Low to Color(0xFF0C5B0F),
+    ToDoImportance.Medium to Color(0xFF9F5F00),
+    ToDoImportance.High to Color(0xFF7C0B0B)
 )
 
 val toDoImportanceIconMap: Map<ToDoImportance, ImageVector> = mapOf(
-    Pair(ToDoImportance.Low, Icons.Filled.LowPriority),
-    Pair(ToDoImportance.Medium, Icons.Filled.Schedule),
-    Pair(ToDoImportance.High, Icons.Filled.PriorityHigh)
+    ToDoImportance.Low to Icons.Filled.LowPriority,
+    ToDoImportance.Medium to Icons.Filled.Schedule,
+    ToDoImportance.High to Icons.Filled.PriorityHigh
 )

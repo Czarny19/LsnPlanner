@@ -17,28 +17,28 @@ import com.lczarny.lsnplanner.data.local.model.PlanClassType
 
 fun LessonPlanType.planClassTypeLabelMap(context: Context): Map<PlanClassType, String> = when (this) {
     LessonPlanType.School -> mapOf(
-        Pair(PlanClassType.Class, context.getString(R.string.class_type_class)),
-        Pair(PlanClassType.PE, context.getString(R.string.class_type_pe)),
-        Pair(PlanClassType.Other, context.getString(R.string.class_type_other))
+        PlanClassType.Class to context.getString(R.string.class_type_class),
+        PlanClassType.PE to context.getString(R.string.class_type_pe),
+        PlanClassType.Other to context.getString(R.string.class_type_other)
     )
 
     LessonPlanType.University -> mapOf(
-        Pair(PlanClassType.Lecture, context.getString(R.string.class_type_lecture)),
-        Pair(PlanClassType.Practical, context.getString(R.string.class_type_practical)),
-        Pair(PlanClassType.Laboratory, context.getString(R.string.class_type_laboratory)),
-        Pair(PlanClassType.Seminar, context.getString(R.string.class_type_seminar)),
-        Pair(PlanClassType.Workshop, context.getString(R.string.class_type_workshop)),
-        Pair(PlanClassType.Other, context.getString(R.string.class_type_other))
+        PlanClassType.Lecture to context.getString(R.string.class_type_lecture),
+        PlanClassType.Practical to context.getString(R.string.class_type_practical),
+        PlanClassType.Laboratory to context.getString(R.string.class_type_laboratory),
+        PlanClassType.Seminar to context.getString(R.string.class_type_seminar),
+        PlanClassType.Workshop to context.getString(R.string.class_type_workshop),
+        PlanClassType.Other to context.getString(R.string.class_type_other)
     )
 }
 
 val toPlanClassTypeIconMap: Map<PlanClassType, ImageVector> = mapOf(
-    Pair(PlanClassType.Class, Icons.Filled.Class),
-    Pair(PlanClassType.PE, Icons.Filled.Sports),
-    Pair(PlanClassType.Lecture, Icons.AutoMirrored.Filled.LibraryBooks),
-    Pair(PlanClassType.Practical, Icons.Filled.DesignServices),
-    Pair(PlanClassType.Laboratory, Icons.Filled.Science),
-    Pair(PlanClassType.Seminar, Icons.Filled.School),
-    Pair(PlanClassType.Workshop, Icons.Filled.Handyman),
-    Pair(PlanClassType.Other, Icons.Filled.Schedule)
+    PlanClassType.Class to Icons.Filled.Class,
+    PlanClassType.PE to Icons.Filled.Sports,
+    PlanClassType.Lecture to Icons.AutoMirrored.Filled.LibraryBooks,
+    PlanClassType.Practical to Icons.Filled.DesignServices,
+    PlanClassType.Laboratory to Icons.Filled.Science,
+    PlanClassType.Seminar to Icons.Filled.School,
+    PlanClassType.Workshop to Icons.Filled.Handyman,
+    PlanClassType.Other to Icons.Filled.Schedule
 )
