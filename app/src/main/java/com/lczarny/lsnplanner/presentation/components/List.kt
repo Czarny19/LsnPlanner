@@ -28,14 +28,14 @@ fun EmptyList(label: String, showIcon: Boolean = true) {
     ) {
         if (showIcon) {
             Icon(
-                modifier = Modifier.size(AppSizes.xlIcon),
+                modifier = Modifier.size(AppSizes.XL_ICON),
                 imageVector = Icons.Outlined.ContentPasteOff,
                 contentDescription = stringResource(R.string.no_items_available),
             )
         }
         Text(
             text = label,
-            modifier = Modifier.padding(top = AppPadding.lgPadding),
+            modifier = Modifier.padding(top = AppPadding.LG_PADDING),
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
         )

@@ -87,18 +87,18 @@ fun MoreTabButton(viewModel: HomeViewModel, icon: ImageVector, label: String, di
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppPadding.mdPadding),
+                .padding(AppPadding.MD_PADDING),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                modifier = Modifier.size(AppSizes.mdIcon),
+                modifier = Modifier.size(AppSizes.MD_ICON),
                 imageVector = icon,
                 contentDescription = label
             )
             Text(
                 label,
-                modifier = Modifier.padding(start = AppPadding.smPadding),
+                modifier = Modifier.padding(start = AppPadding.SM_PADDING),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )

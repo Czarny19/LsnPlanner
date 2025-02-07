@@ -16,18 +16,18 @@ import com.lczarny.lsnplanner.presentation.constants.AppSizes
 @Composable
 fun FullScreenLoading(label: String? = null) {
     Column(
-        modifier = Modifier.padding(AppPadding.screenPadding),
+        modifier = Modifier.padding(AppPadding.SCREEN_PADDING),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         CircularProgressIndicator(
-            modifier = Modifier.width(AppSizes.xlIcon),
+            modifier = Modifier.width(AppSizes.XL_ICON),
             color = MaterialTheme.colorScheme.secondary,
             trackColor = MaterialTheme.colorScheme.surfaceVariant,
         )
         label?.let {
             Text(
-                modifier = Modifier.padding(top = AppPadding.xlPadding),
+                modifier = Modifier.padding(top = AppPadding.XL_PADDING),
                 text = it,
                 style = MaterialTheme.typography.titleLarge,
             )

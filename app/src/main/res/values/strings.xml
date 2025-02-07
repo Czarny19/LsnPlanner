@@ -19,7 +19,7 @@
     <string name="minutes">Minutes</string>
 
     <!-- Errors  -->
-    <string name="number_not_in_range_error">The field value must be beetween: %1$d and %2$d</string>
+    <string name="number_not_in_range_error">The field value must be a value between %1$d and %2$d</string>
 
     <!-- Tutorial -->
     <string name="tutorial">Tutorial</string>
@@ -91,10 +91,9 @@
     <string name="class_prev_week">Prevoius week</string>
     <string name="class_next_week">Next week</string>
     <string name="class_change_date">Change date</string>
-    <string name="class_classroom">Classroom</string>
-    <string name="class_address">Building address</string>
-    <string name="class_address_hint">Optional classroom address</string>
+    <string name="class_classroom">Classroom</string>s
     <string name="class_type_class">Class</string>
+    <string name="class_color">Display color</string>
     <string name="class_type_pe">PE</string>
     <string name="class_type_lecture">Lecture</string>
     <string name="class_type_practical">Practical</string>
@@ -102,6 +101,13 @@
     <string name="class_type_seminar">Seminar</string>
     <string name="class_type_workshop">Workshop</string>
     <string name="class_type_other">Other</string>
+
+    <!-- Colors -->
+    <string name="color">Color</string>
+    <string name="color_default">Default</string>
+    <string name="color_red">Red</string>
+    <string name="color_green">Green</string>
+    <string name="color_purple">Purple</string>
 
     <!-- ToDos -->
     <string name="todo_add">Add a ToDo</string>

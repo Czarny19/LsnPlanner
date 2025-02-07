@@ -11,7 +11,7 @@ class ToDoRepository(private val toDoDao: ToDoDao) {
 
     fun toDo(toDoId: Long): Flow<ToDoModel> = toDoDao.getToDo(toDoId).map { it.mapToModel() }
 
-    fun allToDos(lessonPlanId: Long): Flow<List<ToDoModel>> = toDoDao.getAllToDos(lessonPlanId).map { it.map { it.mapToModel() } }
+    fun allToDos(lessonPlanId: Long): Flow<List<ToDoModel>> = toDoDao.getAllToDos(lessonPlanId).map { toDos -> toDos.map { it.mapToModel() } }
 
     suspend fun insert(toDo: ToDoModel) {
         toDoDao.insertToDo(toDo)

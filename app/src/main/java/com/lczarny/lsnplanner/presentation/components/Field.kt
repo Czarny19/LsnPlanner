@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -63,7 +64,7 @@ import java.util.Calendar
 fun InfoField(modifier: Modifier = Modifier, text: String) {
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary
@@ -72,14 +73,14 @@ fun InfoField(modifier: Modifier = Modifier, text: String) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppPadding.screenPadding),
+                .padding(AppPadding.SCREEN_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround,
         ) {
             Icon(
                 modifier = Modifier
-                    .size(AppSizes.lgIcon)
-                    .padding(end = AppPadding.screenPadding),
+                    .size(AppSizes.LG_ICON)
+                    .padding(end = AppPadding.SCREEN_PADDING),
                 imageVector = Icons.Outlined.Info,
                 contentDescription = stringResource(R.string.information),
             )
@@ -109,7 +110,7 @@ fun OutlinedInputField(
 ) {
     OutlinedTextField(
         modifier = modifier
-            .padding(bottom = AppPadding.inputBottomPadding)
+            .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
             .fillMaxWidth(),
         value = value,
         onValueChange = { text -> if (text.length <= maxLength) onValueChange.invoke(text) },
@@ -155,7 +156,7 @@ fun OutlinedNumberInputField(
 ) {
     OutlinedTextField(
         modifier = modifier
-            .padding(bottom = AppPadding.inputBottomPadding)
+            .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
             .fillMaxWidth(),
         value = value.toString(),
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -227,7 +228,7 @@ fun OutlinedTimePicker(
         },
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = AppPadding.inputBottomPadding)
+            .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
             .pointerInput(displayTime) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)
@@ -279,7 +280,7 @@ fun OutlinedDateTimePicker(
         isError = isError,
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = AppPadding.inputBottomPadding)
+            .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
             .pointerInput(initialValue) {
                 awaitEachGesture {
                     awaitFirstDown(pass = PointerEventPass.Initial)
@@ -327,8 +328,18 @@ fun OutlinedDateTimePicker(
 
 data class DropDownItem(
     val value: Any,
-    val description: String
+    val description: String,
+    val icon: @Composable (() -> Unit)? = null
 )
+
+@Composable
+fun DropDownItemColorIcon(color: Color) {
+    Icon(
+        imageVector = Icons.Filled.Circle,
+        contentDescription = stringResource(R.string.color),
+        tint = color
+    )
+}
 
 @Composable
 fun OutlinedDropDown(
@@ -351,7 +362,7 @@ fun OutlinedDropDown(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = AppPadding.inputBottomPadding)
+                .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
                 .pointerInput(value) {
                     awaitEachGesture {
                         awaitFirstDown(pass = PointerEventPass.Initial)
@@ -364,6 +375,7 @@ fun OutlinedDropDown(
             onValueChange = { },
             label = { Text(text = label) },
             readOnly = true,
+            leadingIcon = value.icon,
             trailingIcon = {
                 Icon(
                     modifier = Modifier.clickable { expanded = true },
@@ -384,7 +396,8 @@ fun OutlinedDropDown(
                         seleced = item
                         expanded = false
                     },
-                    text = { Text(text = item.description) }
+                    text = { Text(text = item.description) },
+                    leadingIcon = item.icon
                 )
             }
         }
@@ -402,7 +415,7 @@ fun OutlinedLabeledCheckbox(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = AppPadding.inputBottomPadding)
+            .padding(bottom = AppPadding.INPUT_BUTTON_PADDING)
             .border(
                 width = 1.dp,
                 color = OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor,
@@ -412,7 +425,7 @@ fun OutlinedLabeledCheckbox(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = AppPadding.xsmPadding),
+                .padding(vertical = AppPadding.XSM_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {

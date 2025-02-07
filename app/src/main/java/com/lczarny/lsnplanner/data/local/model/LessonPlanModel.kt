@@ -1,5 +1,6 @@
 package com.lczarny.lsnplanner.data.local.model
 
+import androidx.annotation.Keep
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Relation
@@ -37,6 +38,7 @@ fun LessonPlanWithClasses.mapToModel() = LessonPlanWithClassesModel(
     classes = classes.map { it.mapToModel() },
 )
 
+@Keep
 enum class LessonPlanType(val raw: String) {
     School("School"),
     University("University");

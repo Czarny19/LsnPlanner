@@ -111,7 +111,7 @@ fun DraggableCard(
                         )
                     }
                     .clickable { clickAction.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
                 content = content
             )
         }
@@ -131,7 +131,7 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     .width(150.dp)
                     .fillMaxHeight()
                     .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
                 colors = CardDefaults.cardColors(containerColor = it.color)
             ) {
                 Column(
@@ -154,7 +154,7 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     .width(150.dp)
                     .height(height)
                     .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
                 colors = CardDefaults.cardColors(containerColor = it.color)
             ) {
                 Column(

@@ -166,10 +166,10 @@ fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppPadding.screenPadding)
+                .padding(AppPadding.SCREEN_PADDING)
         ) {
             InfoField(
-                modifier = Modifier.padding(bottom = AppPadding.inputBottomPadding),
+                modifier = Modifier.padding(bottom = AppPadding.INPUT_BUTTON_PADDING),
                 text = stringResource(R.string.todo_details_info)
             )
             OutlinedDateTimePicker(
@@ -178,7 +178,7 @@ fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean)
                 onDateTimeSelected = { dateMilis -> viewModel.updateDueDate(dateMilis) }
             )
             OutlinedDropDown(
-                modifier = Modifier.padding(bottom = AppPadding.smPadding),
+                modifier = Modifier.padding(bottom = AppPadding.SM_PADDING),
                 label = stringResource(R.string.todo_importance),
                 value = DropDownItem(toDoData.importance, toDoImportanceLabelMap.getValue(toDoData.importance)),
                 onValueChange = { importance -> viewModel.updateImportance(importance.value as ToDoImportance) },

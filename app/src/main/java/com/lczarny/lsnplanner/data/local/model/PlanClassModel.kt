@@ -10,7 +10,7 @@ data class PlanClassModel(
     var id: Long? = null,
     @ColumnInfo(name = "name") var name: String = "",
     @ColumnInfo(name = "type") var type: PlanClassType,
-    @ColumnInfo(name = "color") var color: Long = 0xFF394E85,
+    @ColumnInfo(name = "color") var color: Long = PlanClassColor.Default.raw,
     @ColumnInfo(name = "note") var note: String? = null,
     @ColumnInfo(name = "week_day") var weekDay: Int? = null,
     @ColumnInfo(name = "start_date") var startDate: Long? = null,
@@ -20,6 +20,17 @@ data class PlanClassModel(
     @ColumnInfo(name = "classroom") var classroom: String? = null,
     @ColumnInfo(name = "lesson_plan_id") var lessonPlanId: Long,
 )
+
+enum class PlanClassColor(val raw: Long) {
+    Default(0xFF394E85),
+    Red(0xFFFF0000),
+    Green(0xFF008000),
+    Purple(0xFF800080);
+
+    companion object {
+        fun from(find: Long): PlanClassColor = PlanClassColor.entries.find { it.raw == find } ?: Default
+    }
+}
 
 fun PlanClass.mapToModel() = PlanClassModel(
     id = this.id,
@@ -67,13 +78,13 @@ enum class PlanClassType(val raw: String) {
 }
 
 fun LessonPlanType.planClassTypes(): List<PlanClassType> = when (this) {
-    LessonPlanType.School -> listOf<PlanClassType>(
+    LessonPlanType.School -> listOf(
         PlanClassType.Class,
         PlanClassType.PE,
         PlanClassType.Other
     )
 
-    LessonPlanType.University -> listOf<PlanClassType>(
+    LessonPlanType.University -> listOf(
         PlanClassType.Lecture,
         PlanClassType.Practical,
         PlanClassType.Laboratory,

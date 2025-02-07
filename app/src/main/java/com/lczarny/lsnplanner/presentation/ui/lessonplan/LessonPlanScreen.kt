@@ -90,7 +90,7 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
                 PrimaryButton(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(AppPadding.screenPadding),
+                        .padding(AppPadding.SCREEN_PADDING),
                     text = stringResource(R.string.plan_save),
                     onClick = { viewModel.savePlan() }
                 )
@@ -100,13 +100,13 @@ fun LessonPlanForm(saving: Boolean, viewModel: LessonPlanViewModel) {
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .padding(AppPadding.screenPadding)
+                    .padding(AppPadding.SCREEN_PADDING)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
                 InfoField(
-                    modifier = Modifier.padding(bottom = AppPadding.inputBottomPadding),
+                    modifier = Modifier.padding(bottom = AppPadding.INPUT_BUTTON_PADDING),
                     text = stringResource(R.string.plan_form_info)
                 )
                 OutlinedInputField(

@@ -15,16 +15,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
+import com.lczarny.lsnplanner.data.local.model.PlanClassColor
 import com.lczarny.lsnplanner.data.local.model.PlanClassType
 import com.lczarny.lsnplanner.data.local.model.planClassTypes
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
+import com.lczarny.lsnplanner.presentation.components.DropDownItemColorIcon
 import com.lczarny.lsnplanner.presentation.components.FormSectionHeader
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.OutlinedDateTimePicker
@@ -38,6 +41,7 @@ import com.lczarny.lsnplanner.presentation.components.SavingDialog
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import com.lczarny.lsnplanner.presentation.ui.planclass.model.PlanClassState
+import com.lczarny.lsnplanner.presentation.ui.planclass.model.colorToLabel
 import com.lczarny.lsnplanner.presentation.ui.planclass.model.planClassTypeLabelMap
 import com.lczarny.lsnplanner.utils.toDayOfWeekString
 import kotlinx.datetime.DayOfWeek
@@ -99,7 +103,7 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                 PrimaryButton(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(AppPadding.screenPadding),
+                        .padding(AppPadding.SCREEN_PADDING),
                     text = stringResource(R.string.class_save),
                     onClick = { viewModel.savePlanClass() }
                 )
@@ -109,13 +113,13 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
             Column(
                 modifier = Modifier
                     .padding(padding)
-                    .padding(AppPadding.screenPadding)
+                    .padding(AppPadding.SCREEN_PADDING)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
                 FormSectionHeader(
-                    modifier = Modifier.padding(bottom = AppPadding.smPadding),
+                    modifier = Modifier.padding(bottom = AppPadding.SM_PADDING),
                     label = stringResource(R.string.class_basic_info)
                 )
                 OutlinedInputField(
@@ -141,9 +145,25 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                     onValueChange = { classroom -> viewModel.updateClassroom(classroom) },
                     minLines = 1,
                     maxLines = 1,
-                    maxLength = 20,
+                    maxLength = 30,
                     isError = planClassroomError,
                     errorMsg = stringResource(R.string.field_required)
+                )
+                OutlinedDropDown(
+                    label = stringResource(R.string.class_color),
+                    value = DropDownItem(
+                        value = data.color,
+                        description = PlanClassColor.from(data.color).colorToLabel(context),
+                        icon = { DropDownItemColorIcon(Color(data.color)) }
+                    ),
+                    onValueChange = { color -> viewModel.updateClassColor(color.value as Long) },
+                    items = PlanClassColor.entries.map {
+                        DropDownItem(
+                            value = it.raw,
+                            description = it.colorToLabel(context),
+                            icon = { DropDownItemColorIcon(Color(it.raw)) }
+                        )
+                    }
                 )
                 OutlinedInputField(
                     label = stringResource(R.string.class_note),
@@ -154,7 +174,7 @@ fun PlanClassForm(saving: Boolean, viewModel: PlanClassViewModel) {
                     maxLength = 300,
                 )
                 FormSectionHeader(
-                    modifier = Modifier.padding(bottom = AppPadding.inputBottomPadding),
+                    modifier = Modifier.padding(bottom = AppPadding.INPUT_BUTTON_PADDING),
                     label = stringResource(R.string.class_time_info)
                 )
                 OutlinedLabeledCheckbox(

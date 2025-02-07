@@ -72,8 +72,8 @@ fun ToDosTab(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    contentPadding = PaddingValues(AppPadding.screenPadding),
-                    verticalArrangement = Arrangement.spacedBy(AppPadding.listItemPadding)
+                    contentPadding = PaddingValues(AppPadding.SCREEN_PADDING),
+                    verticalArrangement = Arrangement.spacedBy(AppPadding.LIST_ITEM_PADDING)
                 ) {
                     if (todoListSwipeTutorialDone.not()) {
                         item {
@@ -129,19 +129,19 @@ fun ToDosListItem(
         content = {
             Column(
                 modifier = Modifier.padding(
-                    start = AppPadding.screenPadding,
-                    end = AppPadding.screenPadding,
-                    top = AppPadding.smPadding,
-                    bottom = AppPadding.screenPadding
+                    start = AppPadding.SCREEN_PADDING,
+                    end = AppPadding.SCREEN_PADDING,
+                    top = AppPadding.SM_PADDING,
+                    bottom = AppPadding.SCREEN_PADDING
                 )
             ) {
                 Row(
-                    modifier = Modifier.padding(bottom = AppPadding.mdPadding),
+                    modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start
                 ) {
                     AssistChip(
-                        modifier = Modifier.height(AppSizes.chipHeight),
+                        modifier = Modifier.height(AppSizes.CHIP_HEIGHT),
                         onClick = { },
                         label = { Text(toDoImportanceLabelMap.getValue(toDo.importance), color = MaterialTheme.colorScheme.onPrimary) },
                         colors = AssistChipDefaults.assistChipColors(
@@ -151,7 +151,7 @@ fun ToDosListItem(
                         border = null,
                         leadingIcon = {
                             Icon(
-                                modifier = Modifier.size(AppSizes.smIcon),
+                                modifier = Modifier.size(AppSizes.SM_ICON),
                                 imageVector = toDoImportanceIconMap.getValue(toDo.importance),
                                 contentDescription = stringResource(R.string.todo_importance),
                             )
@@ -161,8 +161,8 @@ fun ToDosListItem(
                     if (toDo.historical) {
                         Icon(
                             modifier = Modifier
-                                .size(AppSizes.mdIcon)
-                                .padding(end = AppPadding.mdPadding),
+                                .size(AppSizes.MD_ICON)
+                                .padding(end = AppPadding.MD_PADDING),
                             imageVector = Icons.Outlined.CheckCircleOutline,
                             contentDescription = stringResource(R.string.done),
                         )
@@ -171,8 +171,8 @@ fun ToDosListItem(
                         toDo.dueDate?.let {
                             Icon(
                                 modifier = Modifier
-                                    .size(AppSizes.mdIcon)
-                                    .padding(end = AppPadding.mdPadding),
+                                    .size(AppSizes.MD_ICON)
+                                    .padding(end = AppPadding.MD_PADDING),
                                 imageVector = Icons.Outlined.Timer,
                                 contentDescription = stringResource(R.string.todo_due_date),
                             )

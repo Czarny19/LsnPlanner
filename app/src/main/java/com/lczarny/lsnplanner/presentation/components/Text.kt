@@ -15,6 +15,6 @@ import com.lczarny.lsnplanner.presentation.constants.AppPadding
 fun FormSectionHeader(modifier: Modifier = Modifier, label: String) {
     Column(modifier = modifier, horizontalAlignment = Alignment.Start) {
         Text(label, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Start)
-        HorizontalDivider(modifier = Modifier.padding(top = AppPadding.xsmPadding))
+        HorizontalDivider(modifier = Modifier.padding(top = AppPadding.XSM_PADDING))
     }
 }

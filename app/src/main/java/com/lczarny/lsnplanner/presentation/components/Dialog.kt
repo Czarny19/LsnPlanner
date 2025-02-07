@@ -50,15 +50,15 @@ fun SavingDialog(show: Boolean) {
             ) {
                 Column(
                     modifier = Modifier
-                        .padding(AppPadding.mdPadding)
+                        .padding(AppPadding.MD_PADDING)
                         .fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier
-                            .width(AppSizes.lgIcon)
-                            .padding(bottom = AppPadding.mdPadding)
+                            .width(AppSizes.LG_ICON)
+                            .padding(bottom = AppPadding.MD_PADDING)
                             .wrapContentSize(Alignment.Center),
                         color = MaterialTheme.colorScheme.secondary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -66,7 +66,7 @@ fun SavingDialog(show: Boolean) {
                     Text(
                         text = stringResource(R.string.saving),
                         modifier = Modifier
-                            .padding(top = AppPadding.mdPadding)
+                            .padding(top = AppPadding.MD_PADDING)
                             .wrapContentSize(Alignment.Center),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge

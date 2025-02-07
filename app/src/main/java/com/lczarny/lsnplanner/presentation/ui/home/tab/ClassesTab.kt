@@ -88,7 +88,7 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = AppPadding.mdPadding),
+                    .padding(vertical = AppPadding.MD_PADDING),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
@@ -109,8 +109,8 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(AppPadding.screenPadding),
-                    verticalArrangement = Arrangement.spacedBy(AppPadding.listItemPadding),
+                    contentPadding = PaddingValues(AppPadding.SCREEN_PADDING),
+                    verticalArrangement = Arrangement.spacedBy(AppPadding.LIST_ITEM_PADDING),
                     horizontalAlignment = Alignment.Start
                 ) {
                     items(items = classesPerWeekDay[page + 1]!!) { planClass ->
@@ -198,35 +198,26 @@ fun ClassesTabItem(viewModel: HomeViewModel, item: PlanClassModel) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = AppPadding.smPadding),
+                .padding(bottom = AppPadding.SM_PADDING),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(startTime, style = MaterialTheme.typography.labelMedium)
-            HorizontalDivider(modifier = Modifier.padding(start = AppPadding.smPadding))
+            HorizontalDivider(modifier = Modifier.padding(start = AppPadding.SM_PADDING))
         }
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = AppPadding.timelineStartPadding),
-            elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
-            colors = CardDefaults.cardColors(containerColor = Color(item.color)),
+                .padding(start = AppPadding.TIMELINE_START_PADDING),
+            elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
+            colors = CardDefaults.cardColors(containerColor = Color(item.color), contentColor = Color.White),
             content = {
                 Column(
-                    modifier = Modifier.padding(AppPadding.screenPadding),
+                    modifier = Modifier.padding(AppPadding.SCREEN_PADDING),
                     horizontalAlignment = Alignment.Start,
                     verticalArrangement = Arrangement.Top,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = AppPadding.xsmPadding),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        ClassesTabItemField(item.name)
-                        ClassesTabItemField(planClassTypeLabelMap[item.type]!!, item.type.toPlanClassTypeIcon())
-                    }
+                    ClassesTabItemTitle(item.name, planClassTypeLabelMap[item.type]!!, item.type.toPlanClassTypeIcon())
                     ClassesTabItemField(classTime, Icons.Filled.Schedule)
                     ClassesTabItemField("${item.durationMinutes} ${stringResource(R.string.minutes)}", Icons.Filled.Timer)
                     item.classroom?.let { ClassesTabItemField("${stringResource(R.string.class_classroom)}: $it", Icons.Filled.Room) }
@@ -237,9 +228,23 @@ fun ClassesTabItem(viewModel: HomeViewModel, item: PlanClassModel) {
 }
 
 @Composable
+fun ClassesTabItemTitle(title: String, type: String, typeImg: ImageVector? = null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = AppPadding.XSM_PADDING),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(title, style = MaterialTheme.typography.labelLarge)
+        ClassesTabItemField(type, typeImg)
+    }
+}
+
+@Composable
 fun ClassesTabItemField(value: String, img: ImageVector? = null) {
-    Row(modifier = Modifier.padding(top = AppPadding.xsmPadding), verticalAlignment = Alignment.CenterVertically) {
-        img?.let { Icon(modifier = Modifier.size(AppSizes.smIcon), imageVector = img, contentDescription = value) }
-        Text(value, modifier = Modifier.padding(start = AppPadding.xsmPadding), style = MaterialTheme.typography.labelLarge)
+    Row(modifier = Modifier.padding(top = AppPadding.XSM_PADDING), verticalAlignment = Alignment.CenterVertically) {
+        img?.let { Icon(modifier = Modifier.size(AppSizes.SM_ICON), imageVector = img, contentDescription = value) }
+        Text(value, modifier = Modifier.padding(start = AppPadding.XSM_PADDING), style = MaterialTheme.typography.labelMedium)
     }
 }

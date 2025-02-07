@@ -29,7 +29,7 @@ import com.lczarny.lsnplanner.presentation.constants.AppSizes
 fun TutorialCard(modifier: Modifier = Modifier, msg: String, onConfirm: () -> Unit) {
     Card(
         modifier = modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.cardElevation),
+        elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiary,
             contentColor = MaterialTheme.colorScheme.onTertiary
@@ -42,24 +42,24 @@ fun TutorialCard(modifier: Modifier = Modifier, msg: String, onConfirm: () -> Un
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(AppPadding.screenPadding),
+                        .padding(AppPadding.SCREEN_PADDING),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Icon(
-                        modifier = Modifier.size(AppSizes.mdIcon),
+                        modifier = Modifier.size(AppSizes.MD_ICON),
                         imageVector = Icons.Outlined.QuestionMark,
                         contentDescription = stringResource(R.string.tutorial),
                     )
                     Text(
                         text = msg,
-                        modifier = Modifier.padding(start = AppPadding.smPadding),
+                        modifier = Modifier.padding(start = AppPadding.SM_PADDING),
                         style = MaterialTheme.typography.bodyLarge,
                         textAlign = TextAlign.Start,
                     )
                 }
                 Button(
-                    modifier = Modifier.padding(end = AppPadding.mdPadding, bottom = AppPadding.smPadding),
+                    modifier = Modifier.padding(end = AppPadding.MD_PADDING, bottom = AppPadding.SM_PADDING),
                     onClick = onConfirm,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onTertiary)
                 ) {

@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Sports
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
+import com.lczarny.lsnplanner.data.local.model.PlanClassColor
 import com.lczarny.lsnplanner.data.local.model.PlanClassType
 
 fun LessonPlanType.planClassTypeLabelMap(context: Context): Map<PlanClassType, String> = when (this) {
@@ -41,4 +42,11 @@ fun PlanClassType.toPlanClassTypeIcon(): ImageVector = when (this) {
     PlanClassType.Seminar -> Icons.Filled.School
     PlanClassType.Workshop -> Icons.Filled.Handyman
     PlanClassType.Other -> Icons.Filled.Schedule
+}
+
+fun PlanClassColor.colorToLabel(context: Context): String = when (this) {
+    PlanClassColor.Default -> context.getString(R.string.color_default)
+    PlanClassColor.Red -> context.getString(R.string.color_red)
+    PlanClassColor.Green -> context.getString(R.string.color_green)
+    PlanClassColor.Purple -> context.getString(R.string.color_purple)
 }

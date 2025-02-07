@@ -2,20 +2,18 @@ package com.lczarny.lsnplanner.presentation.constants
 
 import androidx.compose.ui.unit.dp
 
-class AppPadding {
-    companion object {
-        val screenPadding = 12.dp
-        val listItemPadding = 12.dp
+object AppPadding {
+    val SCREEN_PADDING = 12.dp
+    val LIST_ITEM_PADDING = 12.dp
 
-        val xsmPadding = 4.dp
-        val smPadding = 8.dp
-        val mdPadding = 12.dp
-        val lgPadding = 24.dp
-        val xlPadding = 48.dp
+    val XSM_PADDING = 4.dp
+    val SM_PADDING = 8.dp
+    val MD_PADDING = 12.dp
+    val LG_PADDING = 24.dp
+    val XL_PADDING = 48.dp
 
-        val timelineStartPadding = 64.dp
+    val TIMELINE_START_PADDING = 64.dp
 
-        val inputBottomPadding = 16.dp
-    }
+    val INPUT_BUTTON_PADDING = 16.dp
 }
 

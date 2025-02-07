@@ -21,10 +21,10 @@ class StartScreenTest {
     val composeTestRule = createComposeRule()
 
     @Mock
-    val mockNavController = mock(NavController::class.java)
+    val mockNavController: NavController = mock(NavController::class.java)
 
     @Mock
-    val mockLessonPlanRepository = mock(LessonPlanRepository::class.java)
+    val mockLessonPlanRepository: LessonPlanRepository = mock(LessonPlanRepository::class.java)
 
     @Test
     fun testLoading() {
@@ -41,7 +41,7 @@ class StartScreenTest {
 
     @Test
     fun testFirstLanch() {
-        fun checkIfDefaultFlow() = flow<Boolean> {
+        fun checkIfDefaultFlow() = flow {
             emit(false)
         }
 

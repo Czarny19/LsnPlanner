@@ -68,8 +68,8 @@ fun FirstLaunchInfo(navController: NavController) {
             PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AppPadding.screenPadding)
-                    .padding(bottom = AppPadding.smPadding),
+                    .padding(AppPadding.SCREEN_PADDING)
+                    .padding(bottom = AppPadding.SM_PADDING),
                 text = stringResource(R.string.first_launch_create_plan),
                 onClick = { navController.navigate(LessonPlanRoute(firstLaunch = true)) }
             )
@@ -78,28 +78,28 @@ fun FirstLaunchInfo(navController: NavController) {
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(top = AppPadding.xlPadding)
+                .padding(top = AppPadding.XL_PADDING)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(AppPadding.mdPadding)
-                    .size(AppSizes.xlIcon),
+                    .padding(AppPadding.MD_PADDING)
+                    .size(AppSizes.XL_ICON),
                 imageVector = Icons.Outlined.WavingHand,
                 contentDescription = stringResource(R.string.information),
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
                 text = stringResource(R.string.first_launch_welcome),
-                modifier = Modifier.padding(AppPadding.mdPadding),
+                modifier = Modifier.padding(AppPadding.MD_PADDING),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = stringResource(R.string.first_launch_info),
-                modifier = Modifier.padding(horizontal = AppPadding.mdPadding),
+                modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING),
                 style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center,
             )
