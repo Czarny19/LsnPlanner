@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.ui.todo
+package com.lczarny.lsnplanner.presentation.ui.note
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,57 +33,57 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.ToDoImportance
-import com.lczarny.lsnplanner.data.local.model.ToDoModel
+import com.lczarny.lsnplanner.data.local.model.NoteImportance
+import com.lczarny.lsnplanner.data.local.model.NoteModel
 import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
+import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.FullScreenTextArea
 import com.lczarny.lsnplanner.presentation.components.InfoField
-import com.lczarny.lsnplanner.presentation.components.OutlinedDateTimePicker
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
-import com.lczarny.lsnplanner.presentation.components.SavingDialog
+import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.todo.model.ToDoState
-import com.lczarny.lsnplanner.presentation.ui.todo.model.toDoImportanceLabelMap
+import com.lczarny.lsnplanner.presentation.ui.note.model.noteImportanceLabelMap
 
 @Composable
-fun ToDoScreen(
+fun NoteScreen(
     navController: NavController,
     lessonPlanId: Long,
-    classId: Long? = null,
-    toDoId: Long?,
-    viewModel: ToDoViewModel = hiltViewModel()
+    noteId: Long?,
+    viewModel: NoteViewModel = hiltViewModel(),
 ) {
-    viewModel.intializeToDo(lessonPlanId, classId, toDoId)
+    viewModel.intializeNote(lessonPlanId, noteId)
 
-    val screenState by viewModel.screenState.collectAsState()
+    AppTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background,
+            content = {
+                val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-    AppTheme(
-        content = {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background,
-                content = {
-                    when (screenState) {
-                        ToDoState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
-                        ToDoState.Edit -> ToDoForm(navController, false, viewModel)
-                        ToDoState.Saving -> ToDoForm(navController, true, viewModel)
-                        ToDoState.Finished -> navController.popBackStack()
-                    }
+                when (screenState) {
+                    NoteScreenState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
+                    NoteScreenState.Edit -> NoteForm(navController, viewModel)
+                    NoteScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
+                    NoteScreenState.Finished -> navController.popBackStack()
                 }
-            )
-        }
-    )
+            }
+        )
+    }
 }
 
 @Composable
-fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewModel) {
-    val toDoData by viewModel.toDoData.collectAsState()
+fun NoteForm(navController: NavController, viewModel: NoteViewModel) {
+    val note by viewModel.note.collectAsStateWithLifecycle()
+
+    val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
+    val formTouched by viewModel.formTouched.collectAsStateWithLifecycle()
 
     var detailsExpanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -92,12 +91,33 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
         label = stringResource(R.string.card_animation)
     )
 
-    toDoData?.let { data ->
+    var discardChangesDialogOpen by remember { mutableStateOf(false) }
+
+    DiscardChangesDialog(
+        discardChangesDialogOpen,
+        PredefinedDialogState(
+            onConfirm = {
+                discardChangesDialogOpen = false
+                navController.popBackStack()
+            },
+            onDismiss = { discardChangesDialogOpen = false }
+        )
+    )
+
+    note?.let { data ->
         Scaffold(
             topBar = {
                 AppNavBar(
-                    title = stringResource(if (data.id != null) R.string.route_edit_todo else R.string.route_new_todo),
-                    navIcon = { AppBarBackIconButton(navController) },
+                    title = stringResource(if (data.id != null) R.string.route_edit_note else R.string.route_new_note),
+                    navIcon = {
+                        AppBarBackIconButton(onClick = {
+                            if (formTouched) {
+                                discardChangesDialogOpen = true
+                            } else {
+                                navController.popBackStack()
+                            }
+                        })
+                    },
                     actions = {
                         IconButton(
                             modifier = Modifier.rotate(rotationState),
@@ -110,12 +130,12 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
                             }
                         )
                         IconButton(
-                            onClick = { viewModel.saveToDo() },
-                            enabled = data.content.isEmpty().not(),
+                            onClick = { viewModel.saveNote() },
+                            enabled = saveEnabled,
                             content = {
                                 Icon(
                                     imageVector = Icons.Outlined.Check,
-                                    contentDescription = stringResource(R.string.todo_save),
+                                    contentDescription = stringResource(R.string.note_save),
                                 )
                             }
                         )
@@ -123,7 +143,6 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
                 )
             }
         ) { padding ->
-            SavingDialog(saving)
             Column(
                 modifier = Modifier
                     .padding(padding)
@@ -132,10 +151,10 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
-                ToDoDetails(viewModel, data, detailsExpanded)
+                NoteInfoCard(viewModel, data, detailsExpanded)
                 FullScreenTextArea(
                     placeholder = stringResource(R.string.write_here),
-                    value = data.content,
+                    initialValue = data.content,
                     onValueChange = { name -> viewModel.updateContent(name) },
                 )
             }
@@ -144,12 +163,13 @@ fun ToDoForm(navController: NavController, saving: Boolean, viewModel: ToDoViewM
 }
 
 @Composable
-fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean) {
+fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel, visible: Boolean) {
     if (visible.not()) {
         return
     }
 
-    val toDoImportanceLabelMap = toDoImportanceLabelMap(LocalContext.current)
+    val context = LocalContext.current
+    val noteImportanceLabelMap by lazy { noteImportanceLabelMap(context) }
 
     Card(
         modifier = Modifier
@@ -169,20 +189,15 @@ fun ToDoDetails(viewModel: ToDoViewModel, toDoData: ToDoModel, visible: Boolean)
                 .padding(AppPadding.SCREEN_PADDING)
         ) {
             InfoField(
-                modifier = Modifier.padding(bottom = AppPadding.INPUT_BUTTON_PADDING),
-                text = stringResource(R.string.todo_details_info)
-            )
-            OutlinedDateTimePicker(
-                initialValue = toDoData.dueDate,
-                label = stringResource(R.string.todo_due_date),
-                onDateTimeSelected = { dateMilis -> viewModel.updateDueDate(dateMilis) }
+                modifier = Modifier.padding(bottom = AppPadding.INPUT_BOTTOM_PADDING),
+                text = stringResource(R.string.note_details_info)
             )
             OutlinedDropDown(
                 modifier = Modifier.padding(bottom = AppPadding.SM_PADDING),
-                label = stringResource(R.string.todo_importance),
-                value = DropDownItem(toDoData.importance, toDoImportanceLabelMap.getValue(toDoData.importance)),
-                onValueChange = { importance -> viewModel.updateImportance(importance.value as ToDoImportance) },
-                items = ToDoImportance.entries.map { DropDownItem(it, toDoImportanceLabelMap.getValue(it)) }
+                label = stringResource(R.string.note_importance),
+                value = DropDownItem(note.importance, noteImportanceLabelMap.getValue(note.importance)),
+                onValueChange = { importance -> viewModel.updateImportance(importance.value as NoteImportance) },
+                items = NoteImportance.entries.map { DropDownItem(it, noteImportanceLabelMap.getValue(it)) }
             )
         }
     }
