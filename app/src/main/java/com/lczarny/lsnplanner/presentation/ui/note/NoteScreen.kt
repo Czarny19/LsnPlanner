@@ -49,7 +49,7 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.note.model.noteImportanceLabelMap
+import com.lczarny.lsnplanner.presentation.ui.note.model.getLabel
 
 @Composable
 fun NoteScreen(
@@ -169,7 +169,7 @@ fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel, visible: Boolean) {
     }
 
     val context = LocalContext.current
-    val noteImportanceLabelMap by lazy { noteImportanceLabelMap(context) }
+    val importanceLabel = note.importance.getLabel(context)
 
     Card(
         modifier = Modifier
@@ -195,9 +195,9 @@ fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel, visible: Boolean) {
             OutlinedDropDown(
                 modifier = Modifier.padding(bottom = AppPadding.SM_PADDING),
                 label = stringResource(R.string.note_importance),
-                value = DropDownItem(note.importance, noteImportanceLabelMap.getValue(note.importance)),
+                value = DropDownItem(note.importance, importanceLabel),
                 onValueChange = { importance -> viewModel.updateImportance(importance.value as NoteImportance) },
-                items = NoteImportance.entries.map { DropDownItem(it, noteImportanceLabelMap.getValue(it)) }
+                items = NoteImportance.entries.map { DropDownItem(it, importanceLabel) }
             )
         }
     }
