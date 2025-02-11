@@ -31,13 +31,13 @@ class NoteViewModel @Inject constructor(
     val formTouched = _formTouched.asStateFlow()
 
     fun updateContent(value: String) {
-        _note.tryEmit(_note.value?.apply { content = value })
+        _note.tryEmit(_note.value?.copy(content = value))
         _saveEnabled.tryEmit(value.isNotEmpty())
         _formTouched.tryEmit(true)
     }
 
     fun updateImportance(value: NoteImportance) {
-        _note.tryEmit(_note.value?.apply { importance = value })
+        _note.tryEmit(_note.value?.copy(importance = value))
         _saveEnabled.tryEmit(_note.value?.content?.isNotEmpty() ?: false)
         _formTouched.tryEmit(true)
     }
