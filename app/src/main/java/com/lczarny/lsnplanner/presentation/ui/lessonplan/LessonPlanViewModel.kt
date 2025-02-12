@@ -2,18 +2,16 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lczarny.lsnplanner.data.local.model.GradingSystem
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.LessonPlanState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,74 +19,74 @@ class LessonPlanViewModel @Inject constructor(
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(LessonPlanState.Loading)
-    private val _lessonPlanData = MutableStateFlow<LessonPlanModel?>(null)
+    private val _screenState = MutableStateFlow(LessonPlanScreenState.Loading)
 
-    private val _planNameError = MutableStateFlow(false)
+    private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
+    private val _isNewPlan = MutableStateFlow(false)
 
-    private val _planIsDefault = MutableStateFlow(false)
-    private val _planIsDefaultEnabled = MutableStateFlow(false)
+    private val _saveEnabled = MutableStateFlow(false)
+    private val _formTouched = MutableStateFlow(false)
 
     val screenState = _screenState.asStateFlow()
-    val lessonPlanData = _lessonPlanData.asStateFlow()
-    val planNameError = _planNameError.asStateFlow()
-    val planIsDefaultEnabled = _planIsDefaultEnabled.asStateFlow()
+
+    val lessonPlan = _lessonPlan.asStateFlow()
+    val isNewPlan = _isNewPlan.asStateFlow()
+
+    val saveEnabled = _saveEnabled.asStateFlow()
+    val formTouched = _formTouched.asStateFlow()
 
     fun updatePlanName(value: String) {
-        _lessonPlanData.update { _lessonPlanData.value?.copy(name = value) }
-        _planNameError.update { false }
+        _lessonPlan.tryEmit(_lessonPlan.value?.copy(name = value))
+        _saveEnabled.tryEmit(value.isNotEmpty())
+        _formTouched.tryEmit(true)
     }
 
     fun updatePlanType(value: LessonPlanType) {
-        _lessonPlanData.update { _lessonPlanData.value?.copy(type = value) }
+        _lessonPlan.tryEmit(_lessonPlan.value?.copy(type = value))
+        _formTouched.tryEmit(true)
     }
 
-    fun updatePlanIsDefault(value: Boolean) {
-        _lessonPlanData.update { _lessonPlanData.value?.copy(isDefault = value) }
+    fun updateGradingSystem(value: GradingSystem) {
+        _lessonPlan.tryEmit(_lessonPlan.value?.copy(gradingSystem = value))
+        _formTouched.tryEmit(true)
     }
 
-    fun initializePlan(firstLaunch: Boolean, lessonPlanId: Long?) {
-        if (lessonPlanId == null) {
-            _planIsDefault.update { firstLaunch }
-            _planIsDefaultEnabled.update { firstLaunch.not() }
-            _lessonPlanData.update {
-                LessonPlanModel(
-                    type = LessonPlanType.School,
-                    isDefault = firstLaunch,
-                    createDate = Calendar.getInstance().timeInMillis
-                )
-            }
+    fun initializePlan(lessonPlanId: Long?) {
+        _screenState.tryEmit(LessonPlanScreenState.Loading)
 
-            _screenState.update { LessonPlanState.Edit }
-        } else {
+        lessonPlanId?.let {
+            _isNewPlan.tryEmit(false)
             viewModelScope.launch(Dispatchers.IO) {
-                lessonPlanRepository.lessonPlan(lessonPlanId).flowOn(Dispatchers.IO).collect { plan ->
-                    _lessonPlanData.update { plan }
-                    _planIsDefaultEnabled.update { true }
+                lessonPlanRepository.getById(lessonPlanId).let {
+                    _lessonPlan.emit(it)
+                    _saveEnabled.tryEmit(it.name.isNotEmpty())
                 }
             }.invokeOnCompletion {
-                _screenState.update { LessonPlanState.Edit }
+                _screenState.tryEmit(LessonPlanScreenState.Edit)
             }
+        } ?: run {
+            _isNewPlan.tryEmit(true)
+            _lessonPlan.tryEmit(LessonPlanModel(isActive = true))
+            _screenState.tryEmit(LessonPlanScreenState.Edit)
         }
     }
 
     fun savePlan() {
-        _lessonPlanData.value?.let { lessonPlan ->
-            if (lessonPlan.name.isEmpty()) {
-                _planNameError.update { true }
-                return
-            }
+        _screenState.tryEmit(LessonPlanScreenState.Saving)
 
-            _screenState.update { LessonPlanState.Saving }
+        viewModelScope.launch(Dispatchers.IO) {
+            delay(500)
 
-            viewModelScope.launch(Dispatchers.IO) {
+            _lessonPlan.value?.let { lessonPlan ->
                 lessonPlan.id?.let {
-//                    TODO test
-//                    lessonPlanRepository.update(it)
-                } ?: run { lessonPlanRepository.insert(lessonPlan) }
-            }.invokeOnCompletion {
-                _screenState.update { LessonPlanState.Finished }
+                    lessonPlanRepository.update(lessonPlan)
+                } ?: run {
+                    val planId = lessonPlanRepository.insert(lessonPlan.apply { isActive = true })
+                    lessonPlanRepository.makeOtherPlansNotActive(planId)
+                }
             }
+        }.invokeOnCompletion {
+            _screenState.tryEmit(LessonPlanScreenState.Finished)
         }
     }
 }
