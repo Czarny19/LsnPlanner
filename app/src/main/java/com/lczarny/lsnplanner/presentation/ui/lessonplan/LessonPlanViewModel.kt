@@ -6,6 +6,7 @@ import com.lczarny.lsnplanner.data.local.model.GradingSystem
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -19,7 +20,7 @@ class LessonPlanViewModel @Inject constructor(
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(LessonPlanScreenState.Loading)
+    private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
 
     private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
     private val _isNewPlan = MutableStateFlow(false)
@@ -52,7 +53,7 @@ class LessonPlanViewModel @Inject constructor(
     }
 
     fun initializePlan(lessonPlanId: Long?) {
-        _screenState.tryEmit(LessonPlanScreenState.Loading)
+        _screenState.tryEmit(DetailsScreenState.Loading)
 
         lessonPlanId?.let {
             _isNewPlan.tryEmit(false)
@@ -62,17 +63,17 @@ class LessonPlanViewModel @Inject constructor(
                     _saveEnabled.tryEmit(it.name.isNotEmpty())
                 }
             }.invokeOnCompletion {
-                _screenState.tryEmit(LessonPlanScreenState.Edit)
+                _screenState.tryEmit(DetailsScreenState.Edit)
             }
         } ?: run {
             _isNewPlan.tryEmit(true)
             _lessonPlan.tryEmit(LessonPlanModel(isActive = true))
-            _screenState.tryEmit(LessonPlanScreenState.Edit)
+            _screenState.tryEmit(DetailsScreenState.Edit)
         }
     }
 
     fun savePlan() {
-        _screenState.tryEmit(LessonPlanScreenState.Saving)
+        _screenState.tryEmit(DetailsScreenState.Saving)
 
         viewModelScope.launch(Dispatchers.IO) {
             delay(500)
@@ -86,7 +87,7 @@ class LessonPlanViewModel @Inject constructor(
                 }
             }
         }.invokeOnCompletion {
-            _screenState.tryEmit(LessonPlanScreenState.Finished)
+            _screenState.tryEmit(DetailsScreenState.Finished)
         }
     }
 }

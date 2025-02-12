@@ -48,8 +48,9 @@ import com.lczarny.lsnplanner.presentation.components.InfoField
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
+import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.note.model.getLabel
+import com.lczarny.lsnplanner.presentation.model.getLabel
 
 @Composable
 fun NoteScreen(
@@ -68,10 +69,10 @@ fun NoteScreen(
                 val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
                 when (screenState) {
-                    NoteScreenState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
-                    NoteScreenState.Edit -> NoteForm(navController, viewModel)
-                    NoteScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
-                    NoteScreenState.Finished -> navController.popBackStack()
+                    DetailsScreenState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
+                    DetailsScreenState.Edit -> NoteForm(navController, viewModel)
+                    DetailsScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
+                    DetailsScreenState.Finished -> navController.popBackStack()
                 }
             }
         )

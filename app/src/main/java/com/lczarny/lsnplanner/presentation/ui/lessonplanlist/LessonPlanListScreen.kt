@@ -55,6 +55,7 @@ import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.ListItemTitle
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
+import com.lczarny.lsnplanner.presentation.model.ListScreenState
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import kotlinx.coroutines.channels.Channel
@@ -75,9 +76,9 @@ fun ListPickerScreen(navController: NavController, viewModel: LessonPlanListView
                 val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
                 when (screenState) {
-                    LessonPlanListScreenState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
-                    LessonPlanListScreenState.List -> LessonPlanList(navController, viewModel)
-                    LessonPlanListScreenState.Finished -> navController.popBackStack()
+                    ListScreenState.Loading -> FullScreenLoading(label = stringResource(R.string.please_wait))
+                    ListScreenState.List -> LessonPlanList(navController, viewModel)
+                    ListScreenState.Finished -> navController.popBackStack()
                 }
             }
         )

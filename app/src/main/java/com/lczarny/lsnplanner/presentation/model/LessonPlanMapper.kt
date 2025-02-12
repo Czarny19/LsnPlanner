@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.ui.lessonplan.model
+package com.lczarny.lsnplanner.presentation.model
 
 import android.content.Context
 import com.lczarny.lsnplanner.R

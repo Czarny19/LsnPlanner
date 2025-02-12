@@ -36,10 +36,11 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
+import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.presentation.navigation.HomeRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.getDescription
-import com.lczarny.lsnplanner.presentation.ui.lessonplan.model.getLabel
+import com.lczarny.lsnplanner.presentation.model.getDescription
+import com.lczarny.lsnplanner.presentation.model.getLabel
 
 @Composable
 fun LessonPlanScreen(
@@ -59,10 +60,10 @@ fun LessonPlanScreen(
                     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
                     when (screenState) {
-                        LessonPlanScreenState.Loading -> FullScreenLoading()
-                        LessonPlanScreenState.Edit -> LessonPlanForm(navController, viewModel)
-                        LessonPlanScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
-                        LessonPlanScreenState.Finished -> {
+                        DetailsScreenState.Loading -> FullScreenLoading()
+                        DetailsScreenState.Edit -> LessonPlanForm(navController, viewModel)
+                        DetailsScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
+                        DetailsScreenState.Finished -> {
                             if (firstLaunch) {
                                 navController.navigate(HomeRoute(true)) {
                                     popUpTo(navController.graph.id) { inclusive = true }

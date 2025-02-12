@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.local.model.NoteImportance
 import com.lczarny.lsnplanner.data.local.model.NoteModel
 import com.lczarny.lsnplanner.data.local.repository.NoteRepository
+import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.getCurrentTimestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +19,7 @@ class NoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(NoteScreenState.Loading)
+    private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
     private val _note = MutableStateFlow<NoteModel?>(null)
 
     private val _saveEnabled = MutableStateFlow(false)
@@ -43,22 +44,22 @@ class NoteViewModel @Inject constructor(
     }
 
     fun intializeNote(lessonPlanId: Long, noteId: Long?) {
-        _screenState.tryEmit(NoteScreenState.Loading)
+        _screenState.tryEmit(DetailsScreenState.Loading)
 
         noteId?.let {
             viewModelScope.launch(Dispatchers.IO) {
                 noteRepository.getById(noteId).let { _note.emit(it) }
             }.invokeOnCompletion {
-                _screenState.tryEmit(NoteScreenState.Edit)
+                _screenState.tryEmit(DetailsScreenState.Edit)
             }
         } ?: run {
             _note.tryEmit(NoteModel(lessonPlanId = lessonPlanId))
-            _screenState.tryEmit(NoteScreenState.Edit)
+            _screenState.tryEmit(DetailsScreenState.Edit)
         }
     }
 
     fun saveNote() {
-        _screenState.tryEmit(NoteScreenState.Saving)
+        _screenState.tryEmit(DetailsScreenState.Saving)
 
         viewModelScope.launch(Dispatchers.IO) {
             _note.value?.let { note ->
@@ -69,7 +70,7 @@ class NoteViewModel @Inject constructor(
                 }
             }
         }.invokeOnCompletion {
-            _screenState.tryEmit(NoteScreenState.Finished)
+            _screenState.tryEmit(DetailsScreenState.Finished)
         }
     }
 }

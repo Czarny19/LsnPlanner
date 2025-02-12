@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.presentation.model.ListScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ class LessonPlanListViewModel @Inject constructor(
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(LessonPlanListScreenState.Loading)
+    private val _screenState = MutableStateFlow(ListScreenState.Loading)
     private val _lessonPlans = MutableStateFlow(emptyList<LessonPlanModel>())
 
     val screenState = _screenState.asStateFlow()
@@ -31,7 +32,7 @@ class LessonPlanListViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             lessonPlanRepository.getAll().flowOn(Dispatchers.IO).collect { plans ->
                 _lessonPlans.emit(plans)
-                _screenState.emit(LessonPlanListScreenState.List)
+                _screenState.emit(ListScreenState.List)
             }
         }
     }

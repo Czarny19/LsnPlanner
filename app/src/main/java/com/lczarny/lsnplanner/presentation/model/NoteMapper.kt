@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.ui.note.model
+package com.lczarny.lsnplanner.presentation.model
 
 import android.content.Context
 import androidx.compose.material.icons.Icons
