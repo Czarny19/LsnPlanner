@@ -5,10 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.local.model.NoteImportance
 import com.lczarny.lsnplanner.data.local.model.NoteModel
 import com.lczarny.lsnplanner.data.local.repository.NoteRepository
+import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
-import com.lczarny.lsnplanner.utils.getCurrentTimestamp
+import com.lczarny.lsnplanner.utils.currentTimestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
@@ -46,9 +48,9 @@ class NoteViewModel @Inject constructor(
     fun intializeNote(lessonPlanId: Long, noteId: Long?) {
         _screenState.tryEmit(DetailsScreenState.Loading)
 
-        noteId?.let {
-            viewModelScope.launch(Dispatchers.IO) {
-                noteRepository.getById(noteId).let { _note.emit(it) }
+        noteId?.let { id ->
+            viewModelScope.launch(ioDispatcher) {
+                noteRepository.getById(id).let { _note.emit(it) }
             }.invokeOnCompletion {
                 _screenState.tryEmit(DetailsScreenState.Edit)
             }
@@ -61,10 +63,10 @@ class NoteViewModel @Inject constructor(
     fun saveNote() {
         _screenState.tryEmit(DetailsScreenState.Saving)
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             _note.value?.let { note ->
                 note.id?.let {
-                    noteRepository.update(note.apply { modifyDate = getCurrentTimestamp() })
+                    noteRepository.update(note.apply { modifyDate = currentTimestamp() })
                 } ?: run {
                     noteRepository.insert(note)
                 }

@@ -6,9 +6,10 @@ import com.lczarny.lsnplanner.data.local.model.GradingSystem
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LessonPlanViewModel @Inject constructor(
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
@@ -55,10 +57,10 @@ class LessonPlanViewModel @Inject constructor(
     fun initializePlan(lessonPlanId: Long?) {
         _screenState.tryEmit(DetailsScreenState.Loading)
 
-        lessonPlanId?.let {
+        lessonPlanId?.let { id ->
             _isNewPlan.tryEmit(false)
-            viewModelScope.launch(Dispatchers.IO) {
-                lessonPlanRepository.getById(lessonPlanId).let {
+            viewModelScope.launch(ioDispatcher) {
+                lessonPlanRepository.getById(id).let {
                     _lessonPlan.emit(it)
                     _saveEnabled.tryEmit(it.name.isNotEmpty())
                 }
@@ -75,7 +77,7 @@ class LessonPlanViewModel @Inject constructor(
     fun savePlan() {
         _screenState.tryEmit(DetailsScreenState.Saving)
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             delay(500)
 
             _lessonPlan.value?.let { lessonPlan ->
