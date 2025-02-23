@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.model
+package com.lczarny.lsnplanner.presentation.model.mapper
 
 import android.content.Context
 import com.lczarny.lsnplanner.R

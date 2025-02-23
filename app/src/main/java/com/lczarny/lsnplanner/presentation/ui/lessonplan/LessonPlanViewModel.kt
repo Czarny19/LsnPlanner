@@ -23,53 +23,62 @@ class LessonPlanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
-
     private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
-    private val _isNewPlan = MutableStateFlow(false)
 
     private val _saveEnabled = MutableStateFlow(false)
-    private val _formTouched = MutableStateFlow(false)
+
+    private lateinit var _initialData: LessonPlanModel
 
     val screenState = _screenState.asStateFlow()
-
     val lessonPlan = _lessonPlan.asStateFlow()
-    val isNewPlan = _isNewPlan.asStateFlow()
 
     val saveEnabled = _saveEnabled.asStateFlow()
-    val formTouched = _formTouched.asStateFlow()
+
+    var isNewPlan = false
+        private set
+
+    val dataChanged = { _lessonPlan.value != _initialData }
 
     fun updatePlanName(value: String) {
         _lessonPlan.tryEmit(_lessonPlan.value?.copy(name = value))
         _saveEnabled.tryEmit(value.isNotEmpty())
-        _formTouched.tryEmit(true)
     }
 
     fun updatePlanType(value: LessonPlanType) {
         _lessonPlan.tryEmit(_lessonPlan.value?.copy(type = value))
-        _formTouched.tryEmit(true)
     }
 
     fun updateGradingSystem(value: GradingSystem) {
         _lessonPlan.tryEmit(_lessonPlan.value?.copy(gradingSystem = value))
-        _formTouched.tryEmit(true)
     }
 
     fun initializePlan(lessonPlanId: Long?) {
+        if (_lessonPlan.value != null) {
+            return
+        }
+
         _screenState.tryEmit(DetailsScreenState.Loading)
 
         lessonPlanId?.let { id ->
-            _isNewPlan.tryEmit(false)
+            isNewPlan = false
+
             viewModelScope.launch(ioDispatcher) {
                 lessonPlanRepository.getById(id).let {
                     _lessonPlan.emit(it)
                     _saveEnabled.tryEmit(it.name.isNotEmpty())
+                    _initialData = it.copy()
                 }
             }.invokeOnCompletion {
                 _screenState.tryEmit(DetailsScreenState.Edit)
             }
         } ?: run {
-            _isNewPlan.tryEmit(true)
-            _lessonPlan.tryEmit(LessonPlanModel(isActive = true))
+            isNewPlan = true
+
+            LessonPlanModel(isActive = true).let {
+                _lessonPlan.tryEmit(it)
+                _initialData = it.copy()
+            }
+
             _screenState.tryEmit(DetailsScreenState.Edit)
         }
     }
@@ -84,8 +93,9 @@ class LessonPlanViewModel @Inject constructor(
                 lessonPlan.id?.let {
                     lessonPlanRepository.update(lessonPlan)
                 } ?: run {
-                    val planId = lessonPlanRepository.insert(lessonPlan.apply { isActive = true })
-                    lessonPlanRepository.makeOtherPlansNotActive(planId)
+                    lessonPlanRepository.insert(lessonPlan.apply { isActive = true }).let { id ->
+                        lessonPlanRepository.makeOtherPlansNotActive(id)
+                    }
                 }
             }
         }.invokeOnCompletion {

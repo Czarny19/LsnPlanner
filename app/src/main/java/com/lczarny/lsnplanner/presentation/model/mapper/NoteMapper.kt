@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.presentation.model
+package com.lczarny.lsnplanner.presentation.model.mapper
 
 import android.content.Context
 import androidx.compose.material.icons.Icons

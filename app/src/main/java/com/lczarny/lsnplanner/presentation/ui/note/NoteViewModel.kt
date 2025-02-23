@@ -25,37 +25,48 @@ class NoteViewModel @Inject constructor(
     private val _note = MutableStateFlow<NoteModel?>(null)
 
     private val _saveEnabled = MutableStateFlow(false)
-    private val _formTouched = MutableStateFlow(false)
+
+    private lateinit var _initialData: NoteModel
 
     val screenState = _screenState.asStateFlow()
     val note = _note.asStateFlow()
 
     val saveEnabled = _saveEnabled.asStateFlow()
-    val formTouched = _formTouched.asStateFlow()
+
+    val dataChanged = { _note.value != _initialData }
 
     fun updateContent(value: String) {
         _note.tryEmit(_note.value?.copy(content = value))
         _saveEnabled.tryEmit(value.isNotEmpty())
-        _formTouched.tryEmit(true)
     }
 
     fun updateImportance(value: NoteImportance) {
         _note.tryEmit(_note.value?.copy(importance = value))
         _saveEnabled.tryEmit(_note.value?.content?.isNotEmpty() ?: false)
-        _formTouched.tryEmit(true)
     }
 
     fun intializeNote(lessonPlanId: Long, noteId: Long?) {
+        if (_note.value != null) {
+            return
+        }
+
         _screenState.tryEmit(DetailsScreenState.Loading)
 
         noteId?.let { id ->
             viewModelScope.launch(ioDispatcher) {
-                noteRepository.getById(id).let { _note.emit(it) }
+                noteRepository.getById(id).let {
+                    _note.emit(it)
+                    _initialData = it.copy()
+                }
             }.invokeOnCompletion {
                 _screenState.tryEmit(DetailsScreenState.Edit)
             }
         } ?: run {
-            _note.tryEmit(NoteModel(lessonPlanId = lessonPlanId))
+            NoteModel(lessonPlanId = lessonPlanId).let {
+                _note.tryEmit(it)
+                _initialData = it.copy()
+            }
+
             _screenState.tryEmit(DetailsScreenState.Edit)
         }
     }

@@ -2,6 +2,7 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,20 +28,21 @@ import com.lczarny.lsnplanner.data.local.model.GradingSystem
 import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
-import com.lczarny.lsnplanner.presentation.components.BottomBarButton
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.InfoField
+import com.lczarny.lsnplanner.presentation.components.InputError
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
+import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
+import com.lczarny.lsnplanner.presentation.model.mapper.getDescription
+import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.navigation.HomeRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.model.getDescription
-import com.lczarny.lsnplanner.presentation.model.getLabel
 
 @Composable
 fun LessonPlanScreen(
@@ -84,9 +86,9 @@ fun LessonPlanForm(navController: NavController, viewModel: LessonPlanViewModel)
     val context = LocalContext.current
 
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
-    val isNewPlan by viewModel.isNewPlan.collectAsStateWithLifecycle()
     val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
-    val formTouched by viewModel.formTouched.collectAsStateWithLifecycle()
+
+    var nameTouched by remember { mutableStateOf(false) }
 
     var discardChangesDialogOpen by remember { mutableStateOf(false) }
 
@@ -105,67 +107,72 @@ fun LessonPlanForm(navController: NavController, viewModel: LessonPlanViewModel)
         Scaffold(
             topBar = {
                 AppNavBar(
-                    title = stringResource(if (isNewPlan) R.string.route_new_lesson_plan else R.string.route_edit_lesson_plan),
+                    title = stringResource(if (viewModel.isNewPlan) R.string.route_new_lesson_plan else R.string.route_edit_lesson_plan),
                     navIcon = {
-                        if (isNewPlan.not()) {
-                            AppBarBackIconButton(onClick = {
-                                if (formTouched) {
-                                    discardChangesDialogOpen = true
-                                } else {
-                                    navController.popBackStack()
-                                }
-                            })
-                        }
+                        AppBarBackIconButton(onClick = {
+                            if (viewModel.dataChanged()) {
+                                discardChangesDialogOpen = true
+                            } else {
+                                navController.popBackStack()
+                            }
+                        })
                     },
-                )
-            },
-            bottomBar = {
-                BottomBarButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(R.string.plan_save),
-                    enabled = saveEnabled,
-                    onClick = { viewModel.savePlan() }
                 )
             }
         ) { padding ->
             Column(
                 modifier = Modifier
+                    .fillMaxSize()
                     .padding(padding)
                     .padding(AppPadding.SCREEN_PADDING)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
-                if (isNewPlan) {
+                if (viewModel.isNewPlan) {
                     InfoField(
-                        modifier = Modifier.padding(bottom = AppPadding.INPUT_BOTTOM_PADDING),
+                        modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                         text = stringResource(R.string.plan_form_info)
                     )
                 }
                 OutlinedInputField(
                     label = stringResource(R.string.plan_name),
                     value = data.name,
-                    onValueChange = { name -> viewModel.updatePlanName(name) },
+                    onValueChange = { name ->
+                        nameTouched = true
+                        viewModel.updatePlanName(name)
+                    },
                     maxLines = 1,
                     maxLength = 32,
+                    error = if (nameTouched && data.name.isEmpty()) InputError.FieldRequired else null
                 )
                 OutlinedDropDown(
                     label = stringResource(R.string.plan_type),
-                    readOnly = isNewPlan.not(),
+                    readOnly = viewModel.isNewPlan.not(),
                     value = DropDownItem(data.type, data.type.getLabel(context)),
                     onValueChange = { planType -> viewModel.updatePlanType(planType.value as LessonPlanType) },
                     items = LessonPlanType.entries.map { DropDownItem(it, it.getLabel(context)) }
                 )
                 OutlinedDropDown(
                     label = stringResource(R.string.plan_grading_system),
-                    readOnly = isNewPlan.not(),
+                    readOnly = viewModel.isNewPlan.not(),
                     value = DropDownItem(data.gradingSystem, data.gradingSystem.getLabel(context)),
                     onValueChange = { gradingSystem -> viewModel.updateGradingSystem(gradingSystem.value as GradingSystem) },
                     items = GradingSystem.entries.map { DropDownItem(it, it.getLabel(context)) }
                 )
                 InfoField(
-                    iconVisible = false,
-                    text = "${stringResource(R.string.plan_grading_system_selected)}\n${data.gradingSystem.getDescription(context)}"
+                    modifier = Modifier.padding(top = AppPadding.XSM_PADDING, bottom = AppPadding.MD_PADDING),
+                    text = "${stringResource(R.string.plan_grading_system_selected)}\n${data.gradingSystem.getDescription(context)}",
+                    iconVisible = false
+                )
+                Spacer(modifier = Modifier.weight(1.0f))
+                PrimaryButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = AppPadding.MD_PADDING),
+                    enabled = saveEnabled,
+                    text = stringResource(R.string.plan_save),
+                    onClick = { viewModel.savePlan() }
                 )
             }
         }

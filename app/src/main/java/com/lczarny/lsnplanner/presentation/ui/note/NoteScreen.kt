@@ -49,8 +49,8 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
+import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.model.getLabel
 
 @Composable
 fun NoteScreen(
@@ -82,9 +82,7 @@ fun NoteScreen(
 @Composable
 fun NoteForm(navController: NavController, viewModel: NoteViewModel) {
     val note by viewModel.note.collectAsStateWithLifecycle()
-
     val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
-    val formTouched by viewModel.formTouched.collectAsStateWithLifecycle()
 
     var detailsExpanded by remember { mutableStateOf(false) }
     val rotationState by animateFloatAsState(
@@ -112,7 +110,7 @@ fun NoteForm(navController: NavController, viewModel: NoteViewModel) {
                     title = stringResource(if (data.id != null) R.string.route_edit_note else R.string.route_new_note),
                     navIcon = {
                         AppBarBackIconButton(onClick = {
-                            if (formTouched) {
+                            if (viewModel.dataChanged()) {
                                 discardChangesDialogOpen = true
                             } else {
                                 navController.popBackStack()
@@ -152,7 +150,7 @@ fun NoteForm(navController: NavController, viewModel: NoteViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
-                NoteInfoCard(viewModel, data, detailsExpanded)
+                if (detailsExpanded) NoteInfoCard(viewModel, data)
                 FullScreenTextArea(
                     placeholder = stringResource(R.string.write_here),
                     initialValue = data.content,
@@ -164,13 +162,8 @@ fun NoteForm(navController: NavController, viewModel: NoteViewModel) {
 }
 
 @Composable
-fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel, visible: Boolean) {
-    if (visible.not()) {
-        return
-    }
-
+fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel) {
     val context = LocalContext.current
-    val importanceLabel = note.importance.getLabel(context)
 
     Card(
         modifier = Modifier
@@ -194,11 +187,11 @@ fun NoteInfoCard(viewModel: NoteViewModel, note: NoteModel, visible: Boolean) {
                 text = stringResource(R.string.note_details_info)
             )
             OutlinedDropDown(
-                modifier = Modifier.padding(bottom = AppPadding.SM_PADDING),
+                modifier = Modifier.padding(top = AppPadding.SM_PADDING),
                 label = stringResource(R.string.note_importance),
-                value = DropDownItem(note.importance, importanceLabel),
+                value = DropDownItem(note.importance, note.importance.getLabel(context)),
                 onValueChange = { importance -> viewModel.updateImportance(importance.value as NoteImportance) },
-                items = NoteImportance.entries.map { DropDownItem(it, importanceLabel) }
+                items = NoteImportance.entries.map { DropDownItem(it, it.getLabel(context)) }
             )
         }
     }

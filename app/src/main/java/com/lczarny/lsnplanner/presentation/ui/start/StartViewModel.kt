@@ -30,11 +30,10 @@ class StartViewModel @Inject constructor(
         viewModelScope.launch(ioDispatcher) {
             delay(500)
 
-            lessonPlanRepository.checkIfActivePlanExists().let {
-                when (it) {
-                    true -> _screenState.emit(StartScreenState.StartApp)
-                    false -> _screenState.emit(StartScreenState.FirstLaunch)
-                }
+            if (lessonPlanRepository.checkIfActivePlanExists()) {
+                _screenState.emit(StartScreenState.StartApp)
+            } else {
+                _screenState.emit(StartScreenState.FirstLaunch)
             }
         }
     }

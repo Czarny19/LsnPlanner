@@ -25,8 +25,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.presentation.components.BottomBarButton
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
+import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.navigation.HomeRoute
@@ -47,9 +47,7 @@ fun StartScreen(navController: NavController, viewModel: StartViewModel = hiltVi
                     StartScreenState.FirstLaunch -> FirstLaunchInfo(navController)
                     StartScreenState.StartApp -> {
                         navController.navigate(HomeRoute()) {
-                            popUpTo(navController.graph.id) {
-                                inclusive = true
-                            }
+                            popUpTo(navController.graph.id) { inclusive = true }
                         }
                     }
                 }
@@ -60,42 +58,40 @@ fun StartScreen(navController: NavController, viewModel: StartViewModel = hiltVi
 
 @Composable
 fun FirstLaunchInfo(navController: NavController) {
-    Scaffold(
-        bottomBar = {
-            BottomBarButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.first_launch_create_plan),
-                onClick = { navController.navigate(LessonPlanRoute(firstLaunch = true)) }
-            )
-        }
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
+                .fillMaxSize()
                 .padding(padding)
-                .padding(top = AppPadding.XL_PADDING)
+                .padding(AppPadding.SCREEN_PADDING)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Icon(
-                modifier = Modifier
-                    .padding(AppPadding.MD_PADDING)
-                    .size(AppSizes.XL_ICON),
+                modifier = Modifier.size(AppSizes.XL_ICON),
                 imageVector = Icons.Outlined.WavingHand,
                 contentDescription = stringResource(R.string.first_launch_welcome),
                 tint = MaterialTheme.colorScheme.primary,
             )
             Text(
+                modifier = Modifier.padding(vertical = AppPadding.MD_PADDING),
                 text = stringResource(R.string.first_launch_welcome),
-                modifier = Modifier.padding(AppPadding.MD_PADDING),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
             )
             Text(
+                modifier = Modifier.padding(vertical = AppPadding.MD_PADDING),
                 text = stringResource(R.string.first_launch_info),
-                modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING),
                 style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center,
+            )
+            PrimaryButton(
+                modifier = Modifier
+                    .padding(vertical = AppPadding.SCREEN_PADDING)
+                    .fillMaxWidth(),
+                text = stringResource(R.string.first_launch_create_plan),
+                onClick = { navController.navigate(LessonPlanRoute(firstLaunch = true)) }
             )
         }
     }

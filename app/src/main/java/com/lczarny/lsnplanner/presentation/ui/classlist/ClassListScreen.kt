@@ -1,5 +1,6 @@
-package com.lczarny.lsnplanner.presentation.ui.lessonplanlist
+package com.lczarny.lsnplanner.presentation.ui.classlist
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +12,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FabPosition
@@ -45,6 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.data.local.model.ClassInfoModel
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
 import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
@@ -56,18 +56,19 @@ import com.lczarny.lsnplanner.presentation.components.ListItemTitle
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.ListScreenState
-import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
+import com.lczarny.lsnplanner.presentation.navigation.ClassDetailsRoute
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 
-enum class ListPickerScreenSnackbar {
-    SetActive,
+enum class ClassListScreenSnackbar {
     Deleted
 }
 
 @Composable
-fun LessonPlanListScreen(navController: NavController, viewModel: LessonPlanListViewModel = hiltViewModel()) {
+fun ClassListScreen(navController: NavController, lessonPlanId: Long, viewModel: ClassListViewModel = hiltViewModel()) {
+    viewModel.initializeLessonPlanAndClasses(lessonPlanId)
+
     AppTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -85,97 +86,104 @@ fun LessonPlanListScreen(navController: NavController, viewModel: LessonPlanList
 }
 
 @Composable
-fun LessonPlanList(navController: NavController, viewModel: LessonPlanListViewModel) {
+fun LessonPlanList(navController: NavController, viewModel: ClassListViewModel) {
     val context = LocalContext.current
 
-    val lessonPlans by viewModel.lessonPlans.collectAsStateWithLifecycle()
-    val selectedPlanName = remember { mutableStateOf("") }
+    val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
+    val classes by viewModel.classes.collectAsStateWithLifecycle()
+    val selectedClassName = remember { mutableStateOf("") }
 
     val listState = rememberLazyListState()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val snackbarChannel = remember { Channel<ListPickerScreenSnackbar>(Channel.CONFLATED) }
+    val snackbarChannel = remember { Channel<ClassListScreenSnackbar>(Channel.CONFLATED) }
 
     LaunchedEffect(snackbarChannel) {
         snackbarChannel.receiveAsFlow().collect {
             when (it) {
-                ListPickerScreenSnackbar.SetActive -> snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.snackbar_plan_set_active, selectedPlanName.value),
-                    withDismissAction = true
-                )
-
-                ListPickerScreenSnackbar.Deleted -> snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.snackbar_plan_deleted, selectedPlanName.value),
+                ClassListScreenSnackbar.Deleted -> snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.snackbar_class_deleted, selectedClassName.value),
                     withDismissAction = true
                 )
             }
 
-            selectedPlanName.value = ""
+            selectedClassName.value = ""
         }
     }
 
-    Scaffold(
-        topBar = {
-            AppNavBar(
-                title = stringResource(R.string.route_lesson_plan_list),
-                navIcon = { AppBarBackIconButton(onClick = { navController.popBackStack() }) },
-            )
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
-        floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(LessonPlanRoute()) },
-                content = { Icon(Icons.Filled.Add, stringResource(R.string.plan_add)) },
-            )
-        },
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            state = listState
-        ) {
-            items(items = lessonPlans) { item -> LessonPlanListItem(viewModel, navController, snackbarChannel, item, selectedPlanName) }
-            item { FabListBottomSpacer() }
+    lessonPlan?.let { lessonPlanData ->
+        Scaffold(
+            topBar = {
+                AppNavBar(
+                    title = stringResource(R.string.route_classes, lessonPlanData.name),
+                    navIcon = { AppBarBackIconButton(onClick = { navController.popBackStack() }) },
+                )
+            },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
+            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { navController.navigate(ClassDetailsRoute(lessonPlanId = lessonPlanData.id!!, lessonPlanType = lessonPlanData.type)) },
+                    content = { Icon(Icons.Filled.Add, stringResource(R.string.plan_add)) },
+                )
+            },
+        ) { padding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                state = listState
+            ) {
+                items(items = classes) { item -> ClassListItem(viewModel, navController, snackbarChannel, item, lessonPlanData, selectedClassName) }
+                item { FabListBottomSpacer() }
+            }
         }
     }
 }
 
 @Composable
-fun LessonPlanListItem(
-    viewModel: LessonPlanListViewModel,
+fun ClassListItem(
+    viewModel: ClassListViewModel,
     navController: NavController,
-    snackbarChannel: Channel<ListPickerScreenSnackbar>,
+    snackbarChannel: Channel<ClassListScreenSnackbar>,
+    classInfo: ClassInfoModel,
     lessonPlan: LessonPlanModel,
-    selectedPlanName: MutableState<String>,
+    selectedClassName: MutableState<String>,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                navController.navigate(
+                    ClassDetailsRoute(
+                        lessonPlanId = lessonPlan.id!!,
+                        lessonPlanType = lessonPlan.type,
+                        classInfoId = classInfo.id!!
+                    )
+                )
+            }
             .padding(vertical = AppPadding.XSM_PADDING, horizontal = AppPadding.MD_PADDING),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
         Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = stringResource(R.string.plan_active),
-            tint = if (lessonPlan.isActive) MaterialTheme.colorScheme.tertiary else Color.Transparent
+            imageVector = Icons.Filled.Circle,
+            contentDescription = stringResource(R.string.class_color),
+            tint = Color(classInfo.color.raw)
         )
-        ListItemTitle(modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING), text = lessonPlan.name)
+        ListItemTitle(modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING), text = classInfo.name)
         Spacer(modifier = Modifier.weight(1.0f))
-        LessonPlanListItemMenu(viewModel, navController, snackbarChannel, lessonPlan, selectedPlanName)
+        ClassListItemMenu(viewModel, snackbarChannel, classInfo, selectedClassName)
     }
     HorizontalDivider()
 }
 
 @Composable
-fun LessonPlanListItemMenu(
-    viewModel: LessonPlanListViewModel,
-    navController: NavController,
-    snackbarChannel: Channel<ListPickerScreenSnackbar>,
-    lessonPlan: LessonPlanModel,
-    selectedPlanName: MutableState<String>,
+fun ClassListItemMenu(
+    viewModel: ClassListViewModel,
+    snackbarChannel: Channel<ClassListScreenSnackbar>,
+    classInfo: ClassInfoModel,
+    selectedClassName: MutableState<String>,
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
     var deleteConfirmationDialogOpen by remember { mutableStateOf(false) }
@@ -183,13 +191,13 @@ fun LessonPlanListItemMenu(
     DeleteItemDialog(
         deleteConfirmationDialogOpen,
         BasicDialogState(
-            title = stringResource(R.string.plan_delete),
-            text = stringResource(R.string.plan_delete_question),
+            title = stringResource(R.string.class_delete),
+            text = stringResource(R.string.class_delete_question),
             onConfirm = {
                 deleteConfirmationDialogOpen = false
-                viewModel.deletePlan(lessonPlan.id!!) {
-                    selectedPlanName.value = lessonPlan.name
-                    snackbarChannel.trySend(ListPickerScreenSnackbar.Deleted)
+                viewModel.deleteClass(classInfo.id!!) {
+                    selectedClassName.value = classInfo.name
+                    snackbarChannel.trySend(ClassListScreenSnackbar.Deleted)
                 }
             },
             onDismiss = { deleteConfirmationDialogOpen = false }
@@ -202,56 +210,19 @@ fun LessonPlanListItemMenu(
             contentDescription = stringResource(R.string.options),
         )
         DropdownMenu(expanded = dropDownExpanded, onDismissRequest = { dropDownExpanded = false }) {
-            if (lessonPlan.isActive.not()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.plan_make_active)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.CheckCircle,
-                            contentDescription = stringResource(R.string.plan_make_active)
-                        )
-                    },
-                    onClick = {
-                        dropDownExpanded = false
-                        viewModel.makePlanActive(lessonPlan) {
-                            selectedPlanName.value = lessonPlan.name
-                            snackbarChannel.trySend(ListPickerScreenSnackbar.SetActive)
-                        }
-                    }
-                )
-                HorizontalDivider()
-            }
-
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.plan_edit)) },
+                text = { Text(stringResource(R.string.class_delete)) },
                 leadingIcon = {
                     Icon(
-                        imageVector = Icons.Outlined.Edit,
-                        contentDescription = stringResource(R.string.plan_edit)
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = stringResource(R.string.class_delete)
                     )
                 },
                 onClick = {
                     dropDownExpanded = false
-                    navController.navigate(LessonPlanRoute(lessonPlanId = lessonPlan.id!!))
+                    deleteConfirmationDialogOpen = true
                 }
             )
-
-            if (lessonPlan.isActive.not()) {
-                HorizontalDivider()
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.plan_delete)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Delete,
-                            contentDescription = stringResource(R.string.plan_delete)
-                        )
-                    },
-                    onClick = {
-                        dropDownExpanded = false
-                        deleteConfirmationDialogOpen = true
-                    }
-                )
-            }
         }
     }
 }
