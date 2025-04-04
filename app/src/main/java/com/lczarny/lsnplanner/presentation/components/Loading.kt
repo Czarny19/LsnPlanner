@@ -20,15 +20,11 @@ fun FullScreenLoading(label: String? = null) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.width(AppSizes.XL_ICON),
-            color = MaterialTheme.colorScheme.secondary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
+        CircularProgressIndicator(modifier = Modifier.width(AppSizes.XL_ICON))
         label?.let {
             Text(
+                it,
                 modifier = Modifier.padding(top = AppPadding.XL_PADDING),
-                text = it,
                 style = MaterialTheme.typography.titleLarge,
             )
         }

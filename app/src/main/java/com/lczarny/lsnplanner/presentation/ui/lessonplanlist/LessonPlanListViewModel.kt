@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,8 +34,8 @@ class LessonPlanListViewModel @Inject constructor(
     private fun loadLessonPlans() {
         viewModelScope.launch(ioDispatcher) {
             lessonPlanRepository.getAll().flowOn(ioDispatcher).collect { plans ->
-                _lessonPlans.emit(plans)
-                _screenState.emit(ListScreenState.List)
+                _lessonPlans.update { plans }
+                _screenState.update { ListScreenState.List }
             }
         }
     }

@@ -10,15 +10,21 @@ object StartRoute
 data class HomeRoute(val firstLaunch: Boolean = false)
 
 @Serializable
+object LessonPlanListRoute
+
+@Serializable
 data class LessonPlanRoute(val firstLaunch: Boolean = false, val lessonPlanId: Long? = null)
 
 @Serializable
-data class ToDoRoute(val lessonPlanId: Long, val classId: Long? = null, val toDoId: Long? = null)
+data class NoteRoute(val lessonPlanId: Long, val noteId: Long? = null)
 
 @Serializable
-data class PlanClassRoute(
+data class ClassListRoute(val lessonPlanId: Long)
+
+@Serializable
+data class ClassDetailsRoute(
     val lessonPlanId: Long,
     val lessonPlanType: LessonPlanType,
     val defaultWeekDay: Int = 1,
-    val planClassId: Long? = null
+    val classInfoId: Long? = null
 )

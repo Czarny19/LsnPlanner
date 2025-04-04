@@ -2,29 +2,32 @@ package com.lczarny.lsnplanner.data.local.repository
 
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
 import com.lczarny.lsnplanner.data.local.model.VarArgsId
-import com.lczarny.lsnplanner.data.local.model.mapToModel
+import com.lczarny.lsnplanner.data.local.model.toModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class LessonPlanRepository(private val lessonPlanDao: LessonPlanDao) {
+class LessonPlanRepository(private val dao: LessonPlanDao) {
 
-    fun checkIfDefaultPlanExists(): Flow<Boolean> = lessonPlanDao.checkIfDefaultPlanExists()
+    suspend fun checkIfActivePlanExists(): Boolean = dao.checkIfActivePlanExists()
 
-    fun lessonPlan(id: Long): Flow<LessonPlanModel> = lessonPlanDao.getLessonPlan(id).map { it.mapToModel() }
+    suspend fun getById(id: Long): LessonPlanModel = dao.getSingle(id).toModel()
 
-    fun defaultLessonPlanWithClasses(): Flow<LessonPlanWithClassesModel> =
-        lessonPlanDao.getDefaultLessonPlanWithClasses().map { it.mapToModel() }
+    fun getActive(): Flow<LessonPlanModel> = dao.getActive().map { it.toModel() }
 
-    fun lessonPlanWithClasses(id: Long): Flow<LessonPlanWithClassesModel> =
-        lessonPlanDao.getLessonPlanWithClasses(id).map { it.mapToModel() }
+    fun getAll(): Flow<List<LessonPlanModel>> = dao.getAll().map { items -> items.map { it.toModel() } }
 
-    suspend fun insert(lessonPlan: LessonPlanModel) {
-        lessonPlanDao.insertLessonPlan(lessonPlan)
+    suspend fun makeOtherPlansNotActive(lessonPlanId: Long) {
+        dao.makeOtherPlansNotActive(lessonPlanId)
     }
 
+    suspend fun update(lessonPlan: LessonPlanModel) {
+        dao.update(lessonPlan)
+    }
+
+    suspend fun insert(lessonPlan: LessonPlanModel): Long = dao.insert(lessonPlan)
+
     suspend fun delete(id: Long) {
-        lessonPlanDao.deleteLessonPlan(VarArgsId(id))
+        dao.delete(VarArgsId(id))
     }
 }

@@ -2,40 +2,24 @@ package com.lczarny.lsnplanner.data.local.model
 
 import androidx.annotation.Keep
 import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Relation
 import com.lczarny.lsnplanner.data.local.entity.LessonPlan
-import com.lczarny.lsnplanner.data.local.entity.PlanClass
 
 data class LessonPlanModel(
-    var id: Long? = null,
+    val id: Long? = null,
     @ColumnInfo(name = "name") var name: String = "",
-    @ColumnInfo(name = "type") var type: LessonPlanType,
-    @ColumnInfo(name = "create_date") var createDate: Long,
-    @ColumnInfo(name = "is_default") var isDefault: Boolean,
+    @ColumnInfo(name = "type") var type: LessonPlanType = LessonPlanType.University,
+    @ColumnInfo(name = "is_active") var isActive: Boolean = true,
+    @ColumnInfo(name = "address_enabled") var addressEnabled: Boolean = true,
+    @ColumnInfo(name = "create_date") val createDate: Long,
 )
 
-fun LessonPlan.mapToModel() = LessonPlanModel(
+fun LessonPlan.toModel() = LessonPlanModel(
     id = this.id,
     name = this.name,
     type = this.type,
-    createDate = this.createDate,
-    isDefault = this.isDefault,
-)
-
-data class LessonPlanWithClasses(
-    @Embedded val plan: LessonPlan,
-    @Relation(parentColumn = "id", entityColumn = "lesson_plan_id") val classes: List<PlanClass>,
-)
-
-data class LessonPlanWithClassesModel(
-    val plan: LessonPlanModel,
-    val classes: List<PlanClassModel>,
-)
-
-fun LessonPlanWithClasses.mapToModel() = LessonPlanWithClassesModel(
-    plan = plan.mapToModel(),
-    classes = classes.map { it.mapToModel() },
+    isActive = this.isActive,
+    addressEnabled = this.addressEnabled,
+    createDate = this.createDate
 )
 
 @Keep
@@ -46,4 +30,26 @@ enum class LessonPlanType(val raw: String) {
     companion object {
         fun from(find: String): LessonPlanType = LessonPlanType.entries.find { it.raw == find } ?: School
     }
+}
+
+fun LessonPlanType.planClassTypes(): List<ClassType> = when (this) {
+    LessonPlanType.School -> listOf(
+        ClassType.Class,
+        ClassType.Extracurricular,
+        ClassType.Other
+    )
+
+    LessonPlanType.University -> listOf(
+        ClassType.Lecture,
+        ClassType.Practical,
+        ClassType.Laboratory,
+        ClassType.Seminar,
+        ClassType.Workshop,
+        ClassType.Other
+    )
+}
+
+fun LessonPlanType.defaultClassType() = when (this) {
+    LessonPlanType.School -> ClassType.Class
+    LessonPlanType.University -> ClassType.Lecture
 }

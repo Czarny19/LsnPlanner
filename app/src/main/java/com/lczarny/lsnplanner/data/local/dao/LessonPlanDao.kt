@@ -6,9 +6,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClasses
 import com.lczarny.lsnplanner.data.local.model.VarArgsId
 import kotlinx.coroutines.flow.Flow
 
@@ -16,24 +16,31 @@ import kotlinx.coroutines.flow.Flow
 interface LessonPlanDao {
 
     @Transaction
-    @Query("SELECT EXISTS(SELECT 1 FROM lesson_plan WHERE is_default = 1 LIMIT 1)")
-    fun checkIfDefaultPlanExists(): Flow<Boolean>
+    @Query("SELECT EXISTS(SELECT 1 FROM lesson_plan WHERE is_active = 1 LIMIT 1)")
+    suspend fun checkIfActivePlanExists(): Boolean
 
     @Transaction
     @Query("SELECT  * FROM lesson_plan WHERE id = :id")
-    fun getLessonPlan(id: Long): Flow<LessonPlan>
+    suspend fun getSingle(id: Long): LessonPlan
 
     @Transaction
-    @Query("SELECT * FROM lesson_plan WHERE is_default = 1 LIMIT 1")
-    fun getDefaultLessonPlanWithClasses(): Flow<LessonPlanWithClasses>
+    @Query("SELECT * FROM lesson_plan WHERE is_active = 1 LIMIT 1")
+    fun getActive(): Flow<LessonPlan>
 
     @Transaction
-    @Query("SELECT  * FROM lesson_plan WHERE id = :id")
-    fun getLessonPlanWithClasses(id: Long): Flow<LessonPlanWithClasses>
+    @Query("SELECT * FROM lesson_plan")
+    fun getAll(): Flow<List<LessonPlan>>
+
+    @Transaction
+    @Query("UPDATE lesson_plan set is_active = 0 WHERE id != :lessonPlanId")
+    suspend fun makeOtherPlansNotActive(lessonPlanId: Long)
+
+    @Update(entity = LessonPlan::class)
+    suspend fun update(lessonPlan: LessonPlanModel)
 
     @Insert(entity = LessonPlan::class, onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertLessonPlan(lessonPlan: LessonPlanModel)
+    suspend fun insert(lessonPlan: LessonPlanModel): Long
 
     @Delete(entity = LessonPlan::class)
-    suspend fun deleteLessonPlan(vararg id: VarArgsId)
+    suspend fun delete(vararg id: VarArgsId)
 }

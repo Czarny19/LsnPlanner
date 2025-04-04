@@ -7,15 +7,14 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.lczarny.lsnplanner.data.local.entity.Setting
 import com.lczarny.lsnplanner.data.local.model.SettingModel
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SettingDao {
 
     @Transaction
     @Query("SELECT value FROM setting WHERE name = :settingName")
-    fun getSettingValue(settingName: String): Flow<String?>
+    fun getByName(settingName: String): String?
 
     @Insert(entity = Setting::class, onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSetting(setting: SettingModel)
+    suspend fun insert(setting: SettingModel)
 }

@@ -3,19 +3,31 @@ package com.lczarny.lsnplanner.utils
 import android.content.Context
 import android.text.format.DateFormat
 import com.lczarny.lsnplanner.R
-import kotlinx.datetime.Month
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toKotlinInstant
-import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.Month
+import java.time.ZoneId
 import java.time.format.TextStyle
-import java.util.Calendar
 
-fun Calendar.getDayOfWeekNum(): Int =
-    this.toInstant().toKotlinInstant().toLocalDateTime(TimeZone.currentSystemDefault()).dayOfWeek.value
+val currentTimestamp = { System.currentTimeMillis() }
 
-fun Calendar.getMonthName(context: Context): String =
-    Month.of(this.get(Calendar.MONTH) + 1).getDisplayName(TextStyle.FULL, context.resources.configuration.locales.get(0))
+val currentTimestampWithTime = { hour: Int, minute: Int ->
+    LocalDateTime.now().atZone(ZoneId.systemDefault()).withHour(hour).withMinute(minute).toInstant().toEpochMilli()
+}
+
+val dateTimeFromEpochMilis = { milis: Long -> Instant.ofEpochMilli(milis).atZone(ZoneId.systemDefault()).toLocalDateTime() }
+
+val dateFromEpochMilis = { milis: Long -> dateTimeFromEpochMilis(milis).toLocalDate() }
+
+fun LocalDateTime.getTimestamp(): Long = this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+fun LocalDate.getTimestamp(): Long = this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+fun LocalDateTime.getDayOfWeekNum(): Int = this.dayOfWeek.value
+
+fun Month.getMonthName(context: Context): String = this.getDisplayName(TextStyle.FULL, context.resources.configuration.locales.get(0))
 
 fun Int.toDayOfWeekString(context: Context): String = when (this) {
     1 -> context.resources.getString(R.string.monday)
@@ -28,33 +40,24 @@ fun Int.toDayOfWeekString(context: Context): String = when (this) {
     else -> context.resources.getString(R.string.monday)
 }
 
-fun Int.mapAppDayOfWeekToCalendarDayOfWeek() = when (this) {
-    1 -> 2
-    2 -> 3
-    3 -> 4
-    4 -> 5
-    5 -> 6
-    6 -> 0
-    7 -> 1
-    else -> 1
-}
+fun isDurationOverMidnight(duration: Int, startHour: Int, startMinute: Int): Boolean =
+    ((startHour.toFloat() + (startMinute / 60)) + (duration.toFloat() / 60)) > 24.0f
 
-fun Calendar.isSameDate(date: Calendar): Boolean =
-    get(Calendar.DAY_OF_MONTH) == date.get(Calendar.DAY_OF_MONTH) &&
-            get(Calendar.MONTH) == date.get(Calendar.MONTH) &&
-            get(Calendar.YEAR) == date.get(Calendar.YEAR)
+infix fun LocalDate.isSameDate(date: LocalDate): Boolean =
+    this.dayOfMonth == date.dayOfMonth && this.monthValue == date.monthValue && this.year == date.year
 
-fun Long.convertMillisToSystemDateTime(context: Context): String {
-    val date = ((DateFormat.getDateFormat(context)) as SimpleDateFormat).format(this)
-    val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(this)
-    return "$date $time"
-}
+fun LocalDate.isBetweenDates(start: LocalDate, end: LocalDate): Boolean =
+    this.isAfter(start.minusDays(1)) && this.isBefore(end.plusDays(1))
+
+fun Long.convertMillisToSystemDateTime(context: Context): String =
+    "${this.convertMillisToSystemDate(context)} ${this.convertMillisToSystemTime(context)}"
+
+fun Long.convertMillisToSystemTime(context: Context): String = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(this)
+
+fun Long.convertMillisToSystemDate(context: Context): String = ((DateFormat.getDateFormat(context)) as SimpleDateFormat).format(this)
 
 fun formatTime(context: Context, hour: Int?, minute: Int?): String {
-    val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(Calendar.getInstance().apply {
-        set(Calendar.HOUR_OF_DAY, hour ?: 0)
-        set(Calendar.MINUTE, minute ?: 0)
-    }.timeInMillis)
+    val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(currentTimestampWithTime(hour ?: 0, minute ?: 0))
 
     if (time.indexOf(":") == 1) {
         return "0${time}"
@@ -63,3 +66,5 @@ fun formatTime(context: Context, hour: Int?, minute: Int?): String {
     return time
 }
 
+fun formatDuration(context: Context, hour: Int?, minute: Int?, duration: Int = 0): String =
+    "${formatTime(context, hour, minute)} - ${formatTime(context, hour?.plus((duration / 60)), minute?.plus((duration % 60)))}"

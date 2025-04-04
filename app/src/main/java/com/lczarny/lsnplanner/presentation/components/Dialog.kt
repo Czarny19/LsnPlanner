@@ -1,17 +1,8 @@
 package com.lczarny.lsnplanner.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.shape.RoundedCornerShape
+import android.text.format.DateFormat
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -24,84 +15,79 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.presentation.constants.AppPadding
-import com.lczarny.lsnplanner.presentation.constants.AppSizes
+import com.lczarny.lsnplanner.utils.currentTimestampWithTime
+import com.lczarny.lsnplanner.utils.dateTimeFromEpochMilis
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.Calendar
-import java.util.Date
 
-@Composable
-fun SavingDialog(show: Boolean) {
-    if (show) {
-        Dialog(onDismissRequest = {}) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(140.dp),
-                shape = RoundedCornerShape(16.dp),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(AppPadding.MD_PADDING)
-                        .fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .width(AppSizes.LG_ICON)
-                            .padding(bottom = AppPadding.MD_PADDING)
-                            .wrapContentSize(Alignment.Center),
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                    Text(
-                        text = stringResource(R.string.saving),
-                        modifier = Modifier
-                            .padding(top = AppPadding.MD_PADDING)
-                            .wrapContentSize(Alignment.Center),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                }
-            }
-        }
-    }
-}
-
-data class ConfirmationDialogState(
+data class BasicDialogState(
     var title: String,
     var text: String,
     var onDismiss: () -> Unit,
     var onConfirm: () -> Unit
 )
 
-val closedConfirmationDialogState = ConfirmationDialogState(
-    title = "",
-    text = "",
-    onDismiss = {},
-    onConfirm = {}
+data class PredefinedDialogState(
+    var onDismiss: () -> Unit,
+    var onConfirm: () -> Unit
 )
 
 @Composable
-fun ConfirmationDialog(visible: Boolean, state: ConfirmationDialogState) {
-    if (visible) {
-        AlertDialog(
-            title = { Text(state.title) },
-            text = { Text(state.text) },
-            onDismissRequest = state.onDismiss,
-            confirmButton = { TextButton(onClick = state.onConfirm) { Text(stringResource(R.string.confirm)) } },
-            dismissButton = { TextButton(onClick = state.onDismiss) { Text(stringResource(R.string.cancel)) } }
-        )
+fun ConfirmationDialog(visible: Boolean, state: BasicDialogState) {
+    if (visible.not()) {
+        return
     }
+
+    AlertDialog(
+        title = { Text(state.title) },
+        text = { Text(state.text) },
+        onDismissRequest = state.onDismiss,
+        confirmButton = { TextButton(onClick = state.onConfirm) { Text(stringResource(R.string.confirm)) } },
+        dismissButton = { TextButton(onClick = state.onDismiss) { Text(stringResource(R.string.cancel)) } }
+    )
+}
+
+@Composable
+fun DiscardChangesDialog(visible: Boolean, state: PredefinedDialogState) {
+    if (visible.not()) {
+        return
+    }
+
+    AlertDialog(
+        title = { Text(stringResource(R.string.discard_changes), color = MaterialTheme.colorScheme.error) },
+        text = { Text(stringResource(R.string.discard_changes_question)) },
+        onDismissRequest = state.onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = state.onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) { Text(stringResource(R.string.discard)) }
+        },
+        dismissButton = { TextButton(onClick = state.onDismiss) { Text(stringResource(R.string.cancel)) } }
+    )
+}
+
+@Composable
+fun DeleteItemDialog(visible: Boolean, state: BasicDialogState) {
+    if (visible.not()) {
+        return
+    }
+
+    AlertDialog(
+        title = { Text(state.title, color = MaterialTheme.colorScheme.error) },
+        text = { Text(state.text) },
+        onDismissRequest = state.onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = state.onConfirm,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) { Text(stringResource(R.string.delete)) }
+        },
+        dismissButton = { TextButton(onClick = state.onDismiss) { Text(stringResource(R.string.cancel)) } }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,48 +105,56 @@ object FutureSelectableDates : SelectableDates {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+class MinDateSelectableDates(private val minDateMilis: Long) : SelectableDates {
+    private val now = LocalDate.now()
+
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+        return utcTimeMillis >= minDateMilis
+    }
+
+    override fun isSelectableYear(year: Int): Boolean {
+        return year >= now.year
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppDatePickerDialog(initialValue: Long?, futureDatesOnly: Boolean = false, onDismiss: () -> Unit, onConfirm: (Long?) -> Unit) {
+fun AppDatePickerDialog(initialValue: Long?, selectableDates: SelectableDates? = null, onDismiss: () -> Unit, onConfirm: (Long?) -> Unit) {
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialValue,
-        selectableDates = if (futureDatesOnly) FutureSelectableDates else DatePickerDefaults.AllDates
+        selectableDates = selectableDates ?: DatePickerDefaults.AllDates
     )
 
     DatePickerDialog(
         onDismissRequest = onDismiss,
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
         confirmButton = {
-            TextButton(onClick = { onConfirm.invoke(datePickerState.selectedDateMillis) }) { Text(stringResource(R.string.ok)) }
-        },
-    ) {
-        DatePicker(state = datePickerState)
-    }
+            TextButton(
+                onClick = { onConfirm.invoke(datePickerState.selectedDateMillis) },
+                enabled = datePickerState.selectedDateMillis != null
+            ) { Text(stringResource(R.string.ok)) }
+        }
+    ) { DatePicker(state = datePickerState) }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTimePickerDialog(initialValue: Long?, onDismiss: () -> Unit, onConfirm: (Long) -> Unit) {
-    val time = Calendar.getInstance()
-    initialValue?.let {
-        time.setTime(Date(it))
-    }
+    val time = dateTimeFromEpochMilis(initialValue ?: 0)
 
     val timePickerState = rememberTimePickerState(
-        initialHour = time.get(Calendar.HOUR_OF_DAY),
-        initialMinute = time.get(Calendar.MINUTE),
-        is24Hour = true,
+        initialHour = time.hour,
+        initialMinute = time.minute,
+        is24Hour = DateFormat.is24HourFormat(LocalContext.current),
     )
 
     AlertDialog(
         onDismissRequest = onDismiss,
         dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(R.string.cancel)) } },
         confirmButton = {
-            TextButton(onClick = {
-                onConfirm(time.apply {
-                    this.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
-                    this.set(Calendar.MINUTE, timePickerState.minute)
-                }.timeInMillis)
-            }) { Text(stringResource(R.string.ok)) }
+            TextButton(onClick = { onConfirm(currentTimestampWithTime(timePickerState.hour, timePickerState.minute)) }) {
+                Text(stringResource(R.string.ok))
+            }
         },
         text = { TimePicker(state = timePickerState) }
     )

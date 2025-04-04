@@ -6,11 +6,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.lczarny.lsnplanner.presentation.ui.classdetails.ClassDetailsScreen
+import com.lczarny.lsnplanner.presentation.ui.classlist.ClassListScreen
 import com.lczarny.lsnplanner.presentation.ui.home.HomeScreen
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanScreen
-import com.lczarny.lsnplanner.presentation.ui.planclass.PlanClassScreen
+import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListScreen
+import com.lczarny.lsnplanner.presentation.ui.note.NoteScreen
 import com.lczarny.lsnplanner.presentation.ui.start.StartScreen
-import com.lczarny.lsnplanner.presentation.ui.todo.ToDoScreen
 
 @Composable
 fun AppNavHost(
@@ -23,32 +25,43 @@ fun AppNavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable<StartRoute> { StartScreen(navController) }
+        composable<StartRoute> {
+            StartScreen(navController)
+        }
 
         composable<HomeRoute> { backStackEntry ->
-            val home: HomeRoute = backStackEntry.toRoute()
-            HomeScreen(navController, home.firstLaunch)
+            val homeRoute: HomeRoute = backStackEntry.toRoute()
+            HomeScreen(navController, homeRoute.firstLaunch)
+        }
+
+        composable<LessonPlanListRoute> {
+            LessonPlanListScreen(navController)
         }
 
         composable<LessonPlanRoute> { backStackEntry ->
-            val lessonPlan: LessonPlanRoute = backStackEntry.toRoute()
-            LessonPlanScreen(navController, lessonPlan.firstLaunch, lessonPlan.lessonPlanId)
+            val lessonPlanRoute: LessonPlanRoute = backStackEntry.toRoute()
+            LessonPlanScreen(navController, lessonPlanRoute.firstLaunch, lessonPlanRoute.lessonPlanId)
         }
 
-        composable<PlanClassRoute> { backStackEntry ->
-            val planClass: PlanClassRoute = backStackEntry.toRoute()
-            PlanClassScreen(
+        composable<ClassDetailsRoute> { backStackEntry ->
+            val classRoute: ClassDetailsRoute = backStackEntry.toRoute()
+            ClassDetailsScreen(
                 navController,
-                planClass.lessonPlanId,
-                planClass.lessonPlanType,
-                planClass.defaultWeekDay,
-                planClass.planClassId
+                classRoute.lessonPlanId,
+                classRoute.lessonPlanType,
+                classRoute.defaultWeekDay,
+                classRoute.classInfoId
             )
         }
 
-        composable<ToDoRoute> { backStackEntry ->
-            val toDo: ToDoRoute = backStackEntry.toRoute()
-            ToDoScreen(navController, lessonPlanId = toDo.lessonPlanId, classId = toDo.classId, toDoId = toDo.toDoId)
+        composable<ClassListRoute> { backStackEntry ->
+            val classListRoute: ClassListRoute = backStackEntry.toRoute()
+            ClassListScreen(navController, classListRoute.lessonPlanId)
+        }
+
+        composable<NoteRoute> { backStackEntry ->
+            val noteRoute: NoteRoute = backStackEntry.toRoute()
+            NoteScreen(navController, noteRoute.lessonPlanId, noteRoute.noteId)
         }
     }
 }
