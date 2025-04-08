@@ -1,6 +1,5 @@
 package com.lczarny.lsnplanner.presentation.navigation
 
-import com.lczarny.lsnplanner.data.local.model.LessonPlanType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -24,7 +23,6 @@ data class ClassListRoute(val lessonPlanId: Long)
 @Serializable
 data class ClassDetailsRoute(
     val lessonPlanId: Long,
-    val lessonPlanType: LessonPlanType,
     val defaultWeekDay: Int = 1,
     val classInfoId: Long? = null
 )

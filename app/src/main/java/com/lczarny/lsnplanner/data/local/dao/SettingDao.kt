@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.lczarny.lsnplanner.data.local.entity.Setting
-import com.lczarny.lsnplanner.data.local.model.SettingModel
+import com.lczarny.lsnplanner.data.common.model.SettingModel
 
 @Dao
 interface SettingDao {

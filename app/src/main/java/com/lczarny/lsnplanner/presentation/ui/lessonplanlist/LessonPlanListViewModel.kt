@@ -2,8 +2,8 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplanlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.ListScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel

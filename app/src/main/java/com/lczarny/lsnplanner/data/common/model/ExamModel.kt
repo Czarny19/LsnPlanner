@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.data.local.model
+package com.lczarny.lsnplanner.data.common.model
 
 import androidx.room.ColumnInfo
 import com.lczarny.lsnplanner.data.local.entity.Exam

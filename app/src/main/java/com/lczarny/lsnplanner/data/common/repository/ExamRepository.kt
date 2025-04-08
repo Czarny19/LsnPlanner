@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.data.local.repository
+package com.lczarny.lsnplanner.data.common.repository
 
 import com.lczarny.lsnplanner.data.local.dao.ExamDao
 

@@ -1,60 +1,139 @@
 package com.lczarny.lsnplanner.ui.start
 
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.navigation.NavController
-import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.navigation.compose.ComposeNavigator
+import androidx.navigation.testing.TestNavHostController
+import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.SettingRepository
+import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
+import com.lczarny.lsnplanner.presentation.model.StartScreenState
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import com.lczarny.lsnplanner.presentation.ui.start.StartScreen
 import com.lczarny.lsnplanner.presentation.ui.start.StartViewModel
-import kotlinx.coroutines.flow.flow
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import io.mockk.MockKAnnotations
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.impl.annotations.MockK
+import io.mockk.just
+import io.mockk.spyk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
+import javax.inject.Inject
 
+@HiltAndroidTest
 class StartScreenTest {
 
-    @get:Rule
+    @get:Rule(order = 1)
+    val hiltRule = HiltAndroidRule(this)
+
+    @get:Rule(order = 2)
     val composeTestRule = createComposeRule()
 
-    @Mock
-    val mockNavController: NavController = mock(NavController::class.java)
+    private lateinit var navController: TestNavHostController
 
-    @Mock
-    val mockLessonPlanRepository: LessonPlanRepository = mock(LessonPlanRepository::class.java)
+    private lateinit var lessonPlanRepository: LessonPlanRepository
 
-    @Test
-    fun testLoading() {
-        val viewModel = StartViewModel(mockLessonPlanRepository)
+    @MockK
+    private lateinit var settingsRepository: SettingRepository
 
-        composeTestRule.setContent {
-            AppTheme {
-                StartScreen(mockNavController, viewModel)
-            }
-        }
+    @Inject
+    lateinit var lessonPlanDao: LessonPlanDao
 
-        composeTestRule.onNodeWithText("Please wait…").assertIsDisplayed()
+    @Before
+    fun init() {
+        hiltRule.inject()
+        MockKAnnotations.init(this)
+        lessonPlanRepository = spyk<LessonPlanRepository>(LessonPlanRepository(lessonPlanDao))
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun testFirstLanch() {
-        fun checkIfDefaultFlow() = flow {
-            emit(false)
-        }
+    fun testNormalLaunch() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, settingsRepository)
 
-        Mockito.`when`(mockLessonPlanRepository.checkIfDefaultPlanExists()).thenReturn(checkIfDefaultFlow())
+        coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns true
 
-        val viewModel = StartViewModel(mockLessonPlanRepository)
+        var context: Context? = null
 
         composeTestRule.setContent {
+            context = LocalContext.current
+
+            navController = TestNavHostController(LocalContext.current).apply {
+                navigatorProvider.addNavigator(ComposeNavigator())
+            }
+
             AppTheme {
-                StartScreen(mockNavController, viewModel)
+                StartScreen(navController, viewModel)
             }
         }
 
-        composeTestRule.onNodeWithText("Create your first plan").assertIsDisplayed()
+        advanceUntilIdle()
+
+        composeTestRule.waitUntil { viewModel.screenState.value == StartScreenState.StartApp }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testFirstLanch() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, settingsRepository)
+
+        coEvery { settingsRepository.setUserName("UserName") } just Runs
+        coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns false
+
+        var context: Context? = null
+
+        launch {
+            composeTestRule.setContent {
+                context = LocalContext.current
+
+                navController = TestNavHostController(LocalContext.current).apply {
+                    navigatorProvider.addNavigator(ComposeNavigator())
+                }
+
+                AppTheme {
+                    StartScreen(navController, viewModel)
+                }
+            }
+        }
+
+        advanceUntilIdle()
+
+        val welcomeMsg = composeTestRule.onNodeWithText(context!!.getString(R.string.first_launch_welcome))
+        val userNameInput = composeTestRule.onNodeWithText(context.getString(R.string.user_name))
+        val startButton = composeTestRule.onNodeWithText(context.getString(R.string.first_launch_create_plan))
+
+        welcomeMsg.assertIsDisplayed()
+        userNameInput.assertIsDisplayed()
+        startButton.assertIsNotEnabled()
+
+        userNameInput.performTextInput("UserName")
+
+        composeTestRule.waitUntil { viewModel.startEnabled.value == true }
+
+        startButton.assertIsEnabled()
+        startButton.performClick()
+
+        advanceUntilIdle()
+
+        composeTestRule.waitUntil { viewModel.screenState.value == StartScreenState.UserNameSaved }
     }
 }

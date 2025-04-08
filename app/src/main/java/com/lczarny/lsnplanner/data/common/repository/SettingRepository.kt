@@ -1,8 +1,8 @@
-package com.lczarny.lsnplanner.data.local.repository
+package com.lczarny.lsnplanner.data.common.repository
 
 import com.lczarny.lsnplanner.data.local.dao.SettingDao
-import com.lczarny.lsnplanner.data.local.model.AppSetting
-import com.lczarny.lsnplanner.data.local.model.SettingModel
+import com.lczarny.lsnplanner.data.common.model.AppSetting
+import com.lczarny.lsnplanner.data.common.model.SettingModel
 
 class SettingRepository(private val dao: SettingDao) {
 

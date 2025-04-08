@@ -15,8 +15,10 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.utils.currentTimestampWithTime
 import com.lczarny.lsnplanner.utils.dateTimeFromEpochMilis
@@ -51,10 +53,18 @@ fun ConfirmationDialog(visible: Boolean, state: BasicDialogState) {
 }
 
 @Composable
-fun DiscardChangesDialog(visible: Boolean, state: PredefinedDialogState) {
-    if (visible.not()) {
+fun DiscardChangesDialog(visible: MutableState<Boolean>, navController: NavController) {
+    if (visible.value.not()) {
         return
     }
+
+    val state = PredefinedDialogState(
+        onConfirm = {
+            visible.value = false
+            navController.popBackStack()
+        },
+        onDismiss = { visible.value = false }
+    )
 
     AlertDialog(
         title = { Text(stringResource(R.string.discard_changes), color = MaterialTheme.colorScheme.error) },

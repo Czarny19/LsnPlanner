@@ -21,10 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
+import com.lczarny.lsnplanner.presentation.components.AddIcon
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FabListBottomSpacer
-import com.lczarny.lsnplanner.presentation.components.PlanAddIcon
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListViewModel
@@ -61,15 +60,14 @@ fun LessonPlanList(navController: NavController, viewModel: LessonPlanListViewMo
     }
 
     Scaffold(
-        topBar = {
-            AppNavBar(
-                title = stringResource(R.string.route_lesson_plan_list),
-                navIcon = { AppBarBackIconButton(onClick = { navController.popBackStack() }) },
-            )
-        },
+        topBar = { AppNavBar(title = stringResource(R.string.route_lesson_plan_list), onNavIconClick = { navController.popBackStack() }) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
         floatingActionButtonPosition = FabPosition.End,
-        floatingActionButton = { FloatingActionButton(onClick = { navController.navigate(LessonPlanRoute()) }) { PlanAddIcon() } },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate(LessonPlanRoute()) }) {
+                AddIcon(contentDescription = stringResource(R.string.plan_add))
+            }
+        },
     ) { padding ->
         LazyColumn(
             modifier = Modifier

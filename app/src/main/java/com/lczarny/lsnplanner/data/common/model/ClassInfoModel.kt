@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.data.local.model
+package com.lczarny.lsnplanner.data.common.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Embedded
@@ -14,7 +14,7 @@ data class ClassInfoModel(
     @ColumnInfo(name = "name") var name: String = "",
     @ColumnInfo(name = "teacher") var teacher: String = "",
     @ColumnInfo(name = "type") var type: ClassType,
-    @ColumnInfo(name = "color") var color: Long = 0L,
+    @ColumnInfo(name = "color") var color: Long = 0xFF394E85,
     @ColumnInfo(name = "address") var address: String? = null,
     @ColumnInfo(name = "note") var note: String? = null,
 )

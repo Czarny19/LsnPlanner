@@ -1,10 +1,10 @@
 package com.lczarny.lsnplanner.data.local.coverters
 
 import androidx.room.TypeConverter
-import com.lczarny.lsnplanner.data.local.model.ClassScheduleType
-import com.lczarny.lsnplanner.data.local.model.ClassType
-import com.lczarny.lsnplanner.data.local.model.Importance
-import com.lczarny.lsnplanner.data.local.model.LessonPlanType
+import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
+import com.lczarny.lsnplanner.data.common.model.ClassType
+import com.lczarny.lsnplanner.data.common.model.Importance
+import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 
 class EnumConverter {
 

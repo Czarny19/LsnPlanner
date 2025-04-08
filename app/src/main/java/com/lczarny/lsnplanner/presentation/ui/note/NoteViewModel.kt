@@ -2,11 +2,11 @@ package com.lczarny.lsnplanner.presentation.ui.note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.model.AppSetting
-import com.lczarny.lsnplanner.data.local.model.Importance
-import com.lczarny.lsnplanner.data.local.model.NoteModel
-import com.lczarny.lsnplanner.data.local.repository.NoteRepository
-import com.lczarny.lsnplanner.data.local.repository.SettingRepository
+import com.lczarny.lsnplanner.data.common.model.AppSetting
+import com.lczarny.lsnplanner.data.common.model.Importance
+import com.lczarny.lsnplanner.data.common.model.NoteModel
+import com.lczarny.lsnplanner.data.common.repository.NoteRepository
+import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -51,19 +51,19 @@ class NoteViewModel @Inject constructor(
     fun updateTitle(value: String) {
         _note.update { _note.value?.copy(title = value) }
         checkSaveEnabled()
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun updateContent(value: String) {
         _note.update { _note.value?.copy(content = value) }
         checkSaveEnabled()
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun updateImportance(value: Importance) {
         _note.update { _note.value?.copy(importance = value) }
         checkSaveEnabled()
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun intializeNote(lessonPlanId: Long, noteId: Long?) {
@@ -124,12 +124,12 @@ class NoteViewModel @Inject constructor(
     }
 
     private fun checkSaveEnabled() {
-        val titleNotEmpty = _note.value?.title?.isNotEmpty() ?: false
-        val contentNotEmpty = _note.value?.content?.isNotEmpty() ?: false
+        val titleNotEmpty = _note.value?.title?.isNotEmpty() == true
+        val contentNotEmpty = _note.value?.content?.isNotEmpty() == true
         _saveEnabled.update { titleNotEmpty && contentNotEmpty }
     }
 
-    private fun setDataChanged() {
-        _dataChanged.update { true }
+    private fun checkDataChanged() {
+        _dataChanged.update { _initialData != note.value }
     }
 }

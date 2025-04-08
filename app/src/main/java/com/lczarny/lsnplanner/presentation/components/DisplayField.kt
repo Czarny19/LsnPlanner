@@ -12,24 +12,25 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 
 @Composable
-fun DisplayField(modifier: Modifier = Modifier, label: String? = null, text: String, icon: @Composable () -> Unit) {
+fun DisplayField(modifier: Modifier = Modifier, label: String? = null, text: String, icon: @Composable (() -> Unit)? = null) {
     Card(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
-                .padding(AppPadding.SCREEN_PADDING)
+                .padding(AppPadding.SM_PADDING)
                 .padding(start = AppPadding.SM_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            icon.invoke()
+            icon?.invoke()
 
             Column(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(start = AppPadding.LG_PADDING),
+                    .padding(start = if (icon != null) AppPadding.LG_PADDING else 0.dp),
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.Start
             ) {

@@ -18,7 +18,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.lczarny.lsnplanner.AppTestRunner"
     }
 
     buildTypes {
@@ -40,17 +40,31 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.15"
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            merges += "META-INF/LICENSE.md"
+            merges += "META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 dependencies {
+    ksp(libs.hilt.compiler)
+    ksp(libs.room.compiler)
+
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.datetime)
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.android.material)
 
-    implementation(libs.androidx.compose.runtime)
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.animation.graphics)
@@ -62,29 +76,33 @@ dependencies {
     implementation(libs.bundles.compose)
 
     implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt)
     implementation(libs.androidx.hilt.compose)
 
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.datetime)
-    implementation(libs.kotlinx.serialization.json)
-
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
 
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
 
+    kspTest(libs.hilt.compiler)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockito.inline)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.hilt.android.testing)
 
-    androidTestImplementation(libs.androidx.compose.test.junit4)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.testng)
-    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.androidx.navigation.testing)
+    androidTestImplementation(libs.androidx.compose.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockk)
+
     debugImplementation(libs.androidx.compose.test.manifest)
 }

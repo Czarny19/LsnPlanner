@@ -48,7 +48,6 @@ fun AppNavHost(
             ClassDetailsScreen(
                 navController,
                 classRoute.lessonPlanId,
-                classRoute.lessonPlanType,
                 classRoute.defaultWeekDay,
                 classRoute.classInfoId
             )

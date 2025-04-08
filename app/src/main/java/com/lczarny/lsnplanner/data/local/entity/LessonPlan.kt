@@ -3,7 +3,7 @@ package com.lczarny.lsnplanner.data.local.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.lczarny.lsnplanner.data.local.model.LessonPlanType
+import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import kotlinx.serialization.Required
 
 @Entity(tableName = "lesson_plan")

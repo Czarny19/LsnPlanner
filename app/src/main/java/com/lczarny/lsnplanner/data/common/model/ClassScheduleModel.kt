@@ -1,4 +1,4 @@
-package com.lczarny.lsnplanner.data.local.model
+package com.lczarny.lsnplanner.data.common.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Ignore
@@ -11,6 +11,7 @@ data class ClassScheduleModel(
     @ColumnInfo(name = "class_info_id") var classInfoId: Long,
     @ColumnInfo(name = "type") var type: ClassScheduleType = ClassScheduleType.Weekly,
     @ColumnInfo(name = "duration_minutes") var durationMinutes: Int = 60,
+    @ColumnInfo(name = "address") var address: String? = null,
     @ColumnInfo(name = "classroom") var classroom: String = "",
     @ColumnInfo(name = "start_hour") var startHour: Int = 8,
     @ColumnInfo(name = "start_minute") var startMinute: Int = 0,
@@ -24,6 +25,7 @@ fun ClassSchedule.toModel() = ClassScheduleModel(
     classInfoId = this.classInfoId,
     type = this.type,
     durationMinutes = this.durationMinutes,
+    address = this.address,
     classroom = this.classroom,
     startHour = this.startHour,
     startMinute = this.startMinute,

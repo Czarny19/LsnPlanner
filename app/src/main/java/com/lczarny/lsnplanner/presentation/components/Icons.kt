@@ -6,8 +6,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Class
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
@@ -15,13 +17,14 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.WavingHand
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,10 +48,16 @@ fun SaveIcon() = Icon(Icons.Filled.Save, contentDescription = stringResource(R.s
 fun BackIcon() = Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.go_back))
 
 @Composable
-fun OptionsMenuIcon() = Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.options))
+fun OptionsMenuIcon(tint: Color = LocalContentColor.current) =
+    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.options), tint = tint)
 
 @Composable
-fun DropDownIcon() = Icon(Icons.Outlined.ArrowDropDown, contentDescription = stringResource(R.string.drop_down_arrow))
+fun DropDownIcon(modifier: Modifier = Modifier, color: Color? = null) = Icon(
+    Icons.Outlined.ArrowDropDown,
+    modifier = modifier,
+    contentDescription = stringResource(R.string.drop_down_arrow),
+    tint = color ?: LocalContentColor.current
+)
 
 @Composable
 fun InfoIcon(modifier: Modifier = Modifier) = Icon(
@@ -58,7 +67,18 @@ fun InfoIcon(modifier: Modifier = Modifier) = Icon(
 )
 
 @Composable
-fun SelecteDateIcon() = Icon(Icons.Outlined.DateRange, stringResource(R.string.select_date))
+fun ErrorIcon(modifier: Modifier = Modifier, color: Color? = null) = Icon(
+    Icons.Filled.ErrorOutline,
+    modifier = modifier,
+    contentDescription = stringResource(R.string.error),
+    tint = color ?: MaterialTheme.colorScheme.error
+)
+
+@Composable
+fun SelectDateIcon() = Icon(Icons.Outlined.CalendarToday, stringResource(R.string.select_date))
+
+@Composable
+fun SelectTimeIcon() = Icon(Icons.Outlined.Schedule, stringResource(R.string.select_time))
 
 @Composable
 fun InputDropDownIcon(modifier: Modifier = Modifier, expanded: Boolean) = Icon(
@@ -66,6 +86,15 @@ fun InputDropDownIcon(modifier: Modifier = Modifier, expanded: Boolean) = Icon(
     contentDescription = stringResource(R.string.show_options),
     modifier = modifier
 )
+
+@Composable
+fun SetActiveIcon(contentDescription: String) = Icon(Icons.Outlined.CheckCircle, contentDescription = contentDescription)
+
+@Composable
+fun DeleteIcon(contentDescription: String = stringResource(R.string.delete)) = Icon(Icons.Outlined.Delete, contentDescription = contentDescription)
+
+@Composable
+fun AddIcon(contentDescription: String = stringResource(R.string.add_new)) = Icon(Icons.Filled.Add, contentDescription = contentDescription)
 
 @Composable
 fun AddFirstItemIcon() = Icon(
@@ -81,7 +110,7 @@ fun PlanTypeIcon(modifier: Modifier = Modifier) =
 
 @Composable
 fun PlanCreateDateIcon(modifier: Modifier = Modifier) =
-    Icon(Icons.Filled.EditCalendar, modifier = modifier, contentDescription = stringResource(R.string.plan_type))
+    Icon(Icons.Filled.EditCalendar, modifier = modifier, contentDescription = stringResource(R.string.plan_create_date))
 
 
 @Composable
@@ -99,13 +128,4 @@ fun PlanSelectedIcon(active: Boolean) = Icon(
 )
 
 @Composable
-fun PlanSetActiveIcon() = Icon(Icons.Outlined.CheckCircle, contentDescription = stringResource(R.string.plan_make_active))
-
-@Composable
-fun PlanEditIcon() = Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.plan_edit))
-
-@Composable
-fun PlanDeleteIcon() = Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.plan_delete))
-
-@Composable
-fun PlanAddIcon() = Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.plan_add))
+fun ClassIcon(contentDescription: String) = Icon(Icons.Filled.Class, contentDescription = contentDescription)

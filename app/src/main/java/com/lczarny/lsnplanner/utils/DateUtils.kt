@@ -66,5 +66,14 @@ fun formatTime(context: Context, hour: Int?, minute: Int?): String {
     return time
 }
 
-fun formatDuration(context: Context, hour: Int?, minute: Int?, duration: Int = 0): String =
-    "${formatTime(context, hour, minute)} - ${formatTime(context, hour?.plus((duration / 60)), minute?.plus((duration % 60)))}"
+fun formatDuration(context: Context, hour: Int?, minute: Int?, duration: Int = 0): String {
+    var endHour = hour?.plus((duration / 60))
+    var endMinute = minute?.plus((duration % 60))
+
+    if (endMinute != null && endMinute >= 60) {
+        endMinute = endMinute % 60
+        endHour?.plus(1)
+    }
+
+    return "${formatTime(context, hour, minute)} - ${formatTime(context, endHour, endMinute)}"
+}

@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.Importance
+import com.lczarny.lsnplanner.data.common.model.Importance
 
 fun Importance.getLabel(context: Context) = when (this) {
     Importance.Normal -> context.getString(R.string.importance_normal)

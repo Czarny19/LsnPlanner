@@ -8,9 +8,9 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.lczarny.lsnplanner.data.local.entity.ClassInfo
-import com.lczarny.lsnplanner.data.local.model.ClassInfoModel
-import com.lczarny.lsnplanner.data.local.model.FullClassData
-import com.lczarny.lsnplanner.data.local.model.VarArgsId
+import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
+import com.lczarny.lsnplanner.data.common.model.FullClassData
+import com.lczarny.lsnplanner.data.common.model.VarArgsId
 import kotlinx.coroutines.flow.Flow
 
 @Dao

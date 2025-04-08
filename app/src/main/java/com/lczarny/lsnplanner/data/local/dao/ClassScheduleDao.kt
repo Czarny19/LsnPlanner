@@ -7,8 +7,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.lczarny.lsnplanner.data.local.entity.ClassSchedule
-import com.lczarny.lsnplanner.data.local.model.ClassScheduleModel
-import com.lczarny.lsnplanner.data.local.model.VarArgsId
+import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
+import com.lczarny.lsnplanner.data.common.model.VarArgsId
 import kotlinx.coroutines.flow.Flow
 
 @Dao

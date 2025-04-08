@@ -11,12 +11,12 @@ import androidx.compose.runtime.Composable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavBar(title: String, navIcon: @Composable () -> Unit = {}, actions: @Composable RowScope.() -> Unit = {}) {
+fun AppNavBar(title: String, onNavIconClick: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
     TopAppBar(
         title = { Text(title) },
         actions = actions,
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
-        navigationIcon = navIcon,
+        navigationIcon = { onNavIconClick?.let { IconButton(onClick = it) { BackIcon() } } },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,
@@ -24,9 +24,4 @@ fun AppNavBar(title: String, navIcon: @Composable () -> Unit = {}, actions: @Com
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )
-}
-
-@Composable
-fun AppBarBackIconButton(onClick: () -> Unit) {
-    IconButton(onClick = onClick) { BackIcon() }
 }

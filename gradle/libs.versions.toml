@@ -2,40 +2,30 @@
 kotlin = "2.0.21"
 kotlinSerialization = "1.9.24"
 androidGradlePlugin = "8.9.1"
-
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.8.0"
-
 coreKtx = "1.15.0"
 appcompat = "1.7.0"
-
 activityCompose = "1.10.1"
 composeBom = "2025.03.01"
 material3 = "1.3.1"
-googleFonts = "1.7.8"
-
-lifecycle = "2.8.7"
-
-navigation = "2.8.9"
-
 material = "1.12.0"
-
+googleFonts = "1.7.8"
+lifecycle = "2.8.7"
+navigation = "2.8.9"
 ksp = "2.0.21-1.0.28"
 hilt = "2.55"
 androidxHilt = "1.2.0"
-
 room = "2.6.1"
-
-okhttp = "5.0.0-alpha.14"
 retrofit = "2.11.0"
-
-
+okhttp = "5.0.0-alpha.14"
 junit = "4.13.2"
 junitAndroid = "1.2.1"
-testng = "7.10.2"
+testRunner = "1.6.2"
 mockito = "5.15.2"
 mockitoInline = "5.2.0"
+mockk = "1.13.17"
 
 [libraries]
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -65,6 +55,7 @@ android-material = { group = "com.google.android.material", name = "material", v
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+
 androidx-hilt = { group = "androidx.hilt", name = "hilt-navigation", version.ref = "androidxHilt" }
 androidx-hilt-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
 
@@ -72,17 +63,21 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitAndroid" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "testRunner" }
 androidx-compose-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-compose-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-testng = { group = "org.testng", name = "testng", version.ref = "testng" }
 mockito-android = { group = "org.mockito", name = "mockito-android", version.ref = "mockito" }
 mockito-inline = { group = "org.mockito", name = "mockito-inline", version.ref = "mockitoInline" }
+mockk = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -95,7 +90,6 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 [bundles]
 compose = [
     "androidx-lifecycle-runtimeCompose",
-    "android-material",
     "androidx-compose-material-iconsExtended",
     "androidx-compose-material3",
     "androidx-compose-ui",

@@ -1,5 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.lessonplanlist.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,15 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
+import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
+import com.lczarny.lsnplanner.presentation.components.DeleteIcon
 import com.lczarny.lsnplanner.presentation.components.DeleteItemDialog
 import com.lczarny.lsnplanner.presentation.components.ListItemTitle
 import com.lczarny.lsnplanner.presentation.components.OptionsMenuIcon
-import com.lczarny.lsnplanner.presentation.components.PlanDeleteIcon
-import com.lczarny.lsnplanner.presentation.components.PlanEditIcon
 import com.lczarny.lsnplanner.presentation.components.PlanSelectedIcon
-import com.lczarny.lsnplanner.presentation.components.PlanSetActiveIcon
+import com.lczarny.lsnplanner.presentation.components.SetActiveIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListViewModel
@@ -47,6 +47,7 @@ fun LessonPlanListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { navController.navigate(LessonPlanRoute(lessonPlanId = lessonPlan.id!!)) }
             .padding(vertical = AppPadding.XSM_PADDING, horizontal = AppPadding.MD_PADDING),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
@@ -54,7 +55,7 @@ fun LessonPlanListItem(
         PlanSelectedIcon(lessonPlan.isActive)
         ListItemTitle(modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING), text = lessonPlan.name)
         Spacer(Modifier.weight(1.0f))
-        LessonPlanListItemMenu(viewModel, navController, snackbarChannel, lessonPlan, selectedPlanName)
+        LessonPlanListItemMenu(viewModel, snackbarChannel, lessonPlan, selectedPlanName)
     }
 
     HorizontalDivider()
@@ -63,11 +64,14 @@ fun LessonPlanListItem(
 @Composable
 private fun LessonPlanListItemMenu(
     viewModel: LessonPlanListViewModel,
-    navController: NavController,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,
     lessonPlan: LessonPlanModel,
     selectedPlanName: MutableState<String>,
 ) {
+    if (lessonPlan.isActive) {
+        return IconButton(enabled = false, onClick = {}) {}
+    }
+
     var dropDownExpanded by remember { mutableStateOf(false) }
     var deleteConfirmationDialogOpen by remember { mutableStateOf(false) }
 
@@ -91,44 +95,29 @@ private fun LessonPlanListItemMenu(
         OptionsMenuIcon()
 
         DropdownMenu(expanded = dropDownExpanded, onDismissRequest = { dropDownExpanded = false }) {
-            if (lessonPlan.isActive.not()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.plan_make_active)) },
-                    leadingIcon = { PlanSetActiveIcon() },
-                    onClick = {
-                        dropDownExpanded = false
-
-                        viewModel.makePlanActive(lessonPlan) {
-                            selectedPlanName.value = lessonPlan.name
-                            snackbarChannel.trySend(ListPickerScreenSnackbar.SetActive)
-                        }
-                    }
-                )
-
-                HorizontalDivider()
-            }
-
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.plan_edit)) },
-                leadingIcon = { PlanEditIcon() },
+                text = { Text(stringResource(R.string.plan_make_active)) },
+                leadingIcon = { SetActiveIcon(contentDescription = stringResource(R.string.plan_make_active)) },
                 onClick = {
                     dropDownExpanded = false
-                    navController.navigate(LessonPlanRoute(lessonPlanId = lessonPlan.id!!))
+
+                    viewModel.makePlanActive(lessonPlan) {
+                        selectedPlanName.value = lessonPlan.name
+                        snackbarChannel.trySend(ListPickerScreenSnackbar.SetActive)
+                    }
                 }
             )
 
-            if (lessonPlan.isActive.not()) {
-                HorizontalDivider()
+            HorizontalDivider()
 
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.plan_delete)) },
-                    leadingIcon = { PlanDeleteIcon() },
-                    onClick = {
-                        dropDownExpanded = false
-                        deleteConfirmationDialogOpen = true
-                    }
-                )
-            }
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.plan_delete)) },
+                leadingIcon = { DeleteIcon(contentDescription = stringResource(R.string.plan_delete)) },
+                onClick = {
+                    dropDownExpanded = false
+                    deleteConfirmationDialogOpen = true
+                }
+            )
         }
     }
 }

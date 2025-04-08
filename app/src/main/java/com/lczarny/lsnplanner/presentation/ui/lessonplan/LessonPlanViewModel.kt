@@ -2,9 +2,9 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.local.model.LessonPlanType
-import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.data.common.model.LessonPlanType
+import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -37,22 +37,22 @@ class LessonPlanViewModel @Inject constructor(
     fun updatePlanName(value: String) {
         _lessonPlan.update { _lessonPlan.value?.copy(name = value) }
         _saveEnabled.update { value.isNotEmpty() }
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun updatePlanType(value: LessonPlanType) {
         _lessonPlan.update { _lessonPlan.value?.copy(type = value) }
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun updateAddressEnabled(value: Boolean) {
         _lessonPlan.update { _lessonPlan.value?.copy(addressEnabled = value) }
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun setPlanAsActive() {
         _lessonPlan.update { _lessonPlan.value?.copy(isActive = true) }
-        setDataChanged()
+        checkDataChanged()
     }
 
     fun initializePlan(lessonPlanId: Long?) {
@@ -89,11 +89,10 @@ class LessonPlanViewModel @Inject constructor(
             _lessonPlan.value?.let { lessonPlan ->
                 lessonPlan.id?.let {
                     lessonPlanRepository.update(lessonPlan)
-                    updateOtherPlans(lessonPlan)
+                    updateOtherPlans(lessonPlan.id, lessonPlan.isActive)
                 } ?: run {
-                    lessonPlanRepository.insert(lessonPlan.apply { isActive = true }).run {
-                        updateOtherPlans(lessonPlan)
-                    }
+                    val newId = lessonPlanRepository.insert(lessonPlan.apply { isActive = true })
+                    updateOtherPlans(newId, lessonPlan.isActive)
                 }
             }
         }.invokeOnCompletion {
@@ -101,13 +100,13 @@ class LessonPlanViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateOtherPlans(lessonPlan: LessonPlanModel) {
-        if (lessonPlan.isActive) {
-            lessonPlanRepository.makeOtherPlansNotActive(lessonPlan.id!!)
+    private suspend fun updateOtherPlans(id: Long, isActive: Boolean) {
+        if (isActive) {
+            lessonPlanRepository.makeOtherPlansNotActive(id)
         }
     }
 
-    private fun setDataChanged() {
-        _dataChanged.update { true }
+    private fun checkDataChanged() {
+        _dataChanged.update { _initialData != lessonPlan.value }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -37,7 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -58,7 +59,9 @@ data class DraggableCardAction(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DraggableCard(
+    modifier: Modifier = Modifier,
     clickAction: () -> Unit,
+    colors: CardColors? = null,
     startAction: DraggableCardAction? = null,
     endAction: DraggableCardAction? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -72,7 +75,7 @@ fun DraggableCard(
             initialValue = DragAnchors.Center,
             positionalThreshold = { distance: Float -> distance * 0.5f },
             velocityThreshold = { with(density) { 100.dp.toPx() } },
-            snapAnimationSpec = tween(),
+            snapAnimationSpec = tween(durationMillis = 0),
             decayAnimationSpec = decayAnimationSpec,
         )
     }
@@ -96,12 +99,11 @@ fun DraggableCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RectangleShape)
-            .onGloballyPositioned { coordinates -> contentHeight = with(density) { coordinates.size.height.toDp() } }
     ) {
         Box(modifier = Modifier.anchoredDraggable(dragState, Orientation.Horizontal)) {
-            DraggableCardActions(contentHeight, startAction, endAction)
+            DraggableCardActions(modifier, contentHeight, startAction, endAction)
             Card(
-                modifier = Modifier
+                modifier = modifier
                     .fillMaxSize()
                     .offset {
                         IntOffset(
@@ -110,7 +112,9 @@ fun DraggableCard(
                                 .roundToInt(), y = 0
                         )
                     }
+                    .onSizeChanged { size -> contentHeight = with(density) { size.height.toDp() } }
                     .clickable { clickAction.invoke() },
+                colors = colors ?: CardDefaults.cardColors(),
                 elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
                 content = content
             )
@@ -119,9 +123,14 @@ fun DraggableCard(
 }
 
 @Composable
-private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, endAction: DraggableCardAction?) {
+private fun DraggableCardActions(
+    modifier: Modifier = Modifier,
+    height: Dp,
+    startAction: DraggableCardAction?,
+    endAction: DraggableCardAction?
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(height)
     ) {
@@ -131,7 +140,7 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     .width(150.dp)
                     .fillMaxHeight()
                     .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 colors = CardDefaults.cardColors(containerColor = it.color)
             ) {
                 Column(
@@ -142,8 +151,8 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(imageVector = it.imageVector, contentDescription = it.contentDescription)
-                    Text(text = it.label)
+                    Icon(it.imageVector, it.contentDescription)
+                    Text(it.label)
                 }
             }
         }
@@ -154,7 +163,7 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     .width(150.dp)
                     .height(height)
                     .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                 colors = CardDefaults.cardColors(containerColor = it.color)
             ) {
                 Column(
@@ -165,8 +174,8 @@ private fun DraggableCardActions(height: Dp, startAction: DraggableCardAction?, 
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Icon(imageVector = it.imageVector, contentDescription = it.contentDescription)
-                    Text(text = it.label)
+                    Icon(it.imageVector, it.contentDescription)
+                    Text(it.label)
                 }
             }
         }

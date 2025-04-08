@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DisplayField
@@ -32,7 +30,6 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedCheckbox
 import com.lczarny.lsnplanner.presentation.components.PlanActiveIcon
 import com.lczarny.lsnplanner.presentation.components.PlanCreateDateIcon
 import com.lczarny.lsnplanner.presentation.components.PlanTypeIcon
-import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.components.SaveIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
@@ -40,6 +37,7 @@ import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanViewModel
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDate
+import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
 
 @Composable
 fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel) {
@@ -48,36 +46,17 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
     val dataChanged by viewModel.dataChanged.collectAsStateWithLifecycle()
 
-    var discardChangesDialogOpen by remember { mutableStateOf(false) }
+    var discardChangesDialogOpen = remember { mutableStateOf(false) }
 
-    DiscardChangesDialog(
-        discardChangesDialogOpen,
-        PredefinedDialogState(
-            onConfirm = {
-                discardChangesDialogOpen = false
-                navController.popBackStack()
-            },
-            onDismiss = { discardChangesDialogOpen = false }
-        )
-    )
+    DiscardChangesDialog(discardChangesDialogOpen, navController)
 
     lessonPlan?.let { lessonPlanData ->
         Scaffold(
             topBar = {
                 AppNavBar(
                     title = lessonPlanData.name,
-                    navIcon = {
-                        AppBarBackIconButton(onClick = {
-                            if (dataChanged) {
-                                discardChangesDialogOpen = true
-                            } else {
-                                navController.popBackStack()
-                            }
-                        })
-                    },
-                    actions = {
-                        if (dataChanged) IconButton(onClick = { viewModel.savePlan() }) { SaveIcon() }
-                    }
+                    onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
+                    actions = { if (dataChanged) IconButton(onClick = { viewModel.savePlan() }) { SaveIcon() } }
                 )
             }
         ) { padding ->
@@ -126,6 +105,7 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                 )
 
                 OutlinedCheckbox(
+                    initialValue = lessonPlanData.addressEnabled,
                     label = stringResource(R.string.plan_address_enabled),
                     onCheckedChange = { addressEnabled -> viewModel.updateAddressEnabled(addressEnabled) }
                 )

@@ -20,7 +20,7 @@ import com.lczarny.lsnplanner.data.local.entity.Note
 import com.lczarny.lsnplanner.data.local.entity.Setting
 
 @Database(
-    version = 3,
+    version = 4,
     exportSchema = false,
     entities = [
         ClassInfo::class,

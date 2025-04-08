@@ -143,7 +143,12 @@ private fun InternalDateTimePicker(
         onValueChange = { },
         label = { Text(label) },
         placeholder = { Text(stringResource(R.string.select_date)) },
-        trailingIcon = { SelecteDateIcon() },
+        trailingIcon = {
+            when (inputType) {
+                DateTimeInputType.Time -> SelectTimeIcon()
+                DateTimeInputType.Date, DateTimeInputType.DateTime -> SelectDateIcon()
+            }
+        },
         isError = error != null,
         readOnly = readOnly,
         enabled = enabled,

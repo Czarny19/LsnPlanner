@@ -8,8 +8,8 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.lczarny.lsnplanner.data.local.entity.LessonPlan
-import com.lczarny.lsnplanner.data.local.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.local.model.VarArgsId
+import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.data.common.model.VarArgsId
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,7 +25,7 @@ interface LessonPlanDao {
 
     @Transaction
     @Query("SELECT * FROM lesson_plan WHERE is_active = 1 LIMIT 1")
-    fun getActive(): Flow<LessonPlan>
+    suspend fun getActive(): LessonPlan
 
     @Transaction
     @Query("SELECT * FROM lesson_plan")

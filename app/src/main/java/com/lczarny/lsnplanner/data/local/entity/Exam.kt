@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.lczarny.lsnplanner.data.local.model.Importance
+import com.lczarny.lsnplanner.data.common.model.Importance
 import kotlinx.serialization.Required
 
 @Entity(

@@ -21,8 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.LessonPlanType
-import com.lczarny.lsnplanner.presentation.components.AppBarBackIconButton
+import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
@@ -31,11 +30,11 @@ import com.lczarny.lsnplanner.presentation.components.InputError
 import com.lczarny.lsnplanner.presentation.components.OutlinedCheckbox
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
-import com.lczarny.lsnplanner.presentation.components.PredefinedDialogState
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanViewModel
+import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
 
 @Composable
 fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewModel, firstLaunch: Boolean) {
@@ -47,32 +46,15 @@ fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewMode
 
     var nameTouched by remember { mutableStateOf(false) }
 
-    var discardChangesDialogOpen by remember { mutableStateOf(false) }
+    var discardChangesDialogOpen = remember { mutableStateOf(false) }
 
-    DiscardChangesDialog(
-        discardChangesDialogOpen,
-        PredefinedDialogState(
-            onConfirm = {
-                discardChangesDialogOpen = false
-                navController.popBackStack()
-            },
-            onDismiss = { discardChangesDialogOpen = false }
-        )
-    )
+    DiscardChangesDialog(discardChangesDialogOpen, navController)
 
     Scaffold(
         topBar = {
             AppNavBar(
                 title = stringResource(R.string.route_new_lesson_plan),
-                navIcon = {
-                    if (firstLaunch.not()) AppBarBackIconButton(onClick = {
-                        if (dataChanged) {
-                            discardChangesDialogOpen = true
-                        } else {
-                            navController.popBackStack()
-                        }
-                    })
-                }
+                onNavIconClick = { if (firstLaunch.not()) navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
             )
         }
     ) { padding ->

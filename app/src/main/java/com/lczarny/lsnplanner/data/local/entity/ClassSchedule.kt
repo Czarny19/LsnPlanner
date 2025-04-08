@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.lczarny.lsnplanner.data.local.model.ClassScheduleType
+import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
 import kotlinx.serialization.Required
 
 @Entity(
@@ -25,6 +25,7 @@ data class ClassSchedule(
     @Required @ColumnInfo(name = "type") val type: ClassScheduleType,
     @Required @ColumnInfo(name = "duration_minutes") val durationMinutes: Int,
     @Required @ColumnInfo(name = "classroom") val classroom: String,
+    @ColumnInfo(name = "address", defaultValue = "NULL") val address: String?,
     @ColumnInfo(name = "start_hour") val startHour: Int,
     @ColumnInfo(name = "start_minute") val startMinute: Int,
     @ColumnInfo(name = "week_day", defaultValue = "NULL") val weekDay: Int?,

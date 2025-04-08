@@ -2,8 +2,8 @@ package com.lczarny.lsnplanner.presentation.ui.start
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.local.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.local.repository.SettingRepository
+import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.StartScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +30,7 @@ class StartViewModel @Inject constructor(
     val startEnabled = _startEnabled.asStateFlow()
 
     init {
-        checkIfActivePlanExists()
+        checkActivePlan()
     }
 
     fun updateUserName(userName: String) {
@@ -46,7 +46,7 @@ class StartViewModel @Inject constructor(
         }
     }
 
-    private fun checkIfActivePlanExists() {
+    private fun checkActivePlan() {
         viewModelScope.launch(ioDispatcher) {
             if (lessonPlanRepository.checkIfActivePlanExists()) {
                 _screenState.update { StartScreenState.StartApp }
