@@ -17,11 +17,10 @@ import com.lczarny.lsnplanner.presentation.ui.note.components.NoteEdit
 @Composable
 fun NoteScreen(
     navController: NavController,
-    lessonPlanId: Long,
     noteId: Long?,
     viewModel: NoteViewModel = hiltViewModel(),
 ) {
-    viewModel.intializeNote(lessonPlanId, noteId)
+    viewModel.intializeNote(noteId)
 
     Surface(modifier = Modifier.fillMaxSize()) {
         val screenState by viewModel.screenState.collectAsStateWithLifecycle()

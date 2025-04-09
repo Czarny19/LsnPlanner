@@ -76,9 +76,8 @@ class LessonPlanViewModel @Inject constructor(
             LessonPlanModel(isActive = true, createDate = currentTimestamp()).let { lessonPlan ->
                 _lessonPlan.update { lessonPlan }
                 _initialData = lessonPlan.copy()
+                _screenState.update { DetailsScreenState.Create }
             }
-
-            _screenState.update { DetailsScreenState.Create }
         }
     }
 

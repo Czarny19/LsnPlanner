@@ -83,7 +83,7 @@ class ClassDetailsViewModel @Inject constructor(
         checkDataChanged()
     }
 
-    fun initializeClass(lessonPlanId: Long, defaultWeekDay: Int, classInfoId: Long?) {
+    fun initializeClass(defaultWeekDay: Int, classInfoId: Long?) {
         if (_info.value != null) {
             return
         }
@@ -92,8 +92,8 @@ class ClassDetailsViewModel @Inject constructor(
         _defaultWeekDay = defaultWeekDay
 
         viewModelScope.launch(Dispatchers.IO) {
-            lessonPlanRepository.getActivePlan().collect { plan ->
-                _lessonPlan.update { plan }
+            lessonPlanRepository.getActivePlan().collect { lessonPlan ->
+                _lessonPlan.update { lessonPlan }
 
                 classInfoId?.let { id ->
                     classInfoRepository.getFullDataById(id).let { fullClass ->
@@ -107,7 +107,7 @@ class ClassDetailsViewModel @Inject constructor(
                         _screenState.update { DetailsScreenState.Edit }
                     }
                 } ?: run {
-                    ClassInfoModel(lessonPlanId = lessonPlanId, type = plan.type.defaultClassType()).let { classInfo ->
+                    ClassInfoModel(lessonPlanId = lessonPlan.id!!, type = lessonPlan.type.defaultClassType()).let { classInfo ->
                         _info.update { classInfo }
                         _initialData = classInfo
                     }

@@ -18,12 +18,11 @@ import com.lczarny.lsnplanner.presentation.ui.classdetails.components.ClassDetai
 @Composable
 fun ClassDetailsScreen(
     navController: NavController,
-    lessonPlanId: Long,
     defaultWeekDay: Int,
     classId: Long? = null,
     viewModel: ClassDetailsViewModel = hiltViewModel(),
 ) {
-    viewModel.initializeClass(lessonPlanId, defaultWeekDay, classId)
+    viewModel.initializeClass(defaultWeekDay, classId)
 
     val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 

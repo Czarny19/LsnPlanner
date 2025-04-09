@@ -45,12 +45,7 @@ fun AppNavHost(
 
         composable<ClassDetailsRoute> { backStackEntry ->
             val classRoute: ClassDetailsRoute = backStackEntry.toRoute()
-            ClassDetailsScreen(
-                navController,
-                classRoute.lessonPlanId,
-                classRoute.defaultWeekDay,
-                classRoute.classInfoId
-            )
+            ClassDetailsScreen(navController, classRoute.defaultWeekDay, classRoute.classInfoId)
         }
 
         composable<ClassListRoute> { backStackEntry ->
@@ -60,7 +55,7 @@ fun AppNavHost(
 
         composable<NoteRoute> { backStackEntry ->
             val noteRoute: NoteRoute = backStackEntry.toRoute()
-            NoteScreen(navController, noteRoute.lessonPlanId, noteRoute.noteId)
+            NoteScreen(navController, noteRoute.noteId)
         }
     }
 }
