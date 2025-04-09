@@ -2,11 +2,10 @@ package com.lczarny.lsnplanner.presentation.ui.note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.AppSetting
 import com.lczarny.lsnplanner.data.common.model.Importance
 import com.lczarny.lsnplanner.data.common.model.NoteModel
+import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -15,6 +14,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class NoteViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val noteRepository: NoteRepository,
-    private val settingRepository: SettingRepository
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
@@ -111,14 +111,14 @@ class NoteViewModel @Inject constructor(
     fun markNoteImportanceTutorialDone() {
         viewModelScope.launch(Dispatchers.IO) {
             _noteImportanceTutorialDone.update { true }
-            settingRepository.setNoteImportanceTutorialDone()
+            dataStoreRepository.setTutorialNoteImportanceDone()
         }
     }
 
     private fun getSettings() {
         viewModelScope.launch(Dispatchers.IO) {
-            _noteImportanceTutorialDone.update {
-                settingRepository.getSettingValue(AppSetting.NoteImportanceTutorialDone).toBoolean()
+            dataStoreRepository.getTutorialNoteImportanceDone().flowOn(ioDispatcher).collect {
+                _noteImportanceTutorialDone.update { it }
             }
         }
     }

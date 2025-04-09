@@ -12,8 +12,8 @@ import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
 import com.lczarny.lsnplanner.presentation.model.StartScreenState
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
@@ -51,7 +51,7 @@ class StartScreenTest {
     private lateinit var lessonPlanRepository: LessonPlanRepository
 
     @MockK
-    private lateinit var settingsRepository: SettingRepository
+    private lateinit var dataStoreRepository: DataStoreRepository
 
     @Inject
     lateinit var lessonPlanDao: LessonPlanDao
@@ -67,7 +67,7 @@ class StartScreenTest {
     @Test
     fun testNormalLaunch() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, settingsRepository)
+        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
 
         coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns true
 
@@ -94,9 +94,9 @@ class StartScreenTest {
     @Test
     fun testFirstLanch() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, settingsRepository)
+        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
 
-        coEvery { settingsRepository.setUserName("UserName") } just Runs
+        coEvery { dataStoreRepository.setUserName("UserName") } just Runs
         coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns false
 
         var context: Context? = null

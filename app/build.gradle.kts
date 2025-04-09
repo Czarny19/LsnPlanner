@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtimeCompose)
     implementation(libs.androidx.lifecycle.viewModelCompose)
 
+    implementation(libs.androidx.datastore)
+
     implementation(libs.bundles.compose)
 
     implementation(libs.hilt.android)

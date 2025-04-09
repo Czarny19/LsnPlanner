@@ -7,9 +7,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.model.VarArgsId
+import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 import kotlinx.coroutines.flow.Flow
 
 @Dao

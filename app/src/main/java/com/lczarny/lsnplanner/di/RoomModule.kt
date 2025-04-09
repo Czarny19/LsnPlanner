@@ -2,6 +2,12 @@ package com.lczarny.lsnplanner.di
 
 import android.content.Context
 import androidx.room.Room
+import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
+import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
+import com.lczarny.lsnplanner.data.common.repository.ExamRepository
+import com.lczarny.lsnplanner.data.common.repository.HomeworkRepository
+import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.NoteRepository
 import com.lczarny.lsnplanner.data.local.RoomDb
 import com.lczarny.lsnplanner.data.local.dao.ClassInfoDao
 import com.lczarny.lsnplanner.data.local.dao.ClassScheduleDao
@@ -9,14 +15,6 @@ import com.lczarny.lsnplanner.data.local.dao.ExamDao
 import com.lczarny.lsnplanner.data.local.dao.HomeworkDao
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
 import com.lczarny.lsnplanner.data.local.dao.NoteDao
-import com.lczarny.lsnplanner.data.local.dao.SettingDao
-import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
-import com.lczarny.lsnplanner.data.common.repository.ExamRepository
-import com.lczarny.lsnplanner.data.common.repository.HomeworkRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +29,7 @@ object RoomModule {
     @Provides
     @Singleton
     fun provideDb(@ApplicationContext context: Context): RoomDb =
-        Room.databaseBuilder(context, RoomDb::class.java, "local_db").fallbackToDestructiveMigration().build()
+        Room.databaseBuilder(context, RoomDb::class.java, "local_db").fallbackToDestructiveMigration(false).build()
 
     @Provides
     @Singleton
@@ -80,12 +78,4 @@ object RoomModule {
     @Provides
     @Singleton
     fun provideNoteRepository(noteDao: NoteDao): NoteRepository = NoteRepository(noteDao)
-
-    @Provides
-    @Singleton
-    fun provideSettingDao(db: RoomDb): SettingDao = db.settingDao()
-
-    @Provides
-    @Singleton
-    fun provideSettingRepository(settingDao: SettingDao): SettingRepository = SettingRepository(settingDao)
 }

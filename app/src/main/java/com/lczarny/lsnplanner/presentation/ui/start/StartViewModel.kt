@@ -2,14 +2,15 @@ package com.lczarny.lsnplanner.presentation.ui.start
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.SettingRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.StartScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,7 +19,7 @@ import javax.inject.Inject
 class StartViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     private val lessonPlanRepository: LessonPlanRepository,
-    private val settingRepository: SettingRepository
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(StartScreenState.Loading)
@@ -30,7 +31,7 @@ class StartViewModel @Inject constructor(
     val startEnabled = _startEnabled.asStateFlow()
 
     init {
-        checkActivePlan()
+        loadAppSettingsAndActivePlan()
     }
 
     fun updateUserName(userName: String) {
@@ -40,18 +41,20 @@ class StartViewModel @Inject constructor(
 
     fun save() {
         viewModelScope.launch(ioDispatcher) {
-            settingRepository.setUserName(_userName)
+            dataStoreRepository.setUserName(_userName)
         }.invokeOnCompletion {
             _screenState.update { StartScreenState.UserNameSaved }
         }
     }
 
-    private fun checkActivePlan() {
+    private fun loadAppSettingsAndActivePlan() {
         viewModelScope.launch(ioDispatcher) {
-            if (lessonPlanRepository.checkIfActivePlanExists()) {
-                _screenState.update { StartScreenState.StartApp }
-            } else {
-                _screenState.update { StartScreenState.FirstLaunch }
+            dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
+                if (appSettings.userName == null || lessonPlanRepository.checkIfActivePlanExists().not()) {
+                    _screenState.update { StartScreenState.FirstLaunch }
+                } else {
+                    _screenState.update { StartScreenState.StartApp }
+                }
             }
         }
     }
