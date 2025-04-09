@@ -270,7 +270,7 @@ private fun ClassScheduleBaseInfoSection(viewModel: ClassDetailsViewModel, class
 
     OutlinedDropDown(
         label = stringResource(R.string.class_time_type),
-        initialValue = DropDownItem(classSchedule.type, classSchedule.type.toLabel(context)),
+        initialValue = classSchedule.type.let { DropDownItem(it, it.toLabel(context)) },
         onValueChange = { type -> viewModel.updateClassScheduleType(classSchedule, type.value as ClassScheduleType) },
         items = ClassScheduleType.entries.map { DropDownItem(it, it.toLabel(context)) }
     )

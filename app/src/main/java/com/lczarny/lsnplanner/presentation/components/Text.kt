@@ -7,11 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.lczarny.lsnplanner.R
 
 @Composable
 fun ListItemTitle(modifier: Modifier = Modifier, text: String) {
-    Text(text, modifier = modifier, style = MaterialTheme.typography.titleMedium)
+    Text(text, modifier = modifier, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
 }
 
 @Composable

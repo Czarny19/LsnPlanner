@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +31,8 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
-import com.lczarny.lsnplanner.presentation.model.mapper.planClassTypeLabelMap
+import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
+import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.presentation.ui.classdetails.ClassDetailsViewModel
 
 @Composable
@@ -44,7 +46,7 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
     var nameTouched by remember { mutableStateOf(false) }
 
     lessonPlan?.let { lessonPlanData ->
-        val planClassTypeLabelMap by lazy { lessonPlanData.type.planClassTypeLabelMap(context) }
+        val planClassTypes by lazy { lessonPlanData.type.planClassTypes() }
 
         classInfo?.let { classInfoData ->
             Column(
@@ -62,24 +64,34 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                             nameTouched = true
                             viewModel.updateName(name)
                         },
-                        maxLines = 3,
-                        maxLength = 100,
+                        maxLines = 2,
+                        maxLength = 40,
                         error = if (nameTouched && classInfoData.name.isEmpty()) InputError.FieldRequired else null
                     )
 
                     OutlinedDropDown(
                         label = stringResource(R.string.class_type),
-                        initialValue = DropDownItem(classInfoData.type, planClassTypeLabelMap.getValue(classInfoData.type)),
+                        initialValue = classInfoData.type.let { DropDownItem(it, it.toLabel(context)) },
                         onValueChange = { type -> viewModel.updateClassType(type.value as ClassType) },
-                        items = lessonPlanData.type.planClassTypes().map { DropDownItem(it, planClassTypeLabelMap.getValue(it)) }
+                        items = planClassTypes.map { DropDownItem(it, it.toLabel(context)) }
                     )
                 } else {
                     DisplayField(
-                        modifier = Modifier.padding(bottom = AppPadding.INPUT_BOTTOM_PADDING),
-                        label = stringResource(R.string.class_type),
-                        text = planClassTypeLabelMap.getValue(classInfoData.type),
-                        icon = { ClassIcon(stringResource(R.string.class_type)) }
+                        modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
+                        label = stringResource(R.string.class_name),
+                        text = classInfoData.name,
+                        icon = { ClassIcon(contentDescription = stringResource(R.string.class_name)) }
                     )
+
+                    classInfoData.type.let {
+                        val label = it.toLabel(context)
+                        DisplayField(
+                            modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
+                            label = stringResource(R.string.class_type),
+                            text = label,
+                            icon = { Icon(it.toPlanClassTypeIcon(), contentDescription = label) }
+                        )
+                    }
                 }
 
                 ColorPicker(

@@ -1,7 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.classdetails
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -24,19 +23,15 @@ fun ClassDetailsScreen(
 ) {
     viewModel.initializeClass(defaultWeekDay, classId)
 
-    val screenState by viewModel.screenState.collectAsStateWithLifecycle()
+    Surface(modifier = Modifier.fillMaxSize()) {
+        val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-        content = {
-            when (screenState) {
-                DetailsScreenState.Loading -> FullScreenLoading()
-                DetailsScreenState.Create -> ClassDetailsPager(navController, viewModel, true)
-                DetailsScreenState.Edit -> ClassDetailsPager(navController, viewModel, false)
-                DetailsScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
-                DetailsScreenState.Finished -> navController.popBackStack()
-            }
+        when (screenState) {
+            DetailsScreenState.Loading -> FullScreenLoading()
+            DetailsScreenState.Create -> ClassDetailsPager(navController, viewModel, true)
+            DetailsScreenState.Edit -> ClassDetailsPager(navController, viewModel, false)
+            DetailsScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
+            DetailsScreenState.Finished -> navController.popBackStack()
         }
-    )
+    }
 }

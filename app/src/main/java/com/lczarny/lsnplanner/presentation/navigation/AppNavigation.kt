@@ -18,7 +18,7 @@ data class LessonPlanRoute(val firstLaunch: Boolean = false, val lessonPlanId: L
 data class NoteRoute(val noteId: Long? = null)
 
 @Serializable
-data class ClassListRoute(val lessonPlanId: Long)
+object ClassListRoute
 
 @Serializable
 data class ClassDetailsRoute(val defaultWeekDay: Int = 1, val classInfoId: Long? = null)

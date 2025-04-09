@@ -49,8 +49,7 @@ fun AppNavHost(
         }
 
         composable<ClassListRoute> { backStackEntry ->
-            val classListRoute: ClassListRoute = backStackEntry.toRoute()
-            ClassListScreen(navController, classListRoute.lessonPlanId)
+            ClassListScreen(navController)
         }
 
         composable<NoteRoute> { backStackEntry ->

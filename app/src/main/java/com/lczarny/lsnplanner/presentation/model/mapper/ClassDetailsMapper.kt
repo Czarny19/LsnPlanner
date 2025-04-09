@@ -15,26 +15,19 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
 import com.lczarny.lsnplanner.data.common.model.ClassType
-import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDate
 import com.lczarny.lsnplanner.utils.formatTime
 import com.lczarny.lsnplanner.utils.toDayOfWeekString
 
-fun LessonPlanType.planClassTypeLabelMap(context: Context): Map<ClassType, String> = when (this) {
-    LessonPlanType.School -> mapOf(
-        ClassType.Class to context.getString(R.string.class_type_class),
-        ClassType.Extracurricular to context.getString(R.string.class_type_extracurricular),
-        ClassType.Other to context.getString(R.string.class_type_other)
-    )
-
-    LessonPlanType.University -> mapOf(
-        ClassType.Lecture to context.getString(R.string.class_type_lecture),
-        ClassType.Practical to context.getString(R.string.class_type_practical),
-        ClassType.Laboratory to context.getString(R.string.class_type_laboratory),
-        ClassType.Seminar to context.getString(R.string.class_type_seminar),
-        ClassType.Workshop to context.getString(R.string.class_type_workshop),
-        ClassType.Other to context.getString(R.string.class_type_other)
-    )
+fun ClassType.toLabel(context: Context): String = when (this) {
+    ClassType.Class -> context.getString(R.string.class_type_class)
+    ClassType.Extracurricular -> context.getString(R.string.class_type_extracurricular)
+    ClassType.Lecture -> context.getString(R.string.class_type_lecture)
+    ClassType.Practical -> context.getString(R.string.class_type_practical)
+    ClassType.Laboratory -> context.getString(R.string.class_type_laboratory)
+    ClassType.Seminar -> context.getString(R.string.class_type_seminar)
+    ClassType.Workshop -> context.getString(R.string.class_type_workshop)
+    ClassType.Other -> context.getString(R.string.class_type_other)
 }
 
 fun ClassType.toPlanClassTypeIcon(): ImageVector = when (this) {
