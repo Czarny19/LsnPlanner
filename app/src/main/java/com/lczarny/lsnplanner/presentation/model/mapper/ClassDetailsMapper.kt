@@ -1,23 +1,24 @@
 package com.lczarny.lsnplanner.presentation.model.mapper
 
 import android.content.Context
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
-import androidx.compose.material.icons.filled.Class
-import androidx.compose.material.icons.filled.DesignServices
-import androidx.compose.material.icons.filled.Handyman
-import androidx.compose.material.icons.filled.PlusOne
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Science
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
 import com.lczarny.lsnplanner.data.common.model.ClassType
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDate
 import com.lczarny.lsnplanner.utils.formatTime
 import com.lczarny.lsnplanner.utils.toDayOfWeekString
+
+enum class ClassViewType(val raw: String) {
+    List("list"),
+    Timeline("timeline");
+
+    companion object {
+        fun from(find: String): ClassViewType = ClassViewType.entries.find { it.raw == find } ?: List
+    }
+}
 
 fun ClassType.toLabel(context: Context): String = when (this) {
     ClassType.Class -> context.getString(R.string.class_type_class)
@@ -31,14 +32,14 @@ fun ClassType.toLabel(context: Context): String = when (this) {
 }
 
 fun ClassType.toPlanClassTypeIcon(): ImageVector = when (this) {
-    ClassType.Class -> Icons.Filled.Class
-    ClassType.Extracurricular -> Icons.Filled.PlusOne
-    ClassType.Lecture -> Icons.AutoMirrored.Filled.LibraryBooks
-    ClassType.Practical -> Icons.Filled.DesignServices
-    ClassType.Laboratory -> Icons.Filled.Science
-    ClassType.Seminar -> Icons.Filled.School
-    ClassType.Workshop -> Icons.Filled.Handyman
-    ClassType.Other -> Icons.Filled.Schedule
+    ClassType.Class -> AppIcons.CLASS_TYPE_CLASS
+    ClassType.Extracurricular -> AppIcons.CLASS_TYPE_EXTRA
+    ClassType.Lecture -> AppIcons.CLASS_TYPE_LECTURE
+    ClassType.Practical -> AppIcons.CLASS_TYPE_PRACTICAL
+    ClassType.Laboratory -> AppIcons.CLASS_TYPE_LAB
+    ClassType.Seminar -> AppIcons.CLASS_TYPE_SEMINAR
+    ClassType.Workshop -> AppIcons.CLASS_TYPE_WORKSHOP
+    ClassType.Other -> AppIcons.CLASS_TYPE_OTHER
 }
 
 fun ClassScheduleType.toLabel(context: Context): String = when (this) {

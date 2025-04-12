@@ -23,6 +23,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,10 +46,10 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
 import com.lczarny.lsnplanner.presentation.components.AddFirstItemInfo
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.DeleteIcon
 import com.lczarny.lsnplanner.presentation.components.DropDownIcon
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
-import com.lczarny.lsnplanner.presentation.components.ErrorIcon
 import com.lczarny.lsnplanner.presentation.components.FabListBottomSpacer
 import com.lczarny.lsnplanner.presentation.components.FutureSelectableDates
 import com.lczarny.lsnplanner.presentation.components.InputError
@@ -168,11 +169,13 @@ private fun ClassScheduleInfoBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (hasErrors) ErrorIcon(
+            if (hasErrors) Icon(
+                AppIcons.ERROR,
                 modifier = Modifier
                     .size(AppSizes.MD_ICON)
                     .padding(end = AppPadding.SM_PADDING),
-                color = onContainerColor
+                contentDescription = stringResource(R.string.error),
+                tint = onContainerColor
             )
 
             Text(

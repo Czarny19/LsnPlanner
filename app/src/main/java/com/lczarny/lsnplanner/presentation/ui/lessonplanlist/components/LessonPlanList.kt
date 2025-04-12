@@ -75,7 +75,15 @@ fun LessonPlanList(navController: NavController, viewModel: LessonPlanListViewMo
                 .padding(padding),
             state = listState
         ) {
-            items(items = lessonPlans) { item -> LessonPlanListItem(navController, viewModel, snackbarChannel, item, selectedPlanName) }
+            items(items = lessonPlans, key = { it.id!! }) { item ->
+                LessonPlanListItem(
+                    navController,
+                    viewModel,
+                    snackbarChannel,
+                    item,
+                    selectedPlanName
+                )
+            }
 
             item { FabListBottomSpacer() }
         }

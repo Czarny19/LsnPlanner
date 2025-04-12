@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -22,14 +23,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DisplayField
 import com.lczarny.lsnplanner.presentation.components.InfoCard
 import com.lczarny.lsnplanner.presentation.components.OutlinedCheckbox
-import com.lczarny.lsnplanner.presentation.components.PlanActiveIcon
-import com.lczarny.lsnplanner.presentation.components.PlanCreateDateIcon
-import com.lczarny.lsnplanner.presentation.components.PlanTypeIcon
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.components.SaveIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
@@ -73,20 +72,46 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                     modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     label = stringResource(R.string.plan_type),
                     text = lessonPlanData.type.getLabel(context),
-                    icon = { PlanTypeIcon(modifier = Modifier.size(AppSizes.MD_ICON)) },
+                    icon = {
+                        Icon(
+                            AppIcons.PLAN,
+                            modifier = Modifier.size(AppSizes.MD_ICON),
+                            contentDescription = stringResource(R.string.plan_type)
+                        )
+                    },
                 )
 
                 DisplayField(
                     modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     label = stringResource(R.string.plan_create_date),
                     text = lessonPlanData.createDate.convertMillisToSystemDate(context),
-                    icon = { PlanCreateDateIcon(modifier = Modifier.size(AppSizes.MD_ICON)) },
+                    icon = {
+                        Icon(
+                            AppIcons.EDIT_DATE,
+                            modifier = Modifier.size(AppSizes.MD_ICON),
+                            contentDescription = stringResource(R.string.plan_create_date)
+                        )
+                    },
                 )
 
                 DisplayField(
                     modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     text = stringResource(if (lessonPlanData.isActive) R.string.plan_is_active else R.string.plan_is_not_active),
-                    icon = { PlanActiveIcon(modifier = Modifier.size(AppSizes.MD_ICON), active = lessonPlanData.isActive) }
+                    icon = {
+                        if (lessonPlanData.isActive) {
+                            Icon(
+                                AppIcons.ACTIVE,
+                                modifier = Modifier.size(AppSizes.MD_ICON),
+                                contentDescription = stringResource(R.string.plan_is_active)
+                            )
+                        } else {
+                            Icon(
+                                AppIcons.INACTIVE,
+                                modifier = Modifier.size(AppSizes.MD_ICON),
+                                contentDescription = stringResource(R.string.plan_is_not_active)
+                            )
+                        }
+                    }
                 )
 
                 if (lessonPlanData.isActive.not()) PrimaryButton(

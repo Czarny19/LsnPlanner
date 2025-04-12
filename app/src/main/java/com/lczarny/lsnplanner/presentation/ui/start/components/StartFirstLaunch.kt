@@ -5,8 +5,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,10 +20,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.PrimaryButton
-import com.lczarny.lsnplanner.presentation.components.WelcomeIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
+import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.ui.start.StartViewModel
 
 @Composable
@@ -38,7 +41,14 @@ fun StartFirstLaunch(viewModel: StartViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            WelcomeIcon(modifier = Modifier.padding(top = AppPadding.LG_PADDING))
+            Icon(
+                AppIcons.WELCOME,
+                modifier = Modifier
+                    .padding(top = AppPadding.LG_PADDING)
+                    .size(AppSizes.XL_ICON),
+                contentDescription = stringResource(R.string.first_launch_welcome),
+                tint = MaterialTheme.colorScheme.primary,
+            )
 
             Text(
                 stringResource(R.string.first_launch_welcome),

@@ -21,10 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 
@@ -46,7 +49,14 @@ fun InfoCard(modifier: Modifier = Modifier, text: String, iconVisible: Boolean =
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
-            if (iconVisible) InfoIcon(modifier = Modifier.padding(end = AppPadding.SCREEN_PADDING))
+            if (iconVisible) Icon(
+                AppIcons.INFO,
+                modifier = Modifier
+                    .padding(end = AppPadding.SCREEN_PADDING)
+                    .size(AppSizes.LG_ICON),
+                contentDescription = stringResource(R.string.information),
+            )
+
             Text(text, style = MaterialTheme.typography.labelLarge, textAlign = TextAlign.Start)
         }
     }
@@ -54,7 +64,7 @@ fun InfoCard(modifier: Modifier = Modifier, text: String, iconVisible: Boolean =
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun InfoChip(modifier: Modifier = Modifier, label: String, imageVector: ImageVector) {
+fun InfoChip(modifier: Modifier = Modifier, label: String, imageVector: ImageVector, color: Color? = null) {
     val shape = RoundedCornerShape(8.dp)
 
     Row(
@@ -70,12 +80,12 @@ fun InfoChip(modifier: Modifier = Modifier, label: String, imageVector: ImageVec
                 .padding(start = AppPadding.SM_PADDING, top = AppPadding.XSM_PADDING, bottom = AppPadding.XSM_PADDING)
                 .size(AppSizes.SM_ICON),
             contentDescription = label,
-            tint = MaterialTheme.colorScheme.secondary
+            tint = color ?: MaterialTheme.colorScheme.secondary
         )
         Text(
             label,
             modifier = Modifier.padding(vertical = AppPadding.XSM_PADDING, horizontal = AppPadding.SM_PADDING),
-            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.secondary),
+            style = MaterialTheme.typography.bodySmall.copy(color = color ?: MaterialTheme.colorScheme.secondary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )

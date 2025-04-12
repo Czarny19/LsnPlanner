@@ -83,7 +83,15 @@ fun ClassList(navController: NavController, viewModel: ClassListViewModel) {
                     .padding(padding),
                 state = listState
             ) {
-                items(items = classes) { item -> ClassListItem(viewModel, navController, snackbarChannel, item, selectedClassName) }
+                items(items = classes, key = { it.id!! }) { item ->
+                    ClassListItem(
+                        viewModel,
+                        navController,
+                        snackbarChannel,
+                        item,
+                        selectedClassName
+                    )
+                }
 
                 item { FabListBottomSpacer() }
             }

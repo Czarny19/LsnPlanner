@@ -6,7 +6,7 @@ import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.ListScreenState
+import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ class ClassListViewModel @Inject constructor(
     private val classInfoRepository: ClassInfoRepository
 ) : ViewModel() {
 
-    private val _screenState = MutableStateFlow(ListScreenState.Loading)
+    private val _screenState = MutableStateFlow(BasicScreenState.Loading)
     private val _lessonPlanName = MutableStateFlow<String>("")
     private val _classes = MutableStateFlow(emptyList<ClassInfoModel>())
 
@@ -42,7 +42,7 @@ class ClassListViewModel @Inject constructor(
 
                 classInfoRepository.getAllForLessonPlan(lessonPlan.id!!).flowOn(ioDispatcher).collect { classes ->
                     _classes.update { classes }
-                    _screenState.update { ListScreenState.List }
+                    _screenState.update { BasicScreenState.Ready }
                 }
             }
         }

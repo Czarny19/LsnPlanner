@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +26,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,22 +75,12 @@ fun DraggableCard(
             velocityThreshold = { with(density) { 100.dp.toPx() } },
             snapAnimationSpec = tween(durationMillis = 0),
             decayAnimationSpec = decayAnimationSpec,
+            anchors = DraggableAnchors {
+                DragAnchors.Center at 0f
+                startAction?.let { DragAnchors.Start at with(density) { 100.dp.toPx() } }
+                endAction?.let { DragAnchors.End at with(density) { -100.dp.toPx() } }
+            }
         )
-    }
-
-    val anchors = remember(density) {
-        val startOffset = with(density) { 100.dp.toPx() }
-        val endOffset = with(density) { -100.dp.toPx() }
-
-        DraggableAnchors {
-            DragAnchors.Center at 0f
-            startAction?.let { DragAnchors.Start at startOffset }
-            endAction?.let { DragAnchors.End at endOffset }
-        }
-    }
-
-    SideEffect {
-        dragState.updateAnchors(anchors)
     }
 
     Box(
@@ -102,6 +90,7 @@ fun DraggableCard(
     ) {
         Box(modifier = Modifier.anchoredDraggable(dragState, Orientation.Horizontal)) {
             DraggableCardActions(modifier, contentHeight, startAction, endAction)
+
             Card(
                 modifier = modifier
                     .fillMaxSize()
@@ -122,6 +111,7 @@ fun DraggableCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun DraggableCardActions(
     modifier: Modifier = Modifier,
@@ -134,49 +124,34 @@ private fun DraggableCardActions(
             .fillMaxWidth()
             .height(height)
     ) {
-        startAction?.let {
-            Card(
-                modifier = Modifier
-                    .width(150.dp)
-                    .fillMaxHeight()
-                    .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(containerColor = it.color)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1.0f)
-                        .padding(end = 50.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(it.imageVector, it.contentDescription)
-                    Text(it.label)
-                }
-            }
-        }
+        DraggableCardAction(height, startAction)
         Spacer(modifier = Modifier.weight(1.0f))
-        endAction?.let {
-            Card(
+        DraggableCardAction(height, endAction)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun DraggableCardAction(height: Dp, action: DraggableCardAction?) {
+    action?.let {
+        Card(
+            modifier = Modifier
+                .width(150.dp)
+                .height(height)
+                .clickable { it.onClick.invoke() },
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+            colors = CardDefaults.cardColors(containerColor = it.color)
+        ) {
+            Column(
                 modifier = Modifier
-                    .width(150.dp)
-                    .height(height)
-                    .clickable { it.onClick.invoke() },
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                colors = CardDefaults.cardColors(containerColor = it.color)
+                    .fillMaxSize()
+                    .weight(1.0f)
+                    .padding(start = 50.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .weight(1.0f)
-                        .padding(start = 50.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(it.imageVector, it.contentDescription)
-                    Text(it.label)
-                }
+                Icon(it.imageVector, it.contentDescription)
+                Text(it.label)
             }
         }
     }

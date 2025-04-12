@@ -19,7 +19,6 @@ import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.isDurationOverMidnight
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -91,7 +90,7 @@ class ClassDetailsViewModel @Inject constructor(
         _screenState.update { DetailsScreenState.Loading }
         _defaultWeekDay = defaultWeekDay
 
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             lessonPlanRepository.getActivePlan().collect { lessonPlan ->
                 _lessonPlan.update { lessonPlan }
 

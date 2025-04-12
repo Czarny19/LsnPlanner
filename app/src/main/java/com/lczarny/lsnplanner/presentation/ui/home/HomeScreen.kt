@@ -1,26 +1,9 @@
 package com.lczarny.lsnplanner.presentation.ui.home
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ArrowForward
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.Class
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.NoteAlt
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.CheckBox
-import androidx.compose.material.icons.outlined.Class
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.NoteAlt
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -32,84 +15,63 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.local.model.LessonPlanWithClassesModel
-import com.lczarny.lsnplanner.presentation.components.AppDatePickerDialog
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
-import com.lczarny.lsnplanner.presentation.navigation.PlanClassRoute
-import com.lczarny.lsnplanner.presentation.navigation.ToDoRoute
-import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.home.model.HomeState
-import com.lczarny.lsnplanner.presentation.ui.home.tab.ClassesTab
-import com.lczarny.lsnplanner.presentation.ui.home.tab.MoreTab
-import com.lczarny.lsnplanner.presentation.ui.home.tab.ToDosTab
-import com.lczarny.lsnplanner.utils.getDayOfWeekNum
+import com.lczarny.lsnplanner.presentation.model.BasicScreenState
+import com.lczarny.lsnplanner.presentation.model.TabBarItemWithIcon
+import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTab
+import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTabActions
+import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTabFab
+import com.lczarny.lsnplanner.presentation.ui.home.tab.more.MoreTab
+import com.lczarny.lsnplanner.presentation.ui.home.tab.notes.NotesTab
+import com.lczarny.lsnplanner.presentation.ui.home.tab.notes.NotesTabFab
 import com.lczarny.lsnplanner.utils.getMonthName
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.launch
-import java.util.Calendar
-
-data class TabBarItem(
-    val id: String,
-    val label: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
-)
 
 enum class HomeScreenSnackbar {
     FirstLaunch,
-    DeleteHistoricalToDos,
     ResetTutorials
 }
 
 @Composable
 fun HomeScreen(navController: NavController, firstLaunch: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
-    val screenState by viewModel.screenState.collectAsState()
-    val lessonPlan by viewModel.lessonPlan.collectAsState()
+    Surface(modifier = Modifier.fillMaxSize()) {
+        val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
-    AppTheme(
-        content = {
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colorScheme.background,
-                content = {
-                    when (screenState) {
-                        HomeState.Loading -> FullScreenLoading()
-                        HomeState.Ready -> HomeTabs(navController, firstLaunch, lessonPlan!!, viewModel)
-                    }
-                }
-            )
+        when (screenState) {
+            BasicScreenState.Loading -> FullScreenLoading(stringResource(R.string.please_wait))
+            BasicScreenState.Ready -> HomeTabs(navController, firstLaunch, viewModel)
         }
-    )
+    }
 }
 
 @Composable
-fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: LessonPlanWithClassesModel, viewModel: HomeViewModel) {
+private fun HomeTabs(navController: NavController, firstLaunch: Boolean, viewModel: HomeViewModel) {
     val context = LocalContext.current
 
-    val firstLaunchDone by viewModel.firstLaunchDone.collectAsState()
+    val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
+    val firstLaunchDone by viewModel.firstLaunchDone.collectAsStateWithLifecycle()
+    val classesCurrentDate by viewModel.classesCurrentDate.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarChannel = remember { Channel<HomeScreenSnackbar>(Channel.CONFLATED) }
@@ -119,11 +81,6 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
             when (it) {
                 HomeScreenSnackbar.FirstLaunch -> snackbarHostState.showSnackbar(
                     message = context.getString(R.string.snackbar_create_first_plan),
-                    withDismissAction = true
-                )
-
-                HomeScreenSnackbar.DeleteHistoricalToDos -> snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.todo_delete_all_historical_snackbar),
                     withDismissAction = true
                 )
 
@@ -142,165 +99,90 @@ fun HomeTabs(navController: NavController, firstLaunch: Boolean, lessonPlan: Les
         }
     }
 
-    val classesTab = TabBarItem(
+    val classesTab = TabBarItemWithIcon(
         id = "Classes",
         label = stringResource(R.string.home_tab_classes),
-        selectedIcon = Icons.Filled.Class,
-        unselectedIcon = Icons.Outlined.Class,
+        selectedIcon = AppIcons.HOME_CLASSES_SELECTED,
+        unselectedIcon = AppIcons.HOME_CLASSES,
     )
-    val calendarTab = TabBarItem(
-        id = "Calendar",
-        label = stringResource(R.string.home_tab_calendar),
-        selectedIcon = Icons.Filled.CalendarMonth,
-        unselectedIcon = Icons.Outlined.CalendarMonth
+    val eventsTab = TabBarItemWithIcon(
+        id = "Events",
+        label = stringResource(R.string.home_tab_events),
+        selectedIcon = AppIcons.HOME_EVENTS_SELECTED,
+        unselectedIcon = AppIcons.HOME_EVENTS
     )
-    val toDoTab = TabBarItem(
-        id = "ToDo",
-        label = stringResource(R.string.home_tab_to_dos),
-        selectedIcon = Icons.Filled.NoteAlt,
-        unselectedIcon = Icons.Outlined.NoteAlt
+    val notesTab = TabBarItemWithIcon(
+        id = "Notes",
+        label = stringResource(R.string.home_tab_notes),
+        selectedIcon = AppIcons.HOME_NOTES_SELECTED,
+        unselectedIcon = AppIcons.HOME_NOTES
     )
-    val moreTab = TabBarItem(
+    val moreTab = TabBarItemWithIcon(
         id = "More",
         label = stringResource(R.string.home_tab_more),
-        selectedIcon = Icons.Filled.Menu,
-        unselectedIcon = Icons.Outlined.Menu
+        selectedIcon = AppIcons.HOME_MORE_SELECTED,
+        unselectedIcon = AppIcons.HOME_MORE
     )
 
-    val tabBarItems = listOf(classesTab, calendarTab, toDoTab, moreTab)
+    val tabBarItems by lazy { listOf(classesTab, eventsTab, notesTab, moreTab) }
+
     val bottomBarNavController = rememberNavController()
+    val classesPagerState = rememberPagerState(initialPage = classesCurrentDate.dayOfWeek.value - 1) { 7 }
 
-    val currentClassesDate by viewModel.planClassesCurrentDate.collectAsState()
-    val showHistoricalToDos by viewModel.showHistoricalToDos.collectAsState()
+    val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    val classesCurrentDate by viewModel.planClassesCurrentDate.collectAsState()
-    val classesPagerState = rememberPagerState(initialPage = classesCurrentDate.getDayOfWeekNum() - 1) { 7 }
-    val animationScope = rememberCoroutineScope()
-    var showClassesDateDialog by remember { mutableStateOf(false) }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
-        topBar = {
-            val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-
-            AppNavBar(
-                title = when (currentRoute) {
-                    classesTab.id -> "${currentClassesDate.getMonthName(context)} ${currentClassesDate.get(Calendar.YEAR)}"
-                    calendarTab.id -> stringResource(R.string.home_tab_calendar)
-                    toDoTab.id -> stringResource(R.string.home_tab_to_dos)
-                    else -> stringResource(R.string.home_tab_more)
-                },
-                actions = {
-                    when (currentRoute) {
-                        toDoTab.id -> Row {
-                            IconButton(onClick = { viewModel.switchShowHistoricalToDos() }) {
-                                Icon(
-                                    imageVector = if (showHistoricalToDos) Icons.Filled.CheckBox else Icons.Outlined.CheckBox,
-                                    contentDescription = stringResource(R.string.todo_show_done)
-                                )
-                            }
-                        }
-
-                        classesTab.id -> Row {
-                            IconButton(onClick = { showClassesDateDialog = true }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.CalendarMonth,
-                                    contentDescription = stringResource(R.string.class_change_date)
-                                )
-                            }
-
-                            IconButton(onClick = {
-                                animationScope.launch {
-                                    viewModel.changeCurrentClassesWeek(false)
-                                    classesPagerState.animateScrollToPage(0)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                                    contentDescription = stringResource(R.string.class_prev_week)
-                                )
-                            }
-
-                            IconButton(onClick = {
-                                animationScope.launch {
-                                    viewModel.changeCurrentClassesWeek(true)
-                                    classesPagerState.animateScrollToPage(0)
-                                }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                                    contentDescription = stringResource(R.string.class_next_week)
-                                )
-                            }
-                        }
-                    }
-                }
-            )
-        },
-        bottomBar = { TabView(tabBarItems, bottomBarNavController) },
-        floatingActionButton = {
-            val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
-
-            when (currentRoute) {
-                toDoTab.id -> FloatingActionButton(
-                    onClick = { navController.navigate(ToDoRoute(lessonPlan.plan.id!!)) },
-                    content = { Icon(Icons.Filled.Add, stringResource(R.string.todo_add)) }
-                )
-
-                classesTab.id -> FloatingActionButton(
-                    onClick = {
-                        navController.navigate(
-                            PlanClassRoute(
-                                lessonPlan.plan.id!!,
-                                lessonPlan.plan.type,
-                                classesPagerState.currentPage + 1
-                            )
-                        )
+    lessonPlan?.let { lessonPlanData ->
+        Scaffold(
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
+            topBar = {
+                AppNavBar(
+                    title = when (currentRoute) {
+                        classesTab.id -> "${classesCurrentDate.month.getMonthName(context)} ${classesCurrentDate.year}"
+                        eventsTab.id -> stringResource(R.string.home_tab_events)
+                        notesTab.id -> stringResource(R.string.home_tab_notes)
+                        moreTab.id -> stringResource(R.string.home_tab_more)
+                        else -> ""
                     },
-                    content = { Icon(Icons.Filled.Add, stringResource(R.string.class_add)) }
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        content = { padding ->
-            if (showClassesDateDialog) {
-                AppDatePickerDialog(
-                    initialValue = currentClassesDate.timeInMillis,
-                    onDismiss = { showClassesDateDialog = false },
-                    onConfirm = { selectedDateMillis ->
-                        animationScope.launch {
-                            Calendar.getInstance().apply { timeInMillis = selectedDateMillis!! }.let {
-                                viewModel.changeCurrentClassesDate(it)
-                                classesPagerState.animateScrollToPage(it.getDayOfWeekNum() - 1)
-                                showClassesDateDialog = false
-                            }
+                    actions = {
+                        when (currentRoute) {
+                            classesTab.id -> ClassesTabActions(viewModel)
                         }
                     }
                 )
+            },
+            bottomBar = { TabView(tabBarItems, bottomBarNavController) },
+            floatingActionButtonPosition = FabPosition.End,
+            floatingActionButton = {
+                when (currentRoute) {
+                    notesTab.id -> NotesTabFab(navController)
+                    classesTab.id -> ClassesTabFab(viewModel, navController, classesPagerState)
+                }
             }
-
+        ) { padding ->
             NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
                 composable(classesTab.id) {
                     ClassesTab(padding, viewModel, classesPagerState)
                 }
-                composable(calendarTab.id) {
-                    Text(calendarTab.id)
+
+                composable(eventsTab.id) {
+                    Text(eventsTab.id)
                 }
-                composable(toDoTab.id) {
-                    ToDosTab(padding, viewModel, navController, lessonPlan.plan.id!!)
+
+                composable(notesTab.id) {
+                    NotesTab(padding, navController, viewModel)
                 }
+
                 composable(moreTab.id) {
-                    MoreTab(padding, viewModel, snackbarChannel)
+                    MoreTab(padding, viewModel, navController, snackbarChannel)
                 }
             }
         }
-    )
+    }
 }
 
 @Composable
-fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
+private fun TabView(tabBarItems: List<TabBarItemWithIcon>, navController: NavController) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     NavigationBar {
@@ -318,11 +200,11 @@ fun TabView(tabBarItems: List<TabBarItem>, navController: NavController) {
                     selectedTabIndex = index
                     navController.navigate(tabBarItem.id)
                 },
-                label = { Text(text = tabBarItem.label) },
+                label = { Text(tabBarItem.label) },
                 icon = {
                     Icon(
-                        imageVector = if (selectedTabIndex == index) tabBarItem.selectedIcon else tabBarItem.unselectedIcon,
-                        contentDescription = tabBarItem.id
+                        if (selectedTabIndex == index) tabBarItem.selectedIcon else tabBarItem.unselectedIcon,
+                        contentDescription = tabBarItem.label
                     )
                 }
             )

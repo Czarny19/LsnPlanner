@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -19,17 +21,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
 import com.lczarny.lsnplanner.presentation.components.DeleteIcon
 import com.lczarny.lsnplanner.presentation.components.DeleteItemDialog
 import com.lczarny.lsnplanner.presentation.components.ListItemTitle
 import com.lczarny.lsnplanner.presentation.components.OptionsMenuIcon
-import com.lczarny.lsnplanner.presentation.components.PlanSelectedIcon
-import com.lczarny.lsnplanner.presentation.components.SetActiveIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListViewModel
@@ -52,7 +54,11 @@ fun LessonPlanListItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        PlanSelectedIcon(lessonPlan.isActive)
+        Icon(
+            AppIcons.SELECTED,
+            contentDescription = stringResource(R.string.plan_active),
+            tint = if (lessonPlan.isActive) MaterialTheme.colorScheme.tertiary else Color.Transparent
+        )
         ListItemTitle(modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING), text = lessonPlan.name)
         Spacer(Modifier.weight(1.0f))
         LessonPlanListItemMenu(viewModel, snackbarChannel, lessonPlan, selectedPlanName)
@@ -97,7 +103,7 @@ private fun LessonPlanListItemMenu(
         DropdownMenu(expanded = dropDownExpanded, onDismissRequest = { dropDownExpanded = false }) {
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.plan_make_active)) },
-                leadingIcon = { SetActiveIcon(contentDescription = stringResource(R.string.plan_make_active)) },
+                leadingIcon = { Icon(AppIcons.SELECTED, contentDescription = stringResource(R.string.plan_make_active)) },
                 onClick = {
                     dropDownExpanded = false
 

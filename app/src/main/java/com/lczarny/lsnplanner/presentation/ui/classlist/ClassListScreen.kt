@@ -11,7 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
-import com.lczarny.lsnplanner.presentation.model.ListScreenState
+import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import com.lczarny.lsnplanner.presentation.ui.classlist.components.ClassList
 
 enum class ClassListScreenSnackbar {
@@ -24,8 +24,8 @@ fun ClassListScreen(navController: NavController, viewModel: ClassListViewModel 
         val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
         when (screenState) {
-            ListScreenState.Loading -> FullScreenLoading(stringResource(R.string.please_wait))
-            ListScreenState.List -> ClassList(navController, viewModel)
+            BasicScreenState.Loading -> FullScreenLoading(stringResource(R.string.please_wait))
+            BasicScreenState.Ready -> ClassList(navController, viewModel)
         }
     }
 }

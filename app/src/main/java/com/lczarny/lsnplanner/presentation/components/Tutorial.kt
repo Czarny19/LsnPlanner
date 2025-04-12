@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -46,17 +44,19 @@ fun TutorialCard(modifier: Modifier = Modifier, msg: String, onConfirm: () -> Un
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Icon(
-                    Icons.Outlined.QuestionMark,
-                    modifier = Modifier.size(AppSizes.MD_ICON),
+                    AppIcons.TUTORIAL,
+                    modifier = modifier.size(AppSizes.MD_ICON),
                     contentDescription = stringResource(R.string.tutorial),
                 )
+
                 Text(
                     msg,
-                    modifier = Modifier.padding(start = AppPadding.SM_PADDING),
-                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(start = AppPadding.MD_PADDING),
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Start,
                 )
             }
+
             PrimaryButton(
                 modifier = Modifier.padding(end = AppPadding.MD_PADDING, bottom = AppPadding.SM_PADDING),
                 variant = PrimaryButtonVariant.Alt,

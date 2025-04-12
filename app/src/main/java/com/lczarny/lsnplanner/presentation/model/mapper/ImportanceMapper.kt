@@ -1,13 +1,10 @@
 package com.lczarny.lsnplanner.presentation.model.mapper
 
 import android.content.Context
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LowPriority
-import androidx.compose.material.icons.filled.PriorityHigh
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.Importance
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 
 fun Importance.getLabel(context: Context) = when (this) {
     Importance.Normal -> context.getString(R.string.importance_normal)
@@ -22,7 +19,7 @@ fun Importance.getColor() = when (this) {
 }
 
 fun Importance.getIcon() = when (this) {
-    Importance.Normal -> Icons.Filled.LowPriority
-    Importance.High -> Icons.Filled.PriorityHigh
-    Importance.VeryHigh -> Icons.Filled.Warning
+    Importance.Normal -> AppIcons.IMPORTANCE_NORMAL
+    Importance.High -> AppIcons.IMPORTANCE_HIGH
+    Importance.VeryHigh -> AppIcons.IMPORTANCE_VERY_HIGH
 }

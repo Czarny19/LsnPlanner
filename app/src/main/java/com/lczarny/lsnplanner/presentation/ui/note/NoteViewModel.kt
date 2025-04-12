@@ -12,7 +12,6 @@ import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
@@ -111,16 +110,16 @@ class NoteViewModel @Inject constructor(
     }
 
     fun markNoteImportanceTutorialDone() {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             _noteImportanceTutorialDone.update { true }
             dataStoreRepository.setTutorialNoteImportanceDone()
         }
     }
 
     private fun getSettings() {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStoreRepository.getTutorialNoteImportanceDone().flowOn(ioDispatcher).collect {
-                _noteImportanceTutorialDone.update { it }
+        viewModelScope.launch(ioDispatcher) {
+            dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
+                _noteImportanceTutorialDone.update { appSettings.tutorials.noteImportanceDone }
             }
         }
     }

@@ -22,7 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.ClassType
 import com.lczarny.lsnplanner.data.common.model.planClassTypes
-import com.lczarny.lsnplanner.presentation.components.ClassIcon
+import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.ColorPicker
 import com.lczarny.lsnplanner.presentation.components.DisplayField
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
@@ -80,7 +80,7 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                         modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                         label = stringResource(R.string.class_name),
                         text = classInfoData.name,
-                        icon = { ClassIcon(contentDescription = stringResource(R.string.class_name)) }
+                        icon = { Icon(AppIcons.CLASS, contentDescription = stringResource(R.string.class_name)) }
                     )
 
                     classInfoData.type.let {
@@ -116,7 +116,7 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                         .fillMaxWidth()
                         .padding(vertical = AppPadding.MD_PADDING),
                     enabled = saveEnabled,
-                    text = stringResource(R.string.plan_save),
+                    text = stringResource(R.string.class_save),
                     onClick = { viewModel.saveClass() }
                 )
             }
