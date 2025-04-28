@@ -12,21 +12,21 @@ import com.lczarny.lsnplanner.presentation.ui.home.HomeScreen
 import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanScreen
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListScreen
 import com.lczarny.lsnplanner.presentation.ui.note.NoteScreen
-import com.lczarny.lsnplanner.presentation.ui.start.StartScreen
+import com.lczarny.lsnplanner.presentation.ui.signin.SignInScreen
 
 @Composable
 fun AppNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    startDestination: Any = StartRoute,
+    startDestination: Any = SignInRoute,
 ) {
     NavHost(
         modifier = modifier,
         navController = navController,
         startDestination = startDestination
     ) {
-        composable<StartRoute> {
-            StartScreen(navController)
+        composable<SignInRoute> {
+            SignInScreen(navController)
         }
 
         composable<HomeRoute> { backStackEntry ->

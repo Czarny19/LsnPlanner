@@ -13,32 +13,30 @@ import kotlinx.coroutines.flow.update
 
 class LessonPlanRepository(private val dao: LessonPlanDao) {
 
-    private var _activeLessonPlan = MutableStateFlow(LessonPlanModel(createDate = 0L))
+    private var _activeLessonPlan = MutableStateFlow(LessonPlanModel(createDate = 0L, profileId = -1L))
 
-    suspend fun checkIfActivePlanExists(): Boolean = dao.checkIfActivePlanExists()
+    suspend fun checkIfActivePlanExists(profileId: Long): Boolean = dao.checkIfActivePlanExists(profileId)
 
     suspend fun getById(id: Long): LessonPlanModel = dao.getSingle(id).toModel()
 
-    suspend fun getActivePlan(reload: Boolean = false): StateFlow<LessonPlanModel> {
-        if (_activeLessonPlan.value.id == null || reload) {
-            _activeLessonPlan.update { dao.getActive().toModel() }
-        }
+    fun getActivePlan(): StateFlow<LessonPlanModel> = _activeLessonPlan.asStateFlow()
 
-        return _activeLessonPlan.asStateFlow()
+    suspend fun loadActivePlan(profileId: Long) {
+        _activeLessonPlan.update { dao.getActive(profileId).toModel() }
     }
 
-    fun getAll(): Flow<List<LessonPlanModel>> = dao.getAll().map { items -> items.map { it.toModel() } }
+    fun getAll(profileId: Long): Flow<List<LessonPlanModel>> = dao.getAll(profileId).map { items -> items.map { it.toModel() } }
 
-    suspend fun makeOtherPlansNotActive(lessonPlanId: Long) {
-        dao.makeOtherPlansNotActive(lessonPlanId)
+    suspend fun makeOtherPlansNotActive(lessonPlan: LessonPlanModel) {
+        dao.makeOtherPlansNotActive(lessonPlanId = lessonPlan.id!!, profileId = lessonPlan.profileId)
     }
 
     suspend fun update(lessonPlan: LessonPlanModel) {
-        dao.update(lessonPlan).run { getActivePlan(true) }
+        dao.update(lessonPlan).run { loadActivePlan(lessonPlan.profileId) }
     }
 
     suspend fun insert(lessonPlan: LessonPlanModel): Long = dao.insert(lessonPlan).let { newId ->
-        getActivePlan(true)
+        loadActivePlan(lessonPlan.profileId)
         newId
     }
 

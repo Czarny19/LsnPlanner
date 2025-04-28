@@ -27,7 +27,8 @@
     <string name="select_time">Select time</string>
     <string name="more">More</string>
     <string name="user">User</string>
-    <string name="user_name">User name</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
     <string name="user_hello">Welcome %1$s!</string>
     <string name="add_new">Add new</string>
     <string name="add_first_item">Add first item</string>
@@ -65,15 +66,21 @@
     <string name="sunday">Sunday</string>
 
     <!-- Snackbars -->
+    <string name="snackbar_auth_invalid_credentials">Wrong email or password!</string>
+    <string name="snackbar_auth_banned">This account is banned!</string>
+    <string name="snackbar_auth_user_exists">An account with this email already exists!</string>
+    <string name="snackbar_auth_unknown">An unknown error occurred, please try again later.</string>
     <string name="snackbar_create_first_plan">Created your first lesson plan!</string>
     <string name="snackbar_plan_set_active">Changed active plan to: %1$s</string>
     <string name="snackbar_plan_deleted">Permanently deleted plan: %1$s</string>
     <string name="snackbar_class_deleted">Permanently deleted class: %1$s</string>
 
-    <!-- First launch -->
-    <string name="first_launch_welcome">Welcome to Lsn Planner!</string>
-    <string name="first_launch_info">Before you start using the application, you need to set your user name and create your first lesson plan.\nInput your user name and then click the button below to open the lesson plan creator.</string>
-    <string name="first_launch_create_plan">Create your first lesson plan</string>
+    <!-- Sign In -->
+    <string name="signin_welcome">Welcome to Lsn Planner!</string>
+    <string name="signin_info">Before you start using the application, you need to sign in / sign up (Internet connection is required).</string>
+    <string name="signin_do_signin">Sign in</string>
+    <string name="signin_do_signup">Sign up</string>
+    <string name="signin_reset_password">Reset password</string>
 
     <!-- Home -->
     <string name="home_tab_classes">Classes</string>

@@ -3,7 +3,7 @@ package com.lczarny.lsnplanner.presentation.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
-object StartRoute
+object SignInRoute
 
 @Serializable
 data class HomeRoute(val firstLaunch: Boolean = false)

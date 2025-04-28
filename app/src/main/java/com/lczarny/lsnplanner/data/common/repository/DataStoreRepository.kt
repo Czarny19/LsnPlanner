@@ -30,7 +30,6 @@ class DataStoreRepository(
         return userDataStore.data.combine(tutorialDataStore.data) { userData, tutorials ->
             val appSettings = AppSettings(
                 initialized = true,
-                userName = userData[USER_NAME_KEY],
                 homeClassesViewType = userData[HOME_CLASSES_VIEW],
                 tutorials = Tutorials(
                     noteListSwipeDone = tutorials[TUTORIAL_NOTE_LIST_SWIPE].toString() == "true",
@@ -42,11 +41,6 @@ class DataStoreRepository(
 
             appSettings
         }
-    }
-
-    suspend fun setUserName(userName: String) {
-        userDataStore.edit { it[USER_NAME_KEY] = userName }
-        _appSettings.update { _appSettings.value.copy(userName = userName) }
     }
 
     suspend fun setHomeClassesViewType(viewType: String) {
@@ -81,7 +75,6 @@ class DataStoreRepository(
     }
 
     companion object {
-        private val USER_NAME_KEY = stringPreferencesKey("user_name")
         private val HOME_CLASSES_VIEW = stringPreferencesKey("home_classes_view")
 
         private val TUTORIAL_NOTE_LIST_SWIPE = stringPreferencesKey("note_list_swipe")

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LessonPlanListViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val profileRepository: ProfileRepository,
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
@@ -33,9 +35,11 @@ class LessonPlanListViewModel @Inject constructor(
 
     private fun loadLessonPlans() {
         viewModelScope.launch(ioDispatcher) {
-            lessonPlanRepository.getAll().flowOn(ioDispatcher).collect { plans ->
-                _lessonPlans.update { plans }
-                _screenState.update { BasicScreenState.Ready }
+            profileRepository.getActiveProfile().collect { profile ->
+                lessonPlanRepository.getAll(profile.id).flowOn(ioDispatcher).collect { plans ->
+                    _lessonPlans.update { plans }
+                    _screenState.update { BasicScreenState.Ready }
+                }
             }
         }
     }
@@ -43,7 +47,7 @@ class LessonPlanListViewModel @Inject constructor(
     fun makePlanActive(lessonPlan: LessonPlanModel, onFinished: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             lessonPlanRepository.update(lessonPlan.apply { isActive = true }).also {
-                lessonPlanRepository.makeOtherPlansNotActive(lessonPlan.id!!)
+                lessonPlanRepository.makeOtherPlansNotActive(lessonPlan)
             }
         }.invokeOnCompletion {
             onFinished.invoke()

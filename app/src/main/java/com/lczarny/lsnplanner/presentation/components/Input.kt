@@ -41,25 +41,17 @@ fun OutlinedInputField(
     onValueChange: (String) -> Unit,
     minLines: Int = 1,
     maxLines: Int = 1,
-    maxLength: Int
+    maxLength: Int? = null
 ) {
-    val composableScope = rememberCoroutineScope()
-    var debounceJob: Job? by remember { mutableStateOf(null) }
     var fieldValue by remember { mutableStateOf(initialValue) }
 
     OutlinedTextField(
-        modifier = modifier
-            .padding(bottom = AppPadding.INPUT_BOTTOM_PADDING)
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         value = fieldValue,
         onValueChange = { text ->
-            if (text.length <= maxLength) {
+            if (maxLength == null || text.length <= maxLength) {
                 fieldValue = text
-                debounceJob?.cancel()
-                debounceJob = composableScope.launch {
-                    delay(200)
-                    onValueChange.invoke(text)
-                }
+                onValueChange.invoke(text)
             }
         },
         label = { Text(label) },
@@ -68,7 +60,15 @@ fun OutlinedInputField(
         isError = error != null,
         readOnly = readOnly,
         enabled = enabled,
-        supportingText = { if (error != null) ErrorSupportingText(error) else LengthSupportingText(hint, fieldValue, maxLength) }
+        supportingText = {
+            if (error != null) {
+                ErrorSupportingText(error)
+            } else if (maxLength != null) {
+                LengthSupportingText(hint, fieldValue, maxLength)
+            } else {
+                null
+            }
+        }
     )
 }
 

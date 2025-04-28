@@ -57,6 +57,7 @@ class HomeViewModel @Inject constructor(
     val screenState = _screenState.asStateFlow()
     val firstLaunchDone = _firstLaunchDone.asStateFlow()
 
+    // TODO remove
     val userName = _userName.asStateFlow()
 
     val lessonPlan = _lessonPlan.asStateFlow()
@@ -105,7 +106,6 @@ class HomeViewModel @Inject constructor(
     private fun getSettings() {
         viewModelScope.launch(ioDispatcher) {
             dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
-                _userName.update { appSettings.userName ?: "" }
                 _classesDisplayType.update { ClassViewType.from(appSettings.homeClassesViewType ?: "") }
 
                 _noteListSwipeTutorialDone.update { appSettings.tutorials.noteListSwipeDone }

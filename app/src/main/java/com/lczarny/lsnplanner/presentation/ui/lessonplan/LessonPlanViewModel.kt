@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LessonPlanViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val profileRepository: ProfileRepository,
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
@@ -73,10 +75,14 @@ class LessonPlanViewModel @Inject constructor(
                 _screenState.update { DetailsScreenState.Edit }
             }
         } ?: run {
-            LessonPlanModel(isActive = true, createDate = currentTimestamp()).let { lessonPlan ->
-                _lessonPlan.update { lessonPlan }
-                _initialData = lessonPlan.copy()
-                _screenState.update { DetailsScreenState.Create }
+            viewModelScope.launch(ioDispatcher) {
+                profileRepository.getActiveProfile().collect { profile ->
+                    LessonPlanModel(isActive = true, profileId = profile.id, createDate = currentTimestamp()).let { lessonPlan ->
+                        _lessonPlan.update { lessonPlan }
+                        _initialData = lessonPlan.copy()
+                        _screenState.update { DetailsScreenState.Create }
+                    }
+                }
             }
         }
     }
@@ -88,10 +94,10 @@ class LessonPlanViewModel @Inject constructor(
             _lessonPlan.value?.let { lessonPlan ->
                 lessonPlan.id?.let {
                     lessonPlanRepository.update(lessonPlan)
-                    updateOtherPlans(lessonPlan.id, lessonPlan.isActive)
+                    updateOtherPlans(lessonPlan, lessonPlan.isActive)
                 } ?: run {
                     val newId = lessonPlanRepository.insert(lessonPlan.apply { isActive = true })
-                    updateOtherPlans(newId, lessonPlan.isActive)
+                    updateOtherPlans(lessonPlanRepository.getById(newId), lessonPlan.isActive)
                 }
             }
         }.invokeOnCompletion {
@@ -99,9 +105,9 @@ class LessonPlanViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateOtherPlans(id: Long, isActive: Boolean) {
+    private suspend fun updateOtherPlans(lessonPlan: LessonPlanModel, isActive: Boolean) {
         if (isActive) {
-            lessonPlanRepository.makeOtherPlansNotActive(id)
+            lessonPlanRepository.makeOtherPlansNotActive(lessonPlan)
         }
     }
 

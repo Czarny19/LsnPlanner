@@ -2,13 +2,26 @@ package com.lczarny.lsnplanner.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import kotlinx.serialization.Required
 
-@Entity(tableName = "lesson_plan")
+@Entity(
+    tableName = "lesson_plan",
+    foreignKeys = [
+        ForeignKey(
+            entity = Profile::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("profile_id"),
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.CASCADE
+        ),
+    ]
+)
 data class LessonPlan(
     @PrimaryKey(autoGenerate = true) val id: Long,
+    @ColumnInfo(name = "profile_id", index = true) val profileId: Long,
     @Required @ColumnInfo(name = "name") val name: String,
     @Required @ColumnInfo(name = "type", defaultValue = "University") val type: LessonPlanType,
     @Required @ColumnInfo(name = "is_active", defaultValue = "true") val isActive: Boolean,

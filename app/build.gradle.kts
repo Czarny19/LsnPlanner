@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +21,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "com.lczarny.lsnplanner.AppTestRunner"
+
+        buildConfigField("String", "supabaseAnonKey", gradleLocalProperties(rootDir, providers).getProperty("supabase.anonKey"))
+        buildConfigField("String", "supabaseUrl", gradleLocalProperties(rootDir, providers).getProperty("supabase.url"))
     }
 
     buildTypes {
@@ -35,6 +40,7 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
@@ -87,6 +93,12 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
+
+    implementation(libs.supabase.postgres)
+    implementation(libs.supabase.auth)
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
+    implementation(libs.ktor.utils)
 
     kspTest(libs.hilt.compiler)
 

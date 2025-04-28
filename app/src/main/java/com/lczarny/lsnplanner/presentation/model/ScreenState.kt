@@ -13,9 +13,9 @@ enum class DetailsScreenState {
     Finished
 }
 
-enum class StartScreenState {
+enum class LoginScreenState {
     Loading,
-    FirstLaunch,
-    UserNameSaved,
-    StartApp
+    SignIn,
+    FirstSignIn,
+    Skip
 }

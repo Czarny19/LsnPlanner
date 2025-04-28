@@ -2,7 +2,6 @@ package com.lczarny.lsnplanner.data.common.model
 
 data class AppSettings(
     val initialized: Boolean = false,
-    val userName: String? = null,
     val homeClassesViewType: String? = null,
     val tutorials: Tutorials = Tutorials()
 )

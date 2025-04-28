@@ -15,10 +15,10 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
-import com.lczarny.lsnplanner.presentation.model.StartScreenState
+import com.lczarny.lsnplanner.presentation.model.LoginScreenState
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
-import com.lczarny.lsnplanner.presentation.ui.start.StartScreen
-import com.lczarny.lsnplanner.presentation.ui.start.StartViewModel
+import com.lczarny.lsnplanner.presentation.ui.signin.SignInScreen
+import com.lczarny.lsnplanner.presentation.ui.signin.SignInViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import io.mockk.MockKAnnotations
@@ -67,7 +67,7 @@ class StartScreenTest {
     @Test
     fun testNormalLaunch() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
+        val viewModel = SignInViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
 
         coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns true
 
@@ -81,20 +81,20 @@ class StartScreenTest {
             }
 
             AppTheme {
-                StartScreen(navController, viewModel)
+                SignInScreen(navController, viewModel)
             }
         }
 
         advanceUntilIdle()
 
-        composeTestRule.waitUntil { viewModel.screenState.value == StartScreenState.StartApp }
+        composeTestRule.waitUntil { viewModel.screenState.value == LoginScreenState.StartApp }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun testFirstLanch() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
-        val viewModel = StartViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
+        val viewModel = SignInViewModel(dispatcher, lessonPlanRepository, dataStoreRepository)
 
         coEvery { dataStoreRepository.setUserName("UserName") } just Runs
         coEvery { lessonPlanRepository.checkIfActivePlanExists() } returns false
@@ -110,7 +110,7 @@ class StartScreenTest {
                 }
 
                 AppTheme {
-                    StartScreen(navController, viewModel)
+                    SignInScreen(navController, viewModel)
                 }
             }
         }
@@ -134,6 +134,6 @@ class StartScreenTest {
 
         advanceUntilIdle()
 
-        composeTestRule.waitUntil { viewModel.screenState.value == StartScreenState.UserNameSaved }
+        composeTestRule.waitUntil { viewModel.screenState.value == LoginScreenState.UserNameSaved }
     }
 }
