@@ -14,7 +14,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +37,10 @@ import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import com.lczarny.lsnplanner.presentation.model.TabBarItemWithIcon
+import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
+import com.lczarny.lsnplanner.presentation.navigation.SignInRoute
+import com.lczarny.lsnplanner.presentation.ui.home.components.HomeScreenSnackbar
+import com.lczarny.lsnplanner.presentation.ui.home.components.HomeSnackbar
 import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTab
 import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTabActions
 import com.lczarny.lsnplanner.presentation.ui.home.tab.classes.ClassesTabFab
@@ -46,58 +49,42 @@ import com.lczarny.lsnplanner.presentation.ui.home.tab.notes.NotesTab
 import com.lczarny.lsnplanner.presentation.ui.home.tab.notes.NotesTabFab
 import com.lczarny.lsnplanner.utils.getMonthName
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
-
-enum class HomeScreenSnackbar {
-    FirstLaunch,
-    ResetTutorials
-}
 
 @Composable
-fun HomeScreen(navController: NavController, firstLaunch: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     Surface(modifier = Modifier.fillMaxSize()) {
         val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
         when (screenState) {
             BasicScreenState.Loading -> FullScreenLoading(stringResource(R.string.please_wait))
-            BasicScreenState.Ready -> HomeTabs(navController, firstLaunch, viewModel)
+            BasicScreenState.Ready -> HomeTabs(navController, viewModel)
         }
     }
 }
 
 @Composable
-private fun HomeTabs(navController: NavController, firstLaunch: Boolean, viewModel: HomeViewModel) {
+private fun HomeTabs(navController: NavController, viewModel: HomeViewModel) {
     val context = LocalContext.current
 
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
-    val firstLaunchDone by viewModel.firstLaunchDone.collectAsStateWithLifecycle()
+
+    if (lessonPlan == null) {
+        navigateToLessonPlanCreation(navController)
+        return
+    }
+
+    val sessionActive by viewModel.sessionActive.collectAsStateWithLifecycle()
+
+    if (sessionActive.not()) {
+        navigateToSignIn(navController)
+    }
+
     val classesCurrentDate by viewModel.classesCurrentDate.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarChannel = remember { Channel<HomeScreenSnackbar>(Channel.CONFLATED) }
 
-    LaunchedEffect(snackbarChannel) {
-        snackbarChannel.receiveAsFlow().collect {
-            when (it) {
-                HomeScreenSnackbar.FirstLaunch -> snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.snackbar_create_first_plan),
-                    withDismissAction = true
-                )
-
-                HomeScreenSnackbar.ResetTutorials -> snackbarHostState.showSnackbar(
-                    message = context.getString(R.string.reset_tutorials_done),
-                    withDismissAction = true
-                )
-            }
-        }
-    }
-
-    if (firstLaunch && firstLaunchDone.not()) {
-        LaunchedEffect(true) {
-            snackbarChannel.trySend(HomeScreenSnackbar.FirstLaunch)
-            viewModel.setFirstLaunchDone()
-        }
-    }
+    HomeSnackbar(snackbarHostState, snackbarChannel)
 
     val classesTab = TabBarItemWithIcon(
         id = "Classes",
@@ -161,21 +148,10 @@ private fun HomeTabs(navController: NavController, firstLaunch: Boolean, viewMod
             }
         ) { padding ->
             NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
-                composable(classesTab.id) {
-                    ClassesTab(padding, viewModel, classesPagerState)
-                }
-
-                composable(eventsTab.id) {
-                    Text(eventsTab.id)
-                }
-
-                composable(notesTab.id) {
-                    NotesTab(padding, navController, viewModel)
-                }
-
-                composable(moreTab.id) {
-                    MoreTab(padding, viewModel, navController, snackbarChannel)
-                }
+                composable(classesTab.id) { ClassesTab(padding, viewModel, classesPagerState) }
+                composable(eventsTab.id) { Text(eventsTab.id) }
+                composable(notesTab.id) { NotesTab(padding, navController, viewModel) }
+                composable(moreTab.id) { MoreTab(padding, navController, viewModel, snackbarChannel) }
             }
         }
     }
@@ -209,5 +185,15 @@ private fun TabView(tabBarItems: List<TabBarItemWithIcon>, navController: NavCon
                 }
             )
         }
+    }
+}
+
+private fun navigateToLessonPlanCreation(navController: NavController) {
+    navController.navigate(LessonPlanRoute(firstPlan = true))
+}
+
+private fun navigateToSignIn(navController: NavController) {
+    navController.navigate(SignInRoute) {
+        popUpTo(navController.graph.id) { inclusive = true }
     }
 }

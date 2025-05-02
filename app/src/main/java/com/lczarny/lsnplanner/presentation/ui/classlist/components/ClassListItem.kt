@@ -12,7 +12,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,18 +35,16 @@ import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
 import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.presentation.navigation.ClassDetailsRoute
-import com.lczarny.lsnplanner.presentation.ui.classlist.ClassListScreenSnackbar
 import com.lczarny.lsnplanner.presentation.ui.classlist.ClassListViewModel
 import kotlinx.coroutines.channels.Channel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ClassListItem(
-    viewModel: ClassListViewModel,
     navController: NavController,
+    viewModel: ClassListViewModel,
     snackbarChannel: Channel<ClassListScreenSnackbar>,
     classInfo: ClassInfoModel,
-    selectedClassName: MutableState<String>,
 ) {
     val context = LocalContext.current
 
@@ -57,21 +54,12 @@ fun ClassListItem(
             .clickable { navController.navigate(ClassDetailsRoute(classInfoId = classInfo.id!!)) }
             .padding(vertical = AppPadding.XSM_PADDING, horizontal = AppPadding.MD_PADDING),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING)
     ) {
         ColorIndicator(color = Color(classInfo.color))
-        ListItemTitle(
-            modifier = Modifier
-                .padding(horizontal = AppPadding.MD_PADDING)
-                .weight(1.0f),
-            text = classInfo.name
-        )
-        InfoChip(
-            modifier = Modifier.padding(end = AppPadding.XSM_PADDING),
-            label = classInfo.type.toLabel(context),
-            imageVector = classInfo.type.toPlanClassTypeIcon()
-        )
-        ClassListItemMenu(viewModel, snackbarChannel, classInfo, selectedClassName)
+        ListItemTitle(modifier = Modifier.weight(1.0f), text = classInfo.name)
+        InfoChip(label = classInfo.type.toLabel(context), imageVector = classInfo.type.toPlanClassTypeIcon())
+        ClassListItemMenu(viewModel, snackbarChannel, classInfo)
     }
 
     HorizontalDivider()
@@ -82,7 +70,6 @@ fun ClassListItemMenu(
     viewModel: ClassListViewModel,
     snackbarChannel: Channel<ClassListScreenSnackbar>,
     classInfo: ClassInfoModel,
-    selectedClassName: MutableState<String>,
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
     var deleteConfirmationDialogOpen by remember { mutableStateOf(false) }
@@ -95,7 +82,7 @@ fun ClassListItemMenu(
             onConfirm = {
                 deleteConfirmationDialogOpen = false
                 viewModel.deleteClass(classInfo.id!!) {
-                    selectedClassName.value = classInfo.name
+                    viewModel.setSelectedClassName(classInfo.name)
                     snackbarChannel.trySend(ClassListScreenSnackbar.Deleted)
                 }
             },

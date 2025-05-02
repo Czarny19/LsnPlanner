@@ -17,6 +17,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -37,8 +39,10 @@ import com.lczarny.lsnplanner.presentation.ui.lessonplan.LessonPlanViewModel
 import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
 
 @Composable
-fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewModel, firstLaunch: Boolean) {
+fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewModel, firstPlan: Boolean) {
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
     val dataChanged by viewModel.dataChanged.collectAsStateWithLifecycle()
@@ -54,7 +58,8 @@ fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewMode
         topBar = {
             AppNavBar(
                 title = stringResource(R.string.route_new_lesson_plan),
-                onNavIconClick = { if (firstLaunch.not()) navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
+                navIconVisible = firstPlan.not(),
+                onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
             )
         }
     ) { padding ->
@@ -62,15 +67,12 @@ fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewMode
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(AppPadding.SCREEN_PADDING)
+                .padding(AppPadding.MD_PADDING)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
         ) {
-            InfoCard(
-                modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
-                text = stringResource(R.string.plan_form_info)
-            )
+            InfoCard(text = stringResource(R.string.plan_form_info))
 
             OutlinedInputField(
                 label = stringResource(R.string.plan_name),
@@ -99,11 +101,15 @@ fun LessonPlanCreate(navController: NavController, viewModel: LessonPlanViewMode
 
             PrimaryButton(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = AppPadding.MD_PADDING),
+                    .padding(bottom = AppPadding.MD_PADDING)
+                    .fillMaxWidth(),
                 enabled = saveEnabled,
                 text = stringResource(R.string.plan_save),
-                onClick = { viewModel.savePlan() }
+                onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                    viewModel.savePlan()
+                }
             )
         }
     }

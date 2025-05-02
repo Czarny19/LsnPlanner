@@ -89,7 +89,7 @@ fun ClassesTabList(
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(AppPadding.SCREEN_PADDING),
+            contentPadding = PaddingValues(AppPadding.MD_PADDING),
             verticalArrangement = Arrangement.spacedBy(AppPadding.LIST_ITEM_PADDING),
             horizontalAlignment = Alignment.Start
         ) {
@@ -155,7 +155,7 @@ private fun ClassesTabListItem(viewModel: HomeViewModel, classTimeWithInfo: Pair
         colors = CardDefaults.cardColors(containerColor = Color(classInfo.color), contentColor = Color.White),
     ) {
         Column(
-            modifier = Modifier.padding(AppPadding.SCREEN_PADDING),
+            modifier = Modifier.padding(AppPadding.MD_PADDING),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Top,
         ) {

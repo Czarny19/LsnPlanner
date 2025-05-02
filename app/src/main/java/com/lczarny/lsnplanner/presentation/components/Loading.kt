@@ -16,7 +16,7 @@ import com.lczarny.lsnplanner.presentation.constants.AppSizes
 @Composable
 fun FullScreenLoading(label: String? = null) {
     Column(
-        modifier = Modifier.padding(AppPadding.SCREEN_PADDING),
+        modifier = Modifier.padding(AppPadding.MD_PADDING),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

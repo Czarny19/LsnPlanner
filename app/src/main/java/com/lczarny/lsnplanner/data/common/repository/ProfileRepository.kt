@@ -10,16 +10,21 @@ import kotlinx.coroutines.flow.update
 
 class ProfileRepository(private val dao: ProfileDao) {
 
-    private var _activeProfile = MutableStateFlow(ProfileModel(id = -1L))
+    private var _activeProfile = MutableStateFlow(ProfileModel(id = ""))
 
     fun getActiveProfile(): StateFlow<ProfileModel> = _activeProfile.asStateFlow()
 
-    suspend fun getByEmail(email: String): ProfileModel = dao.getByEmail(email).toModel().let {
-        _activeProfile.update { it }
-        it
+    suspend fun loadActiveProfile(email: String): ProfileModel? = dao.getByEmail(email)?.let { profile ->
+        profile.toModel().let { profileModel ->
+            _activeProfile.update { profileModel }
+            profileModel
+        }
+    } ?: run {
+        null
     }
 
-    suspend fun insert(profile: ProfileModel) {
+    suspend fun insert(profile: ProfileModel): String {
         dao.insert(profile)
+        return dao.getByEmail(profile.email)!!.id
     }
 }

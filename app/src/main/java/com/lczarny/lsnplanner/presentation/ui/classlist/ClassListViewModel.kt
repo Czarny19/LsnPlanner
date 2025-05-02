@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,33 +20,45 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassListViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val profileRepository: ProfileRepository,
     private val lessonPlanRepository: LessonPlanRepository,
     private val classInfoRepository: ClassInfoRepository
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(BasicScreenState.Loading)
+
     private val _lessonPlanName = MutableStateFlow<String>("")
     private val _classes = MutableStateFlow(emptyList<ClassInfoModel>())
+
+    private val _selectedClassName = MutableStateFlow("")
 
     val screenState = _screenState.asStateFlow()
     val lessonPlanName = _lessonPlanName.asStateFlow()
     val classes = _classes.asStateFlow()
 
+    val selectedClassName = _selectedClassName.asStateFlow()
+
     init {
-        loadClasses()
+        watchClasses()
     }
 
-    fun loadClasses() {
+    fun watchClasses() {
         viewModelScope.launch(ioDispatcher) {
-            lessonPlanRepository.getActivePlan().collect { lessonPlan ->
-                _lessonPlanName.update { lessonPlan.name }
+            profileRepository.getActiveProfile().collect { profile ->
+                lessonPlanRepository.getActivePlan(profile.id).collect { lessonPlan ->
+                    _lessonPlanName.update { lessonPlan?.name ?: "" }
 
-                classInfoRepository.getAllForLessonPlan(lessonPlan.id!!).flowOn(ioDispatcher).collect { classes ->
-                    _classes.update { classes }
-                    _screenState.update { BasicScreenState.Ready }
+                    classInfoRepository.getAllForLessonPlan(lessonPlan?.id!!).flowOn(ioDispatcher).collect { classes ->
+                        _classes.update { classes }
+                        _screenState.update { BasicScreenState.Ready }
+                    }
                 }
             }
         }
+    }
+
+    fun setSelectedClassName(name: String) {
+        _selectedClassName.update { name }
     }
 
     fun deleteClass(classInfoId: Long, onFinished: () -> Unit) {

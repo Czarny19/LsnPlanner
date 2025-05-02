@@ -30,8 +30,7 @@ fun AppNavHost(
         }
 
         composable<HomeRoute> { backStackEntry ->
-            val homeRoute: HomeRoute = backStackEntry.toRoute()
-            HomeScreen(navController, homeRoute.firstLaunch)
+            HomeScreen(navController)
         }
 
         composable<LessonPlanListRoute> {
@@ -40,7 +39,7 @@ fun AppNavHost(
 
         composable<LessonPlanRoute> { backStackEntry ->
             val lessonPlanRoute: LessonPlanRoute = backStackEntry.toRoute()
-            LessonPlanScreen(navController, lessonPlanRoute.firstLaunch, lessonPlanRoute.lessonPlanId)
+            LessonPlanScreen(navController, lessonPlanRoute.firstPlan, lessonPlanRoute.lessonPlanId)
         }
 
         composable<ClassDetailsRoute> { backStackEntry ->

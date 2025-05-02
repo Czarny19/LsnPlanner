@@ -15,7 +15,7 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
-import com.lczarny.lsnplanner.presentation.model.LoginScreenState
+import com.lczarny.lsnplanner.presentation.model.SignInScreenState
 import com.lczarny.lsnplanner.presentation.theme.AppTheme
 import com.lczarny.lsnplanner.presentation.ui.signin.SignInScreen
 import com.lczarny.lsnplanner.presentation.ui.signin.SignInViewModel
@@ -87,7 +87,7 @@ class StartScreenTest {
 
         advanceUntilIdle()
 
-        composeTestRule.waitUntil { viewModel.screenState.value == LoginScreenState.StartApp }
+        composeTestRule.waitUntil { viewModel.screenState.value == SignInScreenState.StartApp }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -134,6 +134,6 @@ class StartScreenTest {
 
         advanceUntilIdle()
 
-        composeTestRule.waitUntil { viewModel.screenState.value == LoginScreenState.UserNameSaved }
+        composeTestRule.waitUntil { viewModel.screenState.value == SignInScreenState.UserNameSaved }
     }
 }

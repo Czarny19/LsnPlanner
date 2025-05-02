@@ -14,10 +14,6 @@ import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import com.lczarny.lsnplanner.presentation.ui.classlist.components.ClassList
 
-enum class ClassListScreenSnackbar {
-    Deleted
-}
-
 @Composable
 fun ClassListScreen(navController: NavController, viewModel: ClassListViewModel = hiltViewModel()) {
     Surface(modifier = Modifier.fillMaxSize()) {

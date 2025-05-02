@@ -6,6 +6,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
@@ -46,6 +47,8 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.SensorDoor
 import androidx.compose.material.icons.outlined.Timeline
 import androidx.compose.material.icons.outlined.Timer
+import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material.icons.outlined.WavingHand
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -72,6 +75,10 @@ object AppIcons {
     val TUTORIAL = Icons.Outlined.QuestionMark
     val USER = Icons.Filled.Person
     val RESET = Icons.Filled.SettingsBackupRestore
+    val SIGN_OUT = Icons.AutoMirrored.Filled.Logout
+
+    val PASS_VISIBLE = Icons.Outlined.Visibility
+    val PASS_HIDDEN = Icons.Outlined.VisibilityOff
 
     val ACTIVE = Icons.Filled.Check
     val INACTIVE = Icons.Filled.Close

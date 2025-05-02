@@ -9,14 +9,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
-import com.lczarny.lsnplanner.presentation.model.LoginScreenState
+import com.lczarny.lsnplanner.presentation.model.SignInScreenState
 import com.lczarny.lsnplanner.presentation.navigation.HomeRoute
-import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.ui.signin.components.SignInForm
-
-enum class SignInScreenSnackbar {
-    SignInError
-}
 
 @Composable
 fun SignInScreen(navController: NavController, viewModel: SignInViewModel = hiltViewModel()) {
@@ -24,20 +19,15 @@ fun SignInScreen(navController: NavController, viewModel: SignInViewModel = hilt
         val screenState by viewModel.screenState.collectAsStateWithLifecycle()
 
         when (screenState) {
-            LoginScreenState.Loading -> FullScreenLoading()
-            LoginScreenState.SignIn -> SignInForm(viewModel)
-            LoginScreenState.Skip -> navigateToHome(navController)
-            LoginScreenState.FirstSignIn -> navigateToLessonPlanCreation(navController)
+            SignInScreenState.Loading -> FullScreenLoading()
+            SignInScreenState.SignIn -> SignInForm(viewModel)
+            SignInScreenState.Done -> navigateToHome(navController)
         }
     }
 }
 
 private fun navigateToHome(navController: NavController) {
-    navController.navigate(HomeRoute()) {
+    navController.navigate(HomeRoute) {
         popUpTo(navController.graph.id) { inclusive = true }
     }
-}
-
-private fun navigateToLessonPlanCreation(navController: NavController) {
-    navController.navigate(LessonPlanRoute(firstLaunch = true))
 }

@@ -14,11 +14,6 @@ import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.components.LessonPlanList
 
-enum class ListPickerScreenSnackbar {
-    SetActive,
-    Deleted
-}
-
 @Composable
 fun LessonPlanListScreen(navController: NavController, viewModel: LessonPlanListViewModel = hiltViewModel()) {
     Surface(modifier = Modifier.fillMaxSize()) {

@@ -3,10 +3,8 @@ package com.lczarny.lsnplanner.presentation.ui.home.tab.notes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -18,11 +16,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.Importance
@@ -60,11 +59,10 @@ fun NotesTabItem(navController: NavController, viewModel: HomeViewModel, note: N
     )
 
     DraggableCard(
-        modifier = Modifier.padding(
-            start = AppPadding.SCREEN_PADDING,
-            end = AppPadding.SCREEN_PADDING,
-            bottom = AppPadding.LIST_ITEM_PADDING
-        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RectangleShape)
+            .padding(AppPadding.MD_PADDING),
         clickAction = { navController.navigate(NoteRoute(noteId = note.id)) },
         endAction = DraggableCardAction(
             color = MaterialTheme.colorScheme.error,
@@ -75,7 +73,11 @@ fun NotesTabItem(navController: NavController, viewModel: HomeViewModel, note: N
         ),
         colors = CardDefaults.cardColors()
     ) {
-        Column(Modifier.padding(AppPadding.MD_PADDING)) {
+        Column(
+            modifier = Modifier.padding(AppPadding.MD_PADDING),
+            verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
+            horizontalAlignment = Alignment.Start
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top,
@@ -86,31 +88,24 @@ fun NotesTabItem(navController: NavController, viewModel: HomeViewModel, note: N
                     modifier = Modifier.weight(1.0f),
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelLarge
+                    style = MaterialTheme.typography.titleMedium
                 )
 
-                Column(
-                    modifier = Modifier
-                        .widthIn(min = 100.dp)
-                        .fillMaxHeight()
-                        .padding(start = AppPadding.MD_PADDING),
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    horizontalAlignment = Alignment.End
-                ) {
-                    note.importance.let {
-                        if (it != Importance.Normal) InfoChip(
-                            modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
-                            label = it.getLabel(context),
-                            imageVector = it.getIcon(),
-                            color = it.getColor()
-                        )
-                    }
+                Text(note.modifyDate.convertMillisToSystemDateTime(context), style = MaterialTheme.typography.bodyMedium)
+            }
 
-                    Text(note.modifyDate.convertMillisToSystemDateTime(context), style = MaterialTheme.typography.bodyMedium)
+            note.importance.let {
+                if (it != Importance.Normal) {
+                    InfoChip(
+                        modifier = Modifier.align(Alignment.End),
+                        label = it.getLabel(context),
+                        imageVector = it.getIcon(),
+                        color = it.getColor()
+                    )
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = AppPadding.MD_PADDING))
+            HorizontalDivider()
 
             Text(
                 note.content,

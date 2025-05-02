@@ -8,7 +8,6 @@ import com.lczarny.lsnplanner.data.common.model.AppSettings
 import com.lczarny.lsnplanner.data.common.model.Tutorials
 import com.lczarny.lsnplanner.di.TutorialDataStore
 import com.lczarny.lsnplanner.di.UserDataStore
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,9 +18,8 @@ class DataStoreRepository(
     @UserDataStore private val userDataStore: DataStore<Preferences>,
     @TutorialDataStore private val tutorialDataStore: DataStore<Preferences>
 ) {
-    private var _appSettings = MutableStateFlow<AppSettings>(AppSettings())
+    private var _appSettings = MutableStateFlow(AppSettings())
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getAppSettings(): Flow<AppSettings> {
         if (_appSettings.value.initialized) {
             return _appSettings.asStateFlow()

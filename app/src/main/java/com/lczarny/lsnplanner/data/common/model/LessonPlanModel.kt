@@ -6,7 +6,7 @@ import com.lczarny.lsnplanner.data.local.entity.LessonPlan
 
 data class LessonPlanModel(
     val id: Long? = null,
-    @ColumnInfo(name = "profile_id") var profileId: Long,
+    @ColumnInfo(name = "profile_id") var profileId: String,
     @ColumnInfo(name = "name") var name: String = "",
     @ColumnInfo(name = "type") var type: LessonPlanType = LessonPlanType.University,
     @ColumnInfo(name = "is_active") var isActive: Boolean = true,

@@ -21,7 +21,7 @@ import kotlinx.serialization.Required
 )
 data class LessonPlan(
     @PrimaryKey(autoGenerate = true) val id: Long,
-    @ColumnInfo(name = "profile_id", index = true) val profileId: Long,
+    @ColumnInfo(name = "profile_id", index = true) val profileId: String,
     @Required @ColumnInfo(name = "name") val name: String,
     @Required @ColumnInfo(name = "type", defaultValue = "University") val type: LessonPlanType,
     @Required @ColumnInfo(name = "is_active", defaultValue = "true") val isActive: Boolean,

@@ -6,7 +6,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -27,7 +26,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.toSize
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.presentation.constants.AppPadding
 
 data class DropDownItem(
     val value: Any,
@@ -52,7 +50,6 @@ fun OutlinedDropDown(
         OutlinedTextField(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = AppPadding.INPUT_BOTTOM_PADDING)
                 .pointerInput(seleced) {
                     if (readOnly.not()) {
                         awaitEachGesture {

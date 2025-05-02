@@ -26,17 +26,23 @@
     <string name="select_date">Select date</string>
     <string name="select_time">Select time</string>
     <string name="more">More</string>
-    <string name="user">User</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="user_hello">Welcome %1$s!</string>
     <string name="add_new">Add new</string>
     <string name="add_first_item">Add first item</string>
     <string name="fab_menu_transition">Menu transition</string>
     <string name="fab_menu_rotation">Menu rotation</string>
 
+    <!-- User -->
+    <string name="user">User</string>
+    <string name="user_email">Email</string>
+    <string name="user_password">Password</string>
+    <string name="user_joined">Account created on: %1$s</string>
+    <string name="user_sign_out">Sign out</string>
+    <string name="user_sign_out_msg">Are you sure you want to sign out?</string>
+
     <!-- Errors  -->
     <string name="error">Error</string>
+    <string name="error_email_invalid">Invalid email address!</string>
+    <string name="error_password_hint">Password must be at least 8 characters long and must contain at least one uppercase letter, lowercase letter and number.</string>
     <string name="error_number_not_in_range">The field value must be a value between %1$d - %2$d!</string>
     <string name="error_field_required">This field is required!</string>
     <string name="error_duration_over_midnight">The class time cannot exceed midnight!</string>
@@ -70,7 +76,7 @@
     <string name="snackbar_auth_banned">This account is banned!</string>
     <string name="snackbar_auth_user_exists">An account with this email already exists!</string>
     <string name="snackbar_auth_unknown">An unknown error occurred, please try again later.</string>
-    <string name="snackbar_create_first_plan">Created your first lesson plan!</string>
+    <string name="snackbar_password_reset_sent">An email with password reset instructions was sent!</string>
     <string name="snackbar_plan_set_active">Changed active plan to: %1$s</string>
     <string name="snackbar_plan_deleted">Permanently deleted plan: %1$s</string>
     <string name="snackbar_class_deleted">Permanently deleted class: %1$s</string>
@@ -81,6 +87,8 @@
     <string name="signin_do_signin">Sign in</string>
     <string name="signin_do_signup">Sign up</string>
     <string name="signin_reset_password">Reset password</string>
+    <string name="signin_show_password">Show password</string>
+    <string name="signin_hide_password">Hide password</string>
 
     <!-- Home -->
     <string name="home_tab_classes">Classes</string>
@@ -102,8 +110,8 @@
     <string name="plan_type_school">School</string>
     <string name="plan_type_university">University</string>
     <string name="plan_active_manage">Manage your active plan</string>
-    <string name="plan_is_active">Plan is active</string>
-    <string name="plan_is_not_active">Plan is not active</string>
+    <string name="plan_is_active">This plan is active</string>
+    <string name="plan_is_not_active">This plan is not active</string>
     <string name="plan_list">Lesson plans</string>
     <string name="plan_list_manage">Manage all your lesson plans</string>
     <string name="plan_active">Active plan</string>
@@ -113,7 +121,7 @@
 
     <!-- Classes -->
     <string name="class_add">Add class</string>
-    <string name="class_add_first">Add your first class</string>
+    <string name="class_list_add_empty_hint">Use the \'+\' button to create a new class.</string>
     <string name="class_new">New class</string>
     <string name="class_list_empty_hint">No classes for the day ☺️</string>
     <string name="class_save">Save class</string>
@@ -140,7 +148,7 @@
     <string name="class_type_workshop">Workshop</string>
     <string name="class_type_other">Other</string>
     <string name="class_time_add">Add schedule item</string>
-    <string name="class_time_add_first">Add your first schedule item</string>
+    <string name="class_time_empty_hint">Use the \'+\' button to create a new schedule item.</string>
     <string name="class_time_type">Occurs</string>
     <string name="class_time_type_weekly">Weekly</string>
     <string name="class_time_type_period">Weekly for a period of time</string>

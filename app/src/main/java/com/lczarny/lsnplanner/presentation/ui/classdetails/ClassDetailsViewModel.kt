@@ -14,6 +14,7 @@ import com.lczarny.lsnplanner.data.common.model.defaultClassType
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
 import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.isDurationOverMidnight
@@ -28,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassDetailsViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val profileRepository: ProfileRepository,
     private val lessonPlanRepository: LessonPlanRepository,
     private val classInfoRepository: ClassInfoRepository,
     private val classTimeRepository: ClassScheduleRepository
@@ -91,31 +93,33 @@ class ClassDetailsViewModel @Inject constructor(
         _defaultWeekDay = defaultWeekDay
 
         viewModelScope.launch(ioDispatcher) {
-            lessonPlanRepository.getActivePlan().collect { lessonPlan ->
-                _lessonPlan.update { lessonPlan }
+            profileRepository.getActiveProfile().collect { profile ->
+                lessonPlanRepository.getActivePlan(profile.id).collect { lessonPlan ->
+                    _lessonPlan.update { lessonPlan }
 
-                classInfoId?.let { id ->
-                    classInfoRepository.getFullDataById(id).let { fullClass ->
-                        _info.update { fullClass.info }
-                        _initialData = fullClass.info
+                    classInfoId?.let { id ->
+                        classInfoRepository.getFullDataById(id).let { fullClass ->
+                            _info.update { fullClass.info }
+                            _initialData = fullClass.info
 
-                        _schedules.update { fullClass.schedules }
-                        _exams.update { fullClass.exams }
-                        _homeworks.update { fullClass.homeworks }
+                            _schedules.update { fullClass.schedules }
+                            _exams.update { fullClass.exams }
+                            _homeworks.update { fullClass.homeworks }
 
-                        _screenState.update { DetailsScreenState.Edit }
+                            _screenState.update { DetailsScreenState.Edit }
+                        }
+                    } ?: run {
+                        ClassInfoModel(lessonPlanId = lessonPlan?.id!!, type = lessonPlan.type.defaultClassType()).let { classInfo ->
+                            _info.update { classInfo }
+                            _initialData = classInfo
+                        }
+
+                        _schedules.update { emptyList() }
+                        _exams.update { emptyList() }
+                        _homeworks.update { emptyList() }
+
+                        _screenState.update { DetailsScreenState.Create }
                     }
-                } ?: run {
-                    ClassInfoModel(lessonPlanId = lessonPlan.id!!, type = lessonPlan.type.defaultClassType()).let { classInfo ->
-                        _info.update { classInfo }
-                        _initialData = classInfo
-                    }
-
-                    _schedules.update { emptyList() }
-                    _exams.update { emptyList() }
-                    _homeworks.update { emptyList() }
-
-                    _screenState.update { DetailsScreenState.Create }
                 }
             }
         }.invokeOnCompletion {
@@ -202,10 +206,10 @@ class ClassDetailsViewModel @Inject constructor(
         updateClassSchedule(classSchedule, classSchedule.copy(endDate = value))
     }
 
-    fun isClassScheduleNotValid(classTime: ClassScheduleModel, classroomChanged: Boolean, addressChanged: Boolean): Boolean {
+    fun isClassScheduleNotValid(classTime: ClassScheduleModel): Boolean {
         classTime.let {
-            val classroomError = classroomChanged && it.classroom.isEmpty()
-            val addressError = _lessonPlan.value?.addressEnabled == true && addressChanged && (it.address?.isEmpty() == true)
+            val classroomError = it.classroom.isEmpty()
+            val addressError = _lessonPlan.value?.addressEnabled == true && (it.address?.isEmpty() == true)
             val durationOverMidnight = isDurationOverMidnight(it.durationMinutes, it.startHour, it.startMinute)
             val basicDataError = classroomError || addressError || durationOverMidnight || it.durationMinutes == 0
 
@@ -252,7 +256,7 @@ class ClassDetailsViewModel @Inject constructor(
             return
         }
 
-        if (_schedules.value.firstOrNull { isClassScheduleNotValid(it, true, true) } != null) {
+        if (_schedules.value.firstOrNull { isClassScheduleNotValid(it) } != null) {
             _saveEnabled.update { false }
             return
         }

@@ -15,11 +15,7 @@ import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.presentation.ui.note.components.NoteEdit
 
 @Composable
-fun NoteScreen(
-    navController: NavController,
-    noteId: Long?,
-    viewModel: NoteViewModel = hiltViewModel(),
-) {
+fun NoteScreen(navController: NavController, noteId: Long?, viewModel: NoteViewModel = hiltViewModel()) {
     viewModel.intializeNote(noteId)
 
     Surface(modifier = Modifier.fillMaxSize()) {

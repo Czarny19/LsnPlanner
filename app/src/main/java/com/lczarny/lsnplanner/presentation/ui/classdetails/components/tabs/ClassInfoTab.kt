@@ -52,10 +52,10 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(AppPadding.SCREEN_PADDING)
+                    .padding(AppPadding.MD_PADDING)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.Top,
+                verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
             ) {
                 if (newClass) {
                     OutlinedInputField(
@@ -77,7 +77,6 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                     )
                 } else {
                     DisplayField(
-                        modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                         label = stringResource(R.string.class_name),
                         text = classInfoData.name,
                         icon = { Icon(AppIcons.CLASS, contentDescription = stringResource(R.string.class_name)) }
@@ -86,7 +85,6 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                     classInfoData.type.let {
                         val label = it.toLabel(context)
                         DisplayField(
-                            modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                             label = stringResource(R.string.class_type),
                             text = label,
                             icon = { Icon(it.toPlanClassTypeIcon(), contentDescription = label) }
@@ -109,12 +107,12 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                     maxLength = 500,
                 )
 
-                Spacer(modifier = Modifier.weight(1.0f))
+                Spacer(modifier = Modifier.weight(1f))
 
                 PrimaryButton(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = AppPadding.MD_PADDING),
+                        .padding(bottom = AppPadding.MD_PADDING),
                     enabled = saveEnabled,
                     text = stringResource(R.string.class_save),
                     onClick = { viewModel.saveClass() }

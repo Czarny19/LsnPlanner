@@ -21,13 +21,12 @@ val dateTimeFromEpochMilis = { milis: Long -> Instant.ofEpochMilli(milis).atZone
 
 val dateFromEpochMilis = { milis: Long -> dateTimeFromEpochMilis(milis).toLocalDate() }
 
-fun LocalDateTime.getTimestamp(): Long = this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
 fun LocalDate.getTimestamp(): Long = this.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
 fun LocalDateTime.getDayOfWeekNum(): Int = this.dayOfWeek.value
 
-fun Month.getMonthName(context: Context): String = this.getDisplayName(TextStyle.FULL, context.resources.configuration.locales.get(0))
+fun Month.getMonthName(context: Context): String =
+    this.getDisplayName(TextStyle.SHORT_STANDALONE, context.resources.configuration.locales.get(0)).replaceFirstChar { c -> c.uppercaseChar() }
 
 fun Int.toDayOfWeekString(context: Context): String = when (this) {
     1 -> context.resources.getString(R.string.monday)

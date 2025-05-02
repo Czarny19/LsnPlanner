@@ -1,10 +1,13 @@
 package com.lczarny.lsnplanner.presentation.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -17,7 +20,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,15 +45,20 @@ fun OutlinedInputField(
     error: InputError? = null,
     readOnly: Boolean = false,
     enabled: Boolean = true,
+    obscured: Boolean = false,
     onValueChange: (String) -> Unit,
     minLines: Int = 1,
     maxLines: Int = 1,
-    maxLength: Int? = null
+    maxLength: Int? = null,
+    supportingText: @Composable (() -> Unit)? = null
 ) {
     var fieldValue by remember { mutableStateOf(initialValue) }
+    var obscureEnabled by remember { mutableStateOf(obscured) }
 
     OutlinedTextField(
         modifier = modifier.fillMaxWidth(),
+        visualTransformation = if (obscureEnabled) PasswordVisualTransformation() else VisualTransformation.None,
+        keyboardOptions = KeyboardOptions(keyboardType = if (obscured) KeyboardType.Password else KeyboardType.Text),
         value = fieldValue,
         onValueChange = { text ->
             if (maxLength == null || text.length <= maxLength) {
@@ -60,14 +72,31 @@ fun OutlinedInputField(
         isError = error != null,
         readOnly = readOnly,
         enabled = enabled,
+        suffix = {
+            if (obscured) {
+                if (obscureEnabled) {
+                    Icon(
+                        AppIcons.PASS_HIDDEN,
+                        modifier = Modifier.clickable { obscureEnabled = false },
+                        contentDescription = stringResource(R.string.signin_show_password),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                } else {
+                    Icon(
+                        AppIcons.PASS_VISIBLE,
+                        modifier = Modifier.clickable { obscureEnabled = true },
+                        contentDescription = stringResource(R.string.signin_hide_password),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        },
         supportingText = {
             if (error != null) {
                 ErrorSupportingText(error)
             } else if (maxLength != null) {
                 LengthSupportingText(hint, fieldValue, maxLength)
-            } else {
-                null
-            }
+            } else supportingText?.invoke()
         }
     )
 }

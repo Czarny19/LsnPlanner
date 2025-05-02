@@ -45,11 +45,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
-import com.lczarny.lsnplanner.presentation.components.AddFirstItemInfo
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.DeleteIcon
 import com.lczarny.lsnplanner.presentation.components.DropDownIcon
 import com.lczarny.lsnplanner.presentation.components.DropDownItem
+import com.lczarny.lsnplanner.presentation.components.EmptyList
 import com.lczarny.lsnplanner.presentation.components.FabListBottomSpacer
 import com.lczarny.lsnplanner.presentation.components.FutureSelectableDates
 import com.lczarny.lsnplanner.presentation.components.InputError
@@ -77,23 +77,17 @@ fun ClassSchedulesTab(viewModel: ClassDetailsViewModel) {
     val expandedItemIdx = remember { mutableIntStateOf(-1) }
 
     if (schedules.isEmpty()) {
-        AddFirstItemInfo(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(AppPadding.SCREEN_PADDING),
-            label = stringResource(R.string.class_time_add_first),
-            buttonLabel = stringResource(R.string.class_time_add),
-            onClick = { viewModel.addClassSchedule() }
-        )
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(AppPadding.SCREEN_PADDING),
-            verticalArrangement = Arrangement.spacedBy(AppPadding.LIST_ITEM_PADDING),
-        ) {
-            itemsIndexed(items = schedules) { index, item -> ClassScheduleItem(viewModel, index, item, expandedItemIdx) }
-            item { FabListBottomSpacer() }
-        }
+        EmptyList(stringResource(R.string.class_time_empty_hint))
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(AppPadding.MD_PADDING),
+        verticalArrangement = Arrangement.spacedBy(AppPadding.LIST_ITEM_PADDING),
+    ) {
+        itemsIndexed(items = schedules) { index, item -> ClassScheduleItem(viewModel, index, item, expandedItemIdx) }
+        item { FabListBottomSpacer() }
     }
 }
 
@@ -110,10 +104,7 @@ private fun ClassScheduleItem(viewModel: ClassDetailsViewModel, idx: Int, classS
 
     if (lessonPlan?.addressEnabled == true) expandedSize += 30.dp
 
-    var classroomTouched by remember { mutableStateOf(false) }
-    var addressTouched by remember { mutableStateOf(false) }
-
-    val hasErrors = viewModel.isClassScheduleNotValid(classSchedule, classroomTouched, addressTouched)
+    val hasErrors = viewModel.isClassScheduleNotValid(classSchedule)
 
     var containerColor = MaterialTheme.colorScheme.primaryContainer
     var onContainerColor = MaterialTheme.colorScheme.onPrimaryContainer

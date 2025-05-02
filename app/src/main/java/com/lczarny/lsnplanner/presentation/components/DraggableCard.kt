@@ -1,7 +1,5 @@
 package com.lczarny.lsnplanner.presentation.components
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.AnchoredDraggableState
@@ -32,9 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -65,16 +61,11 @@ fun DraggableCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val density = LocalDensity.current
-    val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     var contentHeight by remember { mutableStateOf(0.dp) }
 
     val dragState = remember {
         AnchoredDraggableState(
             initialValue = DragAnchors.Center,
-            positionalThreshold = { distance: Float -> distance * 0.5f },
-            velocityThreshold = { with(density) { 100.dp.toPx() } },
-            snapAnimationSpec = tween(durationMillis = 0),
-            decayAnimationSpec = decayAnimationSpec,
             anchors = DraggableAnchors {
                 DragAnchors.Center at 0f
                 startAction?.let { DragAnchors.Start at with(density) { 100.dp.toPx() } }
@@ -83,31 +74,21 @@ fun DraggableCard(
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RectangleShape)
-    ) {
-        Box(modifier = Modifier.anchoredDraggable(dragState, Orientation.Horizontal)) {
-            DraggableCardActions(modifier, contentHeight, startAction, endAction)
+    Box(modifier = Modifier.anchoredDraggable(dragState, Orientation.Horizontal)) {
+        DraggableCardActions(modifier, contentHeight, startAction, endAction)
 
-            Card(
-                modifier = modifier
-                    .fillMaxSize()
-                    .offset {
-                        IntOffset(
-                            x = dragState
-                                .requireOffset()
-                                .roundToInt(), y = 0
-                        )
-                    }
-                    .onSizeChanged { size -> contentHeight = with(density) { size.height.toDp() } }
-                    .clickable { clickAction.invoke() },
-                colors = colors ?: CardDefaults.cardColors(),
-                elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
-                content = content
-            )
-        }
+        val offset = IntOffset(x = dragState.requireOffset().roundToInt(), y = 0)
+
+        Card(
+            modifier = modifier
+                .fillMaxSize()
+                .offset { offset }
+                .onSizeChanged { size -> contentHeight = with(density) { size.height.toDp() } }
+                .clickable { clickAction.invoke() },
+            colors = colors ?: CardDefaults.cardColors(),
+            elevation = CardDefaults.cardElevation(defaultElevation = AppSizes.CARD_ELEVATION),
+            content = content
+        )
     }
 }
 

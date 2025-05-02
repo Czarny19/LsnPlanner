@@ -51,7 +51,7 @@ fun FabMenu(items: List<FabMenuItem>) {
 
     Column(
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(AppPadding.SCREEN_PADDING, Alignment.Bottom)
+        verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING, Alignment.Bottom)
     ) {
         FabMenuItems(visible = filterFabExpanded, items = items.filter { it.visible }, onClick = changeExpanded)
 
@@ -86,7 +86,7 @@ private fun FabMenuItems(visible: Boolean, items: List<FabMenuItem>, onClick: ()
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(AppPadding.SCREEN_PADDING),
+            verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
         ) {
             items.forEach { menuItem -> FabMenuOption(menuItem = menuItem, onClick = onClick) }
         }

@@ -69,7 +69,7 @@ fun ColorPicker(modifier: Modifier = Modifier, label: String, initialColorHex: L
 
     Row(
         modifier = modifier
-            .padding(top = AppPadding.CHECKBOX_TOP_PADDING, bottom = AppPadding.CHECKBOX_BOTTOM_PADDING)
+            .padding(bottom = AppPadding.CHECKBOX_BOTTOM_PADDING)
             .fillMaxWidth()
             .clickable { colorPickerDialogOpen = true }
             .border(

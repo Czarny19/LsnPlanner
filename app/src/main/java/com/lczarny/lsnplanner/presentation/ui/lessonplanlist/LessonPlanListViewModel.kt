@@ -26,14 +26,18 @@ class LessonPlanListViewModel @Inject constructor(
     private val _screenState = MutableStateFlow(BasicScreenState.Loading)
     private val _lessonPlans = MutableStateFlow(emptyList<LessonPlanModel>())
 
+    private val _selectedPlanName = MutableStateFlow("")
+
     val screenState = _screenState.asStateFlow()
     val lessonPlans = _lessonPlans.asStateFlow()
 
+    val selectedPlanName = _selectedPlanName.asStateFlow()
+
     init {
-        loadLessonPlans()
+        watchLessonPlans()
     }
 
-    private fun loadLessonPlans() {
+    private fun watchLessonPlans() {
         viewModelScope.launch(ioDispatcher) {
             profileRepository.getActiveProfile().collect { profile ->
                 lessonPlanRepository.getAll(profile.id).flowOn(ioDispatcher).collect { plans ->
@@ -42,6 +46,10 @@ class LessonPlanListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setSelectedPlanName(name: String) {
+        _selectedPlanName.update { name }
     }
 
     fun makePlanActive(lessonPlan: LessonPlanModel, onFinished: () -> Unit) {

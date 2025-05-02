@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 object SignInRoute
 
 @Serializable
-data class HomeRoute(val firstLaunch: Boolean = false)
+object HomeRoute
 
 @Serializable
 object LessonPlanListRoute
 
 @Serializable
-data class LessonPlanRoute(val firstLaunch: Boolean = false, val lessonPlanId: Long? = null)
+data class LessonPlanRoute(val firstPlan: Boolean = false, val lessonPlanId: Long? = null)
 
 @Serializable
 data class NoteRoute(val noteId: Long? = null)

@@ -39,9 +39,9 @@ fun TutorialCard(modifier: Modifier = Modifier, msg: String, onConfirm: () -> Un
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AppPadding.SCREEN_PADDING),
+                    .padding(AppPadding.MD_PADDING),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.Start
             ) {
                 Icon(
                     AppIcons.TUTORIAL,

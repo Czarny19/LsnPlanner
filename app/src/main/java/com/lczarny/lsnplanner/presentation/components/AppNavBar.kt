@@ -12,12 +12,12 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavBar(title: String, onNavIconClick: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
+fun AppNavBar(title: String, navIconVisible: Boolean = true, onNavIconClick: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
     TopAppBar(
         title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         actions = actions,
         scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
-        navigationIcon = { onNavIconClick?.let { IconButton(onClick = it) { BackIcon() } } },
+        navigationIcon = { if (navIconVisible && onNavIconClick != null) { IconButton(onClick = onNavIconClick) { BackIcon() } } },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,

@@ -6,15 +6,19 @@ import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
 import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.model.NoteModel
+import com.lczarny.lsnplanner.data.common.model.ProfileModel
+import com.lczarny.lsnplanner.data.common.repository.AuthRepository
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
 import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
 import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.common.repository.NoteRepository
+import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import com.lczarny.lsnplanner.presentation.model.mapper.ClassViewType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -33,6 +37,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val authRepository: AuthRepository,
+    private val profileRepository: ProfileRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val lessonPlanRepository: LessonPlanRepository,
     private val classInfoRepository: ClassInfoRepository,
@@ -41,9 +47,9 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(BasicScreenState.Loading)
-    private val _firstLaunchDone = MutableStateFlow(false)
 
-    private val _userName = MutableStateFlow("")
+    private val _sessionActive = MutableStateFlow(true)
+    private val _userProfile = MutableStateFlow<ProfileModel?>(null)
 
     private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
 
@@ -55,10 +61,9 @@ class HomeViewModel @Inject constructor(
     private val _noteListSwipeTutorialDone = MutableStateFlow(false)
 
     val screenState = _screenState.asStateFlow()
-    val firstLaunchDone = _firstLaunchDone.asStateFlow()
 
-    // TODO remove
-    val userName = _userName.asStateFlow()
+    val sessionActive = _sessionActive.asStateFlow()
+    val userProfile = _userProfile.asStateFlow()
 
     val lessonPlan = _lessonPlan.asStateFlow()
 
@@ -70,12 +75,9 @@ class HomeViewModel @Inject constructor(
     val noteListSwipeTutorialDone = _noteListSwipeTutorialDone.asStateFlow()
 
     init {
-        getActiveLessonPlan()
-        getSettings()
-    }
-
-    fun setFirstLaunchDone() {
-        _firstLaunchDone.update { true }
+        watchUserSession()
+        watchActiveLessonPlan()
+        watchSettings()
     }
 
     fun changeCurrentClassesDate(date: LocalDate) {
@@ -86,24 +88,37 @@ class HomeViewModel @Inject constructor(
         _classesCurrentDate.update { _classesCurrentDate.value.plusWeeks(if (goForward) 1 else -1) }
     }
 
-    private fun getActiveLessonPlan() {
+    fun watchUserSession() {
         viewModelScope.launch(ioDispatcher) {
-            lessonPlanRepository.getActivePlan().collect { plan ->
-                _lessonPlan.update { plan }
-
-                plan.id?.let { id ->
-                    getClasses(id)
-                    getNotes(id)
+            authRepository.currentSessionStatus.collect { status ->
+                if (status is SessionStatus.Authenticated) {
+                    _sessionActive.update { true }
+                    profileRepository.getActiveProfile().collect { profile -> _userProfile.update { profile } }
+                } else {
+                    _sessionActive.update { false }
                 }
-
-                delay(500)
-
-                _screenState.update { BasicScreenState.Ready }
             }
         }
     }
 
-    private fun getSettings() {
+    private fun watchActiveLessonPlan() {
+        viewModelScope.launch(ioDispatcher) {
+            profileRepository.getActiveProfile().collect { profile ->
+                lessonPlanRepository.getActivePlan(profile.id).flowOn(ioDispatcher).collect { plan ->
+                    _lessonPlan.update { plan }
+
+                    plan?.id?.let { id ->
+                        getClasses(id)
+                        getNotes(id)
+                    }
+
+                    _screenState.update { BasicScreenState.Ready }
+                }
+            }
+        }
+    }
+
+    private fun watchSettings() {
         viewModelScope.launch(ioDispatcher) {
             dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
                 _classesDisplayType.update { ClassViewType.from(appSettings.homeClassesViewType ?: "") }
@@ -166,10 +181,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun signOut() {
+        viewModelScope.launch(ioDispatcher) {
+            authRepository.signOut()
+        }
+    }
+
     fun resetTutorials(onComplete: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
             dataStoreRepository.resetTutorials()
-            getSettings()
         }.invokeOnCompletion {
             onComplete.invoke()
         }

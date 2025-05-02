@@ -11,7 +11,7 @@ import com.lczarny.lsnplanner.data.local.entity.Profile
 interface ProfileDao {
 
     @Query("SELECT * FROM profile WHERE email = :email")
-    suspend fun getByEmail(email: String): Profile
+    suspend fun getByEmail(email: String): Profile?
 
     @Insert(entity = Profile::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: ProfileModel)

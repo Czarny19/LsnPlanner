@@ -13,9 +13,8 @@ enum class DetailsScreenState {
     Finished
 }
 
-enum class LoginScreenState {
+enum class SignInScreenState {
     Loading,
     SignIn,
-    FirstSignIn,
-    Skip
+    Done
 }

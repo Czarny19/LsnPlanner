@@ -17,7 +17,7 @@ interface LessonPlanDao {
 
     @Transaction
     @Query("SELECT EXISTS(SELECT 1 FROM lesson_plan WHERE is_active = 1 and profile_id = :profileId LIMIT 1)")
-    suspend fun checkIfActivePlanExists(profileId: Long): Boolean
+    suspend fun checkIfActivePlanExists(profileId: String): Boolean
 
     @Transaction
     @Query("SELECT  * FROM lesson_plan WHERE id = :id")
@@ -25,15 +25,15 @@ interface LessonPlanDao {
 
     @Transaction
     @Query("SELECT * FROM lesson_plan WHERE is_active = 1 and profile_id = :profileId LIMIT 1")
-    suspend fun getActive(profileId: Long): LessonPlan
+    fun getActive(profileId: String): Flow<LessonPlan?>
 
     @Transaction
     @Query("SELECT * FROM lesson_plan where profile_id = :profileId")
-    fun getAll(profileId: Long): Flow<List<LessonPlan>>
+    fun getAll(profileId: String): Flow<List<LessonPlan>>
 
     @Transaction
     @Query("UPDATE lesson_plan set is_active = 0 WHERE id != :lessonPlanId and profile_id = :profileId")
-    suspend fun makeOtherPlansNotActive(lessonPlanId: Long, profileId: Long)
+    suspend fun makeOtherPlansNotActive(lessonPlanId: Long, profileId: String)
 
     @Update(entity = LessonPlan::class)
     suspend fun update(lessonPlan: LessonPlanModel)

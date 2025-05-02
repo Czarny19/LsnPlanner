@@ -25,6 +25,7 @@ class LessonPlanViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
+
     private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
     private val _dataChanged = MutableStateFlow(false)
     private val _saveEnabled = MutableStateFlow(false)
@@ -32,6 +33,7 @@ class LessonPlanViewModel @Inject constructor(
     private lateinit var _initialData: LessonPlanModel
 
     val screenState = _screenState.asStateFlow()
+
     val lessonPlan = _lessonPlan.asStateFlow()
     val dataChanged = _dataChanged.asStateFlow()
     val saveEnabled = _saveEnabled.asStateFlow()

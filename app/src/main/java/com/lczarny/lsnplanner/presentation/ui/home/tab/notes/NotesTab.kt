@@ -22,6 +22,7 @@ import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 @Composable
 fun NotesTab(padding: PaddingValues, navController: NavController, viewModel: HomeViewModel) {
     val notes by viewModel.notes.collectAsStateWithLifecycle()
+
     val tutorialDone by viewModel.noteListSwipeTutorialDone.collectAsStateWithLifecycle()
 
     if (notes.isEmpty()) {
@@ -34,16 +35,11 @@ fun NotesTab(padding: PaddingValues, navController: NavController, viewModel: Ho
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(vertical = AppPadding.SCREEN_PADDING),
         ) {
             if (tutorialDone.not()) {
                 item {
                     TutorialCard(
-                        modifier = Modifier.padding(
-                            start = AppPadding.SCREEN_PADDING,
-                            end = AppPadding.SCREEN_PADDING,
-                            bottom = AppPadding.LIST_ITEM_PADDING
-                        ),
+                        modifier = Modifier.padding(AppPadding.MD_PADDING),
                         msg = stringResource(R.string.tutorial_note_swipe),
                         onConfirm = { viewModel.markNoteListSwipeTutorialDone() }
                     )

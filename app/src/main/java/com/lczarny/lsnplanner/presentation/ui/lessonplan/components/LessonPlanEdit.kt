@@ -63,13 +63,12 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .padding(AppPadding.SCREEN_PADDING)
+                    .padding(AppPadding.MD_PADDING)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
+                verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
             ) {
                 DisplayField(
-                    modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     label = stringResource(R.string.plan_type),
                     text = lessonPlanData.type.getLabel(context),
                     icon = {
@@ -82,7 +81,6 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                 )
 
                 DisplayField(
-                    modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     label = stringResource(R.string.plan_create_date),
                     text = lessonPlanData.createDate.convertMillisToSystemDate(context),
                     icon = {
@@ -95,7 +93,6 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                 )
 
                 DisplayField(
-                    modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
                     text = stringResource(if (lessonPlanData.isActive) R.string.plan_is_active else R.string.plan_is_not_active),
                     icon = {
                         if (lessonPlanData.isActive) {
@@ -115,19 +112,14 @@ fun LessonPlanEdit(navController: NavController, viewModel: LessonPlanViewModel)
                 )
 
                 if (lessonPlanData.isActive.not()) PrimaryButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = AppPadding.MD_PADDING),
+                    modifier = Modifier.fillMaxWidth(),
                     text = stringResource(R.string.plan_make_active),
                     onClick = { viewModel.setPlanAsActive() }
                 )
 
-                HorizontalDivider(modifier = Modifier.padding(bottom = AppPadding.MD_PADDING))
+                HorizontalDivider()
 
-                InfoCard(
-                    modifier = Modifier.padding(bottom = AppPadding.MD_PADDING),
-                    text = stringResource(R.string.plan_address_enabled_change_info)
-                )
+                InfoCard(text = stringResource(R.string.plan_address_enabled_change_info))
 
                 OutlinedCheckbox(
                     initialValue = lessonPlanData.addressEnabled,

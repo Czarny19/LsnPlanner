@@ -19,7 +19,7 @@ import com.lczarny.lsnplanner.presentation.ui.lessonplan.components.LessonPlanEd
 @Composable
 fun LessonPlanScreen(
     navController: NavController,
-    firstLaunch: Boolean,
+    firstPlan: Boolean,
     lessonPlanId: Long?,
     viewModel: LessonPlanViewModel = hiltViewModel()
 ) {
@@ -30,17 +30,17 @@ fun LessonPlanScreen(
 
         when (screenState) {
             DetailsScreenState.Loading -> FullScreenLoading()
-            DetailsScreenState.Create -> LessonPlanCreate(navController, viewModel, firstLaunch)
+            DetailsScreenState.Create -> LessonPlanCreate(navController, viewModel, firstPlan)
             DetailsScreenState.Edit -> LessonPlanEdit(navController, viewModel)
             DetailsScreenState.Saving -> FullScreenLoading(stringResource(R.string.saving))
-            DetailsScreenState.Finished -> navigateAfterFinished(navController, firstLaunch)
+            DetailsScreenState.Finished -> navigateAfterFinished(navController, firstPlan)
         }
     }
 }
 
-private fun navigateAfterFinished(navController: NavController, firstLaunch: Boolean) {
-    if (firstLaunch) {
-        navController.navigate(HomeRoute(true)) {
+private fun navigateAfterFinished(navController: NavController, firstPlan: Boolean) {
+    if (firstPlan) {
+        navController.navigate(HomeRoute) {
             popUpTo(navController.graph.id) { inclusive = true }
         }
     } else {

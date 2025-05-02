@@ -52,6 +52,7 @@ import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
 @Composable
 fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Boolean) {
     val note by viewModel.note.collectAsStateWithLifecycle()
+
     val dataChanged by viewModel.dataChanged.collectAsStateWithLifecycle()
     val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
 
@@ -98,15 +99,16 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
                 Box(modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)) {
                     OutlinedInputField(
                         modifier = Modifier.padding(
-                            top = if (detailsExpanded) 0.dp else AppPadding.SCREEN_PADDING,
-                            start = AppPadding.SCREEN_PADDING,
-                            end = AppPadding.SCREEN_PADDING
+                            top = if (detailsExpanded) 0.dp else AppPadding.MD_PADDING,
+                            start = AppPadding.MD_PADDING,
+                            end = AppPadding.MD_PADDING,
+                            bottom = AppPadding.MD_PADDING
                         ),
                         label = stringResource(R.string.note_title),
                         initialValue = noteData.title,
                         onValueChange = { title -> viewModel.updateTitle(title) },
                         maxLines = 5,
-                        maxLength = 300
+                        maxLength = 200
                     )
                 }
 
@@ -141,7 +143,7 @@ private fun NoteTopMenu(viewModel: NoteViewModel, note: NoteModel) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = AppPadding.SCREEN_PADDING, start = AppPadding.SCREEN_PADDING, end = AppPadding.SCREEN_PADDING)
+                .padding(top = AppPadding.MD_PADDING, start = AppPadding.MD_PADDING, end = AppPadding.MD_PADDING)
         ) {
             if (tutorialDone.not()) TutorialCard(
                 modifier = Modifier.padding(bottom = AppPadding.INPUT_BOTTOM_PADDING),

@@ -14,7 +14,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +34,6 @@ import com.lczarny.lsnplanner.presentation.components.OptionsMenuIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.LessonPlanListViewModel
-import com.lczarny.lsnplanner.presentation.ui.lessonplanlist.ListPickerScreenSnackbar
 import kotlinx.coroutines.channels.Channel
 
 @Composable
@@ -44,7 +42,6 @@ fun LessonPlanListItem(
     viewModel: LessonPlanListViewModel,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,
     lessonPlan: LessonPlanModel,
-    selectedPlanName: MutableState<String>,
 ) {
     Row(
         modifier = Modifier
@@ -61,7 +58,7 @@ fun LessonPlanListItem(
         )
         ListItemTitle(modifier = Modifier.padding(horizontal = AppPadding.MD_PADDING), text = lessonPlan.name)
         Spacer(Modifier.weight(1.0f))
-        LessonPlanListItemMenu(viewModel, snackbarChannel, lessonPlan, selectedPlanName)
+        LessonPlanListItemMenu(viewModel, snackbarChannel, lessonPlan)
     }
 
     HorizontalDivider()
@@ -72,7 +69,6 @@ private fun LessonPlanListItemMenu(
     viewModel: LessonPlanListViewModel,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,
     lessonPlan: LessonPlanModel,
-    selectedPlanName: MutableState<String>,
 ) {
     if (lessonPlan.isActive) {
         return IconButton(enabled = false, onClick = {}) {}
@@ -89,7 +85,7 @@ private fun LessonPlanListItemMenu(
             onConfirm = {
                 deleteConfirmationDialogOpen = false
                 viewModel.deletePlan(lessonPlan.id!!) {
-                    selectedPlanName.value = lessonPlan.name
+                    viewModel.setSelectedPlanName(lessonPlan.name)
                     snackbarChannel.trySend(ListPickerScreenSnackbar.Deleted)
                 }
             },
@@ -108,7 +104,7 @@ private fun LessonPlanListItemMenu(
                     dropDownExpanded = false
 
                     viewModel.makePlanActive(lessonPlan) {
-                        selectedPlanName.value = lessonPlan.name
+                        viewModel.setSelectedPlanName(lessonPlan.name)
                         snackbarChannel.trySend(ListPickerScreenSnackbar.SetActive)
                     }
                 }

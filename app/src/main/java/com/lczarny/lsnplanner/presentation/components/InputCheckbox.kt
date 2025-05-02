@@ -31,7 +31,7 @@ fun OutlinedCheckbox(
 
     Row(
         modifier = modifier
-            .padding(top = AppPadding.CHECKBOX_TOP_PADDING, bottom = AppPadding.CHECKBOX_BOTTOM_PADDING)
+            .padding(bottom = AppPadding.CHECKBOX_BOTTOM_PADDING)
             .fillMaxWidth()
             .clickable {
                 fieldValue = !fieldValue

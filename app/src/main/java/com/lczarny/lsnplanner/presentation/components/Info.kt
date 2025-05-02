@@ -2,9 +2,7 @@ package com.lczarny.lsnplanner.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -45,14 +43,14 @@ fun InfoCard(modifier: Modifier = Modifier, text: String, iconVisible: Boolean =
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(AppPadding.SCREEN_PADDING),
+                .padding(AppPadding.MD_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start,
         ) {
             if (iconVisible) Icon(
                 AppIcons.INFO,
                 modifier = Modifier
-                    .padding(end = AppPadding.SCREEN_PADDING)
+                    .padding(end = AppPadding.MD_PADDING)
                     .size(AppSizes.LG_ICON),
                 contentDescription = stringResource(R.string.information),
             )
@@ -72,7 +70,9 @@ fun InfoChip(modifier: Modifier = Modifier, label: String, imageVector: ImageVec
             .shadow(4.dp, shape)
             .clip(shape)
             .background(color = MaterialTheme.colorScheme.background)
-            .widthIn(max = 160.dp)
+            .widthIn(max = 160.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
         Icon(
             imageVector,
@@ -88,37 +88,6 @@ fun InfoChip(modifier: Modifier = Modifier, label: String, imageVector: ImageVec
             style = MaterialTheme.typography.bodySmall.copy(color = color ?: MaterialTheme.colorScheme.secondary),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-fun AddFirstItemInfo(
-    modifier: Modifier = Modifier,
-    label: String,
-    buttonLabel: String,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(AppPadding.SCREEN_PADDING),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AddFirstItemIcon()
-
-        Text(
-            label,
-            modifier = Modifier.padding(vertical = AppPadding.MD_PADDING),
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
-        )
-
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = AppPadding.MD_PADDING),
-            text = buttonLabel,
-            onClick = onClick
         )
     }
 }
