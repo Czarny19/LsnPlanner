@@ -7,6 +7,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -27,6 +28,7 @@ import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.components.AddIcon
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
+import com.lczarny.lsnplanner.presentation.components.SaveIcon
 import com.lczarny.lsnplanner.presentation.model.TabBarItem
 import com.lczarny.lsnplanner.presentation.ui.classdetails.ClassDetailsViewModel
 import com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs.ClassHomeworkTab
@@ -40,6 +42,7 @@ import kotlinx.coroutines.launch
 fun ClassDetailsPager(navController: NavController, viewModel: ClassDetailsViewModel, newClass: Boolean) {
     val classInfo by viewModel.info.collectAsStateWithLifecycle()
     val dataChanged by viewModel.dataChanged.collectAsStateWithLifecycle()
+    val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
 
     val classInfoPagerState = rememberPagerState(initialPage = 0) { if (newClass) 2 else 4 }
     val animationScope = rememberCoroutineScope()
@@ -61,7 +64,13 @@ fun ClassDetailsPager(navController: NavController, viewModel: ClassDetailsViewM
                 Column {
                     AppNavBar(
                         title = if (newClass) stringResource(R.string.route_new_plan_class) else classInfoData.name,
-                        onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) }
+                        onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
+                        actions = {
+                            IconButton(
+                                onClick = { viewModel.saveClass() },
+                                enabled = saveEnabled,
+                            ) { SaveIcon() }
+                        }
                     )
 
                     classInfoPagerState.currentPage.let { page ->

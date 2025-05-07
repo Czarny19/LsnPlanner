@@ -34,6 +34,11 @@ fun ClassSchedule.toModel() = ClassScheduleModel(
     endDate = this.endDate
 )
 
+data class ClassScheduleWithInfoModel(
+    val schedule: ClassScheduleModel,
+    val info: ClassInfoModel
+)
+
 enum class ClassScheduleType(val raw: String) {
     Weekly("Weekly"),
     Period("Period"),

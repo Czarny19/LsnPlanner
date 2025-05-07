@@ -11,8 +11,8 @@ class NoteRepository(private val dao: NoteDao) {
 
     suspend fun getById(noteId: Long): NoteModel = dao.getSingle(noteId).toModel()
 
-    fun getAllForLessonPlan(lessonPlanId: Long): Flow<List<NoteModel>> =
-        dao.getAllForLessonPlan(lessonPlanId).map { items -> items.map { it.toModel() } }
+    fun watchAll(lessonPlanId: Long): Flow<List<NoteModel>> =
+        dao.watchAll(lessonPlanId).map { items -> items.map { it.toModel() } }
 
     suspend fun insert(note: NoteModel) {
         dao.insert(note)

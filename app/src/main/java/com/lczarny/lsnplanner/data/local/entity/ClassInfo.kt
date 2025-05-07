@@ -23,7 +23,6 @@ data class ClassInfo(
     @PrimaryKey(autoGenerate = true) val id: Long,
     @Required @ColumnInfo(name = "lesson_plan_id", index = true) val lessonPlanId: Long,
     @Required @ColumnInfo(name = "name") val name: String,
-    @Required @ColumnInfo(name = "teacher") val teacher: String,
     @Required @ColumnInfo(name = "type") val type: ClassType,
     @Required @ColumnInfo(name = "color") val color: Long,
     @ColumnInfo(name = "address", defaultValue = "NULL") val address: String?,

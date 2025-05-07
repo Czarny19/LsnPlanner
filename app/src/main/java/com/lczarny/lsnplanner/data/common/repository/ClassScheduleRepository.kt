@@ -9,8 +9,7 @@ import kotlinx.coroutines.flow.map
 
 class ClassScheduleRepository(private val dao: ClassScheduleDao) {
 
-    fun getAllForClassInfo(classInfoId: Long): Flow<List<ClassScheduleModel>> =
-        dao.getAllForClassInfo(classInfoId).map { items -> items.map { it.toModel() } }
+    fun watchAll(lessonPlanId: Long): Flow<List<ClassScheduleModel>> = dao.watchAll(lessonPlanId).map { items -> items.map { it.toModel() } }
 
     suspend fun insert(classTime: ClassScheduleModel): Long = dao.insert(classTime)
 

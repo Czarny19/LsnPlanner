@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,9 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
+import com.lczarny.lsnplanner.data.common.model.ClassScheduleWithInfoModel
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.EmptyList
 import com.lczarny.lsnplanner.presentation.components.FabListBottomSpacer
@@ -43,46 +40,25 @@ import com.lczarny.lsnplanner.presentation.constants.AppSizes
 import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
 import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
-import com.lczarny.lsnplanner.utils.dateFromEpochMilis
 import com.lczarny.lsnplanner.utils.formatDuration
 import com.lczarny.lsnplanner.utils.formatTime
-import com.lczarny.lsnplanner.utils.isBetweenDates
-import com.lczarny.lsnplanner.utils.isSameDate
+import kotlinx.datetime.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Composable
-fun ClassesTabList(
-    viewModel: HomeViewModel,
-    pagerState: PagerState,
-    weekStartDate: LocalDate,
-    classScheduleWithInfoList: List<Pair<ClassScheduleModel, ClassInfoModel>>
-) {
-    val classesCurrentDate by viewModel.classesCurrentDate.collectAsState()
+fun ClassesTabList(viewModel: HomeViewModel, pagerState: PagerState) {
     val currentHour = LocalDateTime.now().hour
     val isCurrentDay = pagerState.currentPage + 1 == LocalDate.now().dayOfWeek.value
 
-    HorizontalPager(modifier = Modifier.fillMaxSize(), state = pagerState, beyondViewportPageCount = 0) { page ->
-        // TODO load once for entire week, loads every tab change for days in between
-        val classScheduleByHourMap = classScheduleWithInfoList
-            .filter {
-                when (it.first.type) {
-                    ClassScheduleType.Weekly -> it.first.weekDay == page + 1
-                    ClassScheduleType.Single -> it.first.startDate != null && dateFromEpochMilis(it.first.startDate!!) isSameDate weekStartDate.plusDays(
-                        (page + 1).toLong()
-                    )
+    val classesSchedulesPerDay by viewModel.classesSchedulesPerDay.collectAsStateWithLifecycle()
 
-                    ClassScheduleType.Period -> {
-                        val startDate = dateFromEpochMilis(it.first.startDate!!)
-                        val endDate = dateFromEpochMilis(it.first.endDate!!)
-                        it.first.weekDay == page + 1 && classesCurrentDate.isBetweenDates(startDate, endDate)
-                    }
-                }
-            }
-            .sortedWith(compareBy<Pair<ClassScheduleModel, ClassInfoModel>> { it.first.startHour }.thenBy { it.first.startMinute })
-            .groupBy { it.first.startHour }
+    HorizontalPager(modifier = Modifier.fillMaxSize(), state = pagerState, beyondViewportPageCount = 6) { page ->
+        val todaysClassesPerHour = classesSchedulesPerDay[DayOfWeek(page + 1)]!!
+            .sortedWith(compareBy<ClassScheduleWithInfoModel> { it.schedule.startHour }.thenBy { it.schedule.startMinute })
+            .groupBy { it.schedule.startHour }
 
-        if (classScheduleByHourMap.isEmpty()) {
+        if (todaysClassesPerHour.isEmpty()) {
             EmptyList(stringResource(R.string.class_list_empty_hint), showIcon = false)
             return@HorizontalPager
         }
@@ -95,14 +71,14 @@ fun ClassesTabList(
         ) {
             var prevHour = -1
 
-            classScheduleByHourMap.forEach { (hour, schedule) ->
+            todaysClassesPerHour.forEach { (hour, scheduleWithInfoList) ->
                 for (emptyHour in (prevHour + 1)..hour) {
                     item { ClassesTabListHourDivider(emptyHour, isCurrentDay, currentHour) }
                 }
 
                 prevHour = hour
 
-                items(items = schedule, key = { it.first.id!! }) { ClassesTabListItem(viewModel, it) }
+                items(items = scheduleWithInfoList, key = { it.schedule.id!! }) { ClassesTabListItem(viewModel, it) }
             }
 
             for (emptyHour in (prevHour + 1)..<24) {
@@ -136,11 +112,11 @@ private fun ClassesTabListHourDivider(hour: Int, isCurrentDay: Boolean, currentH
 }
 
 @Composable
-private fun ClassesTabListItem(viewModel: HomeViewModel, classTimeWithInfo: Pair<ClassScheduleModel, ClassInfoModel>) {
+private fun ClassesTabListItem(viewModel: HomeViewModel, scheduleWithInfo: ClassScheduleWithInfoModel) {
     val context = LocalContext.current
 
-    val schedule = classTimeWithInfo.first
-    val classInfo = classTimeWithInfo.second
+    val schedule = scheduleWithInfo.schedule
+    val classInfo = scheduleWithInfo.info
 
 
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()

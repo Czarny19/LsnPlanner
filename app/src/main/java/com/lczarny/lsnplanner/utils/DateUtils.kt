@@ -10,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.Month
 import java.time.ZoneId
 import java.time.format.TextStyle
+import java.time.temporal.WeekFields
 
 val currentTimestamp = { System.currentTimeMillis() }
 
@@ -39,6 +40,8 @@ fun Int.toDayOfWeekString(context: Context): String = when (this) {
     else -> context.resources.getString(R.string.monday)
 }
 
+fun LocalDate.getWeekNumber() = this.get(WeekFields.ISO.weekOfWeekBasedYear())
+
 fun isDurationOverMidnight(duration: Int, startHour: Int, startMinute: Int): Boolean =
     ((startHour.toFloat() + (startMinute / 60)) + (duration.toFloat() / 60)) > 24.0f
 
@@ -54,6 +57,8 @@ fun Long.convertMillisToSystemDateTime(context: Context): String =
 fun Long.convertMillisToSystemTime(context: Context): String = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(this)
 
 fun Long.convertMillisToSystemDate(context: Context): String = ((DateFormat.getDateFormat(context)) as SimpleDateFormat).format(this)
+
+fun LocalDate.weekStartDate(): LocalDate = this.minusDays(this.dayOfWeek.value.toLong() - 1)
 
 fun formatTime(context: Context, hour: Int?, minute: Int?): String {
     val time = ((DateFormat.getTimeFormat(context)) as SimpleDateFormat).format(currentTimestampWithTime(hour ?: 0, minute ?: 0))

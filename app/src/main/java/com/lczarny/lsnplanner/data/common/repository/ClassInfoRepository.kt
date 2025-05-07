@@ -12,8 +12,7 @@ class ClassInfoRepository(private val dao: ClassInfoDao) {
 
     suspend fun getFullDataById(id: Long): FullClassDataModel = dao.getSingleFullData(id).toModel()
 
-    fun getAllForLessonPlan(lessonPlanId: Long): Flow<List<ClassInfoModel>> =
-        dao.getAllForLessonPlan(lessonPlanId).map { items -> items.map { it.toModel() } }
+    fun watchAll(lessonPlanId: Long): Flow<List<ClassInfoModel>> = dao.watchAll(lessonPlanId).map { items -> items.map { it.toModel() } }
 
     suspend fun insert(classInfo: ClassInfoModel): Long = dao.insert(classInfo)
 

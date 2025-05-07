@@ -21,7 +21,7 @@ interface ClassInfoDao {
     suspend fun getSingleFullData(id: Long): FullClassData
 
     @Query("SELECT * FROM class_info WHERE lesson_plan_id = :lessonPlanId")
-    fun getAllForLessonPlan(lessonPlanId: Long): Flow<List<ClassInfo>>
+    fun watchAll(lessonPlanId: Long): Flow<List<ClassInfo>>
 
     @Insert(entity = ClassInfo::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(classInfo: ClassInfoModel): Long

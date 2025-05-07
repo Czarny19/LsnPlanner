@@ -9,6 +9,7 @@ import com.lczarny.lsnplanner.data.common.repository.HomeworkRepository
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.common.repository.NoteRepository
 import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.data.local.RoomDb
 import com.lczarny.lsnplanner.data.local.dao.ClassInfoDao
 import com.lczarny.lsnplanner.data.local.dao.ClassScheduleDao
@@ -87,5 +88,6 @@ object RoomModule {
 
     @Provides
     @Singleton
-    fun provideProfileRepository(profileDao: ProfileDao): ProfileRepository = ProfileRepository(profileDao)
+    fun provideProfileRepository(profileDao: ProfileDao, sessionRepository: SessionRepository): ProfileRepository =
+        ProfileRepository(profileDao, sessionRepository)
 }

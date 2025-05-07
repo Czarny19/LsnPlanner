@@ -4,8 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,8 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassListViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val profileRepository: ProfileRepository,
-    private val lessonPlanRepository: LessonPlanRepository,
+    private val sessionRepository: SessionRepository,
     private val classInfoRepository: ClassInfoRepository
 ) : ViewModel() {
 
@@ -39,20 +37,16 @@ class ClassListViewModel @Inject constructor(
     val selectedClassName = _selectedClassName.asStateFlow()
 
     init {
+        _lessonPlanName.update { sessionRepository.activeLessonPlan.name }
+
         watchClasses()
     }
 
     fun watchClasses() {
         viewModelScope.launch(ioDispatcher) {
-            profileRepository.getActiveProfile().collect { profile ->
-                lessonPlanRepository.getActivePlan(profile.id).collect { lessonPlan ->
-                    _lessonPlanName.update { lessonPlan?.name ?: "" }
-
-                    classInfoRepository.getAllForLessonPlan(lessonPlan?.id!!).flowOn(ioDispatcher).collect { classes ->
-                        _classes.update { classes }
-                        _screenState.update { BasicScreenState.Ready }
-                    }
-                }
+            classInfoRepository.watchAll(sessionRepository.activeLessonPlan.id!!).flowOn(ioDispatcher).collect { classes ->
+                _classes.update { classes }
+                _screenState.update { BasicScreenState.Ready }
             }
         }
     }

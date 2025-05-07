@@ -133,7 +133,7 @@
     <string name="class_type">Class type</string>
     <string name="class_note">Note</string>
     <string name="class_duration">Duration (minutes)</string>
-    <string name="class_prev_week">Prevoius week</string>
+    <string name="class_prev_week">Previous week</string>
     <string name="class_next_week">Next week</string>
     <string name="class_select_date">Select date</string>
     <string name="class_classroom">Classroom</string>

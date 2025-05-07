@@ -25,11 +25,11 @@ interface LessonPlanDao {
 
     @Transaction
     @Query("SELECT * FROM lesson_plan WHERE is_active = 1 and profile_id = :profileId LIMIT 1")
-    fun getActive(profileId: String): Flow<LessonPlan?>
+    fun watchActive(profileId: String): Flow<LessonPlan?>
 
     @Transaction
     @Query("SELECT * FROM lesson_plan where profile_id = :profileId")
-    fun getAll(profileId: String): Flow<List<LessonPlan>>
+    fun watchAll(profileId: String): Flow<List<LessonPlan>>
 
     @Transaction
     @Query("UPDATE lesson_plan set is_active = 0 WHERE id != :lessonPlanId and profile_id = :profileId")

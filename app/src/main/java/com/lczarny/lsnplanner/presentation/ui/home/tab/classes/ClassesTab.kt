@@ -7,27 +7,22 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
+import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 
 @Composable
 fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: PagerState) {
-    val classesCurrentDate by viewModel.classesCurrentDate.collectAsState()
-    val weekStartDate = classesCurrentDate.minusDays(classesCurrentDate.dayOfWeek.value.toLong())
-
     val classesDisplayType by viewModel.classesDisplayType.collectAsStateWithLifecycle()
-    val classesWithSchedules by viewModel.classesWithSchedules.collectAsState()
-    val classScheduleByHourMap: MutableList<Pair<ClassScheduleModel, ClassInfoModel>> = mutableListOf()
+    val classesLoading by viewModel.classesLoading.collectAsStateWithLifecycle()
 
-    classesWithSchedules.forEach {
-        classScheduleByHourMap.addAll(it.value.map { classTime -> Pair(classTime, it.key) })
+    if (classesLoading) {
+        FullScreenLoading()
+        return
     }
 
     Column(
@@ -40,7 +35,7 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
         ClassesTabTopNav(viewModel, pagerState)
 
         when (classesDisplayType) {
-            ClassViewType.List -> ClassesTabList(viewModel, pagerState, weekStartDate, classScheduleByHourMap)
+            ClassViewType.List -> ClassesTabList(viewModel, pagerState)
             ClassViewType.Timeline -> ClassesTabTimeline()
         }
     }

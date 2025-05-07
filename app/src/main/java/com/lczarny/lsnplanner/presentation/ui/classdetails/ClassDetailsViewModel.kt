@@ -13,8 +13,7 @@ import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.model.defaultClassType
 import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
 import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.isDurationOverMidnight
@@ -29,8 +28,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassDetailsViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val profileRepository: ProfileRepository,
-    private val lessonPlanRepository: LessonPlanRepository,
+    private val sessionRepository: SessionRepository,
     private val classInfoRepository: ClassInfoRepository,
     private val classTimeRepository: ClassScheduleRepository
 ) : ViewModel() {
@@ -64,6 +62,10 @@ class ClassDetailsViewModel @Inject constructor(
     val dataChanged = _dataChanged.asStateFlow()
     val saveEnabled = _saveEnabled.asStateFlow()
 
+    init {
+        _lessonPlan.update { sessionRepository.activeLessonPlan }
+    }
+
     fun updateName(value: String) {
         _info.update { _info.value?.copy(name = value) }
         checkDataChanged()
@@ -92,38 +94,32 @@ class ClassDetailsViewModel @Inject constructor(
         _screenState.update { DetailsScreenState.Loading }
         _defaultWeekDay = defaultWeekDay
 
-        viewModelScope.launch(ioDispatcher) {
-            profileRepository.getActiveProfile().collect { profile ->
-                lessonPlanRepository.getActivePlan(profile.id).collect { lessonPlan ->
-                    _lessonPlan.update { lessonPlan }
+        classInfoId?.let { id ->
+            viewModelScope.launch(ioDispatcher) {
+                classInfoRepository.getFullDataById(id).let { fullClass ->
+                    _initialData = fullClass.info
 
-                    classInfoId?.let { id ->
-                        classInfoRepository.getFullDataById(id).let { fullClass ->
-                            _info.update { fullClass.info }
-                            _initialData = fullClass.info
+                    _info.update { fullClass.info }
+                    _schedules.update { fullClass.schedules }
+                    _exams.update { fullClass.exams }
+                    _homeworks.update { fullClass.homeworks }
 
-                            _schedules.update { fullClass.schedules }
-                            _exams.update { fullClass.exams }
-                            _homeworks.update { fullClass.homeworks }
-
-                            _screenState.update { DetailsScreenState.Edit }
-                        }
-                    } ?: run {
-                        ClassInfoModel(lessonPlanId = lessonPlan?.id!!, type = lessonPlan.type.defaultClassType()).let { classInfo ->
-                            _info.update { classInfo }
-                            _initialData = classInfo
-                        }
-
-                        _schedules.update { emptyList() }
-                        _exams.update { emptyList() }
-                        _homeworks.update { emptyList() }
-
-                        _screenState.update { DetailsScreenState.Create }
-                    }
+                    _screenState.update { DetailsScreenState.Edit }
                 }
             }
-        }.invokeOnCompletion {
-            _screenState.update { if (classInfoId != null) DetailsScreenState.Edit else DetailsScreenState.Create }
+        } ?: run {
+            sessionRepository.activeLessonPlan.let {
+                ClassInfoModel(lessonPlanId = it.id!!, type = it.type.defaultClassType()).let { classInfo ->
+                    _initialData = classInfo
+
+                    _info.update { classInfo }
+                    _schedules.update { emptyList() }
+                    _exams.update { emptyList() }
+                    _homeworks.update { emptyList() }
+
+                    _screenState.update { DetailsScreenState.Create }
+                }
+            }
         }
     }
 

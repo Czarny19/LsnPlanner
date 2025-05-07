@@ -5,9 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.Importance
 import com.lczarny.lsnplanner.data.common.model.NoteModel
 import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
 import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -23,8 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val profileRepository: ProfileRepository,
-    private val lessonPlanRepository: LessonPlanRepository,
+    private val sessionRepository: SessionRepository,
     private val noteRepository: NoteRepository,
     private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
@@ -76,23 +74,19 @@ class NoteViewModel @Inject constructor(
 
         _screenState.update { DetailsScreenState.Loading }
 
-        viewModelScope.launch(ioDispatcher) {
-            noteId?.let { id ->
+        noteId?.let { id ->
+            viewModelScope.launch(ioDispatcher) {
                 noteRepository.getById(id).let { note ->
                     _note.update { note }
                     _initialData = note.copy()
                     _screenState.update { DetailsScreenState.Edit }
                 }
-            } ?: run {
-                profileRepository.getActiveProfile().collect { profile ->
-                    lessonPlanRepository.getActivePlan(profile.id).collect { lessonPlan ->
-                        NoteModel(lessonPlanId = lessonPlan?.id!!).let { note ->
-                            _note.update { note }
-                            _initialData = note.copy()
-                            _screenState.update { DetailsScreenState.Create }
-                        }
-                    }
-                }
+            }
+        } ?: run {
+            NoteModel(lessonPlanId = sessionRepository.activeLessonPlan.id!!).let { note ->
+                _note.update { note }
+                _initialData = note.copy()
+                _screenState.update { DetailsScreenState.Create }
             }
         }
     }

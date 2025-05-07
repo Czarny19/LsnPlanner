@@ -3,24 +3,14 @@ package com.lczarny.lsnplanner.data.common.repository
 import com.lczarny.lsnplanner.data.common.model.ProfileModel
 import com.lczarny.lsnplanner.data.common.model.toModel
 import com.lczarny.lsnplanner.data.local.dao.ProfileDao
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
-class ProfileRepository(private val dao: ProfileDao) {
+class ProfileRepository(private val dao: ProfileDao, private val sessionRepository: SessionRepository) {
 
-    private var _activeProfile = MutableStateFlow(ProfileModel(id = ""))
-
-    fun getActiveProfile(): StateFlow<ProfileModel> = _activeProfile.asStateFlow()
-
-    suspend fun loadActiveProfile(email: String): ProfileModel? = dao.getByEmail(email)?.let { profile ->
-        profile.toModel().let { profileModel ->
-            _activeProfile.update { profileModel }
-            profileModel
-        }
+    suspend fun loadActiveProfile(email: String): Boolean = dao.getByEmail(email)?.let { profile ->
+        profile.toModel().let { profileModel -> sessionRepository.activeProfile = profileModel }
+        true
     } ?: run {
-        null
+        false
     }
 
     suspend fun insert(profile: ProfileModel): String {

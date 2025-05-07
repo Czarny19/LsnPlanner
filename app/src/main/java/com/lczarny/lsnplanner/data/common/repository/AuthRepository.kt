@@ -12,10 +12,6 @@ enum class AuthError {
 }
 
 class AuthRepository(private val auth: Auth) {
-    val currentSessionStatus = auth.sessionStatus
-
-    val currentUser = { auth.currentUserOrNull() }
-
     suspend fun signIn(email: String, password: String): AuthError? {
         return try {
             auth.signInWith(Email) {

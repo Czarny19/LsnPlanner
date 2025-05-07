@@ -2,9 +2,7 @@ package com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +27,6 @@ import com.lczarny.lsnplanner.presentation.components.DropDownItem
 import com.lczarny.lsnplanner.presentation.components.InputError
 import com.lczarny.lsnplanner.presentation.components.OutlinedDropDown
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
-import com.lczarny.lsnplanner.presentation.components.PrimaryButton
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
 import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
@@ -41,7 +38,6 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
 
     val classInfo by viewModel.info.collectAsStateWithLifecycle()
     val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
-    val saveEnabled by viewModel.saveEnabled.collectAsStateWithLifecycle()
 
     var nameTouched by remember { mutableStateOf(false) }
 
@@ -105,17 +101,6 @@ fun ClassInfoTab(viewModel: ClassDetailsViewModel, newClass: Boolean) {
                     minLines = 3,
                     maxLines = 10,
                     maxLength = 500,
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                PrimaryButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = AppPadding.MD_PADDING),
-                    enabled = saveEnabled,
-                    text = stringResource(R.string.class_save),
-                    onClick = { viewModel.saveClass() }
                 )
             }
         }

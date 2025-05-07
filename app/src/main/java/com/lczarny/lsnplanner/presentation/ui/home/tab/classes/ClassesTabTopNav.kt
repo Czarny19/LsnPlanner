@@ -25,13 +25,14 @@ import androidx.compose.ui.unit.dp
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.utils.toDayOfWeekString
+import com.lczarny.lsnplanner.utils.weekStartDate
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
 fun ClassesTabTopNav(viewModel: HomeViewModel, pagerState: PagerState) {
     val classesCurrentDate by viewModel.classesCurrentDate.collectAsState()
-    val weekStartDate = classesCurrentDate.minusDays(classesCurrentDate.dayOfWeek.value.toLong())
+    val weekStartDate = classesCurrentDate.weekStartDate()
 
     Box(
         modifier = Modifier
@@ -46,7 +47,7 @@ fun ClassesTabTopNav(viewModel: HomeViewModel, pagerState: PagerState) {
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             for (i in 1..7) {
-                ClassesTabTopNavItem(i, viewModel, weekStartDate.plusDays(i.toLong()), pagerState)
+                ClassesTabTopNavItem(i, viewModel, weekStartDate.plusDays(i.toLong() - 1), pagerState)
             }
         }
     }
@@ -57,24 +58,24 @@ fun ClassesTabTopNavItem(index: Int, viewModel: HomeViewModel, date: LocalDate, 
     val contex = LocalContext.current
     val animationScope = rememberCoroutineScope()
 
-    val isActive = pagerState.currentPage + 1 == index
-
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(40.dp)
             .background(
-                color = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+                color = if (pagerState.currentPage == index - 1) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
                 shape = CircleShape
             )
-    ) {
-        Column(
-            modifier = Modifier.clickable {
+            // todo poprawic efekt click
+            .clickable {
                 animationScope.launch {
                     pagerState.animateScrollToPage(index - 1)
                     viewModel.changeCurrentClassesDate(date)
                 }
             },
+    ) {
+        Column(
+            modifier = Modifier,
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

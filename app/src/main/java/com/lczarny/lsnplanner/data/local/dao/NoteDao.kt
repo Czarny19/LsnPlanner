@@ -18,7 +18,7 @@ interface NoteDao {
     suspend fun getSingle(noteId: Long): Note
 
     @Query("SELECT * FROM note WHERE lesson_plan_id = :lessonPlanId")
-    fun getAllForLessonPlan(lessonPlanId: Long): Flow<List<Note>>
+    fun watchAll(lessonPlanId: Long): Flow<List<Note>>
 
     @Insert(entity = Note::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: NoteModel)

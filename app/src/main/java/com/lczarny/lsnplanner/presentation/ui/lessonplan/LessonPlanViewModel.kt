@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.model.LessonPlanType
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
 import com.lczarny.lsnplanner.utils.currentTimestamp
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LessonPlanViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val profileRepository: ProfileRepository,
+    private val sessionRepository: SessionRepository,
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
@@ -77,14 +77,10 @@ class LessonPlanViewModel @Inject constructor(
                 _screenState.update { DetailsScreenState.Edit }
             }
         } ?: run {
-            viewModelScope.launch(ioDispatcher) {
-                profileRepository.getActiveProfile().collect { profile ->
-                    LessonPlanModel(isActive = true, profileId = profile.id, createDate = currentTimestamp()).let { lessonPlan ->
-                        _lessonPlan.update { lessonPlan }
-                        _initialData = lessonPlan.copy()
-                        _screenState.update { DetailsScreenState.Create }
-                    }
-                }
+            LessonPlanModel(isActive = true, profileId = sessionRepository.activeProfile.id, createDate = currentTimestamp()).let { lessonPlan ->
+                _initialData = lessonPlan.copy()
+                _lessonPlan.update { lessonPlan }
+                _screenState.update { DetailsScreenState.Create }
             }
         }
     }

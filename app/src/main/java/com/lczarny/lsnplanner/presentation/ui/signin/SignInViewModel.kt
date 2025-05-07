@@ -6,6 +6,7 @@ import com.lczarny.lsnplanner.data.common.model.toProfile
 import com.lczarny.lsnplanner.data.common.repository.AuthError
 import com.lczarny.lsnplanner.data.common.repository.AuthRepository
 import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.SignInScreenState
 import com.lczarny.lsnplanner.utils.isValidEmail
@@ -23,8 +24,9 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val sessionRepository: SessionRepository,
     private val authRepository: AuthRepository,
-    private val profileRepository: ProfileRepository
+    private val profileRepository: ProfileRepository,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(SignInScreenState.Loading)
@@ -102,13 +104,13 @@ class SignInViewModel @Inject constructor(
 
     private fun watchUserInfo() {
         viewModelScope.launch(ioDispatcher) {
-            authRepository.currentSessionStatus.collect { status ->
-                val currentUser = authRepository.currentUser()
+            sessionRepository.status.collect { status ->
+                val currentUser = sessionRepository.user()
 
                 if (status is SessionStatus.Authenticated && currentUser != null) {
-                    profileRepository.loadActiveProfile(currentUser.email!!)?.let {
+                    if (profileRepository.loadActiveProfile(currentUser.email!!)) {
                         _screenState.update { SignInScreenState.Done }
-                    } ?: run {
+                    } else {
                         createNewProfile(currentUser)
                     }
                 } else {

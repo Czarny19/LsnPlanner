@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
 import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
+import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
 import com.lczarny.lsnplanner.presentation.model.BasicScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LessonPlanListViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val profileRepository: ProfileRepository,
+    private val sessionRepository: SessionRepository,
     private val lessonPlanRepository: LessonPlanRepository
 ) : ViewModel() {
 
@@ -39,11 +39,9 @@ class LessonPlanListViewModel @Inject constructor(
 
     private fun watchLessonPlans() {
         viewModelScope.launch(ioDispatcher) {
-            profileRepository.getActiveProfile().collect { profile ->
-                lessonPlanRepository.getAll(profile.id).flowOn(ioDispatcher).collect { plans ->
-                    _lessonPlans.update { plans }
-                    _screenState.update { BasicScreenState.Ready }
-                }
+            lessonPlanRepository.watchAll(sessionRepository.activeProfile.id).flowOn(ioDispatcher).collect { plans ->
+                _lessonPlans.update { plans }
+                _screenState.update { BasicScreenState.Ready }
             }
         }
     }

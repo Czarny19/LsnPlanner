@@ -147,11 +147,13 @@ private fun HomeTabs(navController: NavController, viewModel: HomeViewModel) {
                 }
             }
         ) { padding ->
-            NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
-                composable(classesTab.id) { ClassesTab(padding, viewModel, classesPagerState) }
-                composable(eventsTab.id) { Text(eventsTab.id) }
-                composable(notesTab.id) { NotesTab(padding, navController, viewModel) }
-                composable(moreTab.id) { MoreTab(padding, navController, viewModel, snackbarChannel) }
+            Surface(modifier = Modifier.fillMaxSize()) {
+                NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
+                    composable(classesTab.id) { ClassesTab(padding, viewModel, classesPagerState) }
+                    composable(eventsTab.id) { Text(eventsTab.id) }
+                    composable(notesTab.id) { NotesTab(padding, navController, viewModel) }
+                    composable(moreTab.id) { MoreTab(padding, navController, viewModel, snackbarChannel) }
+                }
             }
         }
     }

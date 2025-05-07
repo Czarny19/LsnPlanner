@@ -13,9 +13,9 @@ class LessonPlanRepository(private val dao: LessonPlanDao) {
 
     suspend fun getById(id: Long): LessonPlanModel = dao.getSingle(id).toModel()
 
-    fun getActivePlan(profileId: String): Flow<LessonPlanModel?> = dao.getActive(profileId).map { profile -> profile?.toModel() }
+    fun watchActive(profileId: String) = dao.watchActive(profileId).map { profile -> profile?.toModel() }
 
-    fun getAll(profileId: String): Flow<List<LessonPlanModel>> = dao.getAll(profileId).map { items -> items.map { it.toModel() } }
+    fun watchAll(profileId: String): Flow<List<LessonPlanModel>> = dao.watchAll(profileId).map { items -> items.map { it.toModel() } }
 
     suspend fun makeOtherPlansNotActive(lessonPlan: LessonPlanModel) {
         dao.makeOtherPlansNotActive(lessonPlanId = lessonPlan.id!!, profileId = lessonPlan.profileId)
