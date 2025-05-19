@@ -3,6 +3,7 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplanlist.components
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,6 +18,7 @@ enum class ListPickerScreenSnackbar {
 }
 
 @Composable
+@Stable
 fun LessonPlanListSnackbar(
     snackbarHostState: SnackbarHostState,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,

@@ -20,12 +20,12 @@ import androidx.compose.ui.Modifier
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 
 @Composable
-fun OutlinedCheckbox(
+inline fun OutlinedCheckbox(
     modifier: Modifier = Modifier,
     label: String,
     initialValue: Boolean = false,
     enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit,
+    crossinline onCheckedChange: (Boolean) -> Unit,
 ) {
     var fieldValue by remember { mutableStateOf(initialValue) }
 

@@ -20,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,18 +27,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleWithInfoModel
+import com.lczarny.lsnplanner.database.model.ClassScheduleWithInfo
+import com.lczarny.lsnplanner.database.model.LessonPlan
+import com.lczarny.lsnplanner.model.mapper.toLabel
+import com.lczarny.lsnplanner.model.mapper.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.EmptyList
 import com.lczarny.lsnplanner.presentation.components.FabListBottomSpacer
 import com.lczarny.lsnplanner.presentation.components.InfoChip
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
-import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
-import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
-import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.utils.formatDuration
 import com.lczarny.lsnplanner.utils.formatTime
 import kotlinx.datetime.DayOfWeek
@@ -47,15 +45,17 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Composable
-fun ClassesTabList(viewModel: HomeViewModel, pagerState: PagerState) {
+fun ClassesTabList(
+    lessonPlan: LessonPlan,
+    classesSchedulesPerDay: Map<DayOfWeek, List<ClassScheduleWithInfo>>,
+    pagerState: PagerState
+) {
     val currentHour = LocalDateTime.now().hour
     val isCurrentDay = pagerState.currentPage + 1 == LocalDate.now().dayOfWeek.value
 
-    val classesSchedulesPerDay by viewModel.classesSchedulesPerDay.collectAsStateWithLifecycle()
-
     HorizontalPager(modifier = Modifier.fillMaxSize(), state = pagerState, beyondViewportPageCount = 6) { page ->
         val todaysClassesPerHour = classesSchedulesPerDay[DayOfWeek(page + 1)]!!
-            .sortedWith(compareBy<ClassScheduleWithInfoModel> { it.schedule.startHour }.thenBy { it.schedule.startMinute })
+            .sortedWith(compareBy<ClassScheduleWithInfo> { it.schedule.startHour }.thenBy { it.schedule.startMinute })
             .groupBy { it.schedule.startHour }
 
         if (todaysClassesPerHour.isEmpty()) {
@@ -78,7 +78,7 @@ fun ClassesTabList(viewModel: HomeViewModel, pagerState: PagerState) {
 
                 prevHour = hour
 
-                items(items = scheduleWithInfoList, key = { it.schedule.id!! }) { ClassesTabListItem(viewModel, it) }
+                items(items = scheduleWithInfoList, key = { it.schedule.id!! }) { ClassesTabListItem(lessonPlan, it) }
             }
 
             for (emptyHour in (prevHour + 1)..<24) {
@@ -112,14 +112,12 @@ private fun ClassesTabListHourDivider(hour: Int, isCurrentDay: Boolean, currentH
 }
 
 @Composable
-private fun ClassesTabListItem(viewModel: HomeViewModel, scheduleWithInfo: ClassScheduleWithInfoModel) {
+private fun ClassesTabListItem(lessonPlan: LessonPlan, scheduleWithInfo: ClassScheduleWithInfo) {
     val context = LocalContext.current
 
     val schedule = scheduleWithInfo.schedule
     val classInfo = scheduleWithInfo.info
 
-
-    val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
     val duration = formatDuration(context, schedule.startHour, schedule.startMinute, schedule.durationMinutes)
 
     Card(
@@ -138,7 +136,7 @@ private fun ClassesTabListItem(viewModel: HomeViewModel, scheduleWithInfo: Class
             ClassesTabListItemTitle(classInfo.name, classInfo.type.toLabel(context), classInfo.type.toPlanClassTypeIcon())
             ClassesTabListItemField(duration, AppIcons.TIME)
             ClassesTabListItemField("${schedule.durationMinutes} ${stringResource(R.string.minutes)}", AppIcons.DURATION)
-            if (lessonPlan?.addressEnabled == true) {
+            if (lessonPlan.addressEnabled == true) {
                 ClassesTabListItemField("${stringResource(R.string.class_address)}: ${schedule.address}", AppIcons.LOCATION)
             }
             ClassesTabListItemField("${stringResource(R.string.class_classroom)}: ${schedule.classroom}", AppIcons.CLASSROOM)

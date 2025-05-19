@@ -2,11 +2,12 @@ package com.lczarny.lsnplanner.presentation.ui.classlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
-import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.database.model.ClassInfo
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.BasicScreenState
+import com.lczarny.lsnplanner.domain.cls.DeleteClassUseCase
+import com.lczarny.lsnplanner.domain.cls.LoadClassListUseCase
+import com.lczarny.lsnplanner.model.BasicScreenState
+import com.lczarny.lsnplanner.model.SessionInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,14 +20,15 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassListViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val classInfoRepository: ClassInfoRepository
+    private val sessionInfo: SessionInfo,
+    private val loadClassListUseCase: LoadClassListUseCase,
+    private val deleteClassUseCase: DeleteClassUseCase
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(BasicScreenState.Loading)
 
     private val _lessonPlanName = MutableStateFlow<String>("")
-    private val _classes = MutableStateFlow(emptyList<ClassInfoModel>())
+    private val _classes = MutableStateFlow(emptyList<ClassInfo>())
 
     private val _selectedClassName = MutableStateFlow("")
 
@@ -37,29 +39,25 @@ class ClassListViewModel @Inject constructor(
     val selectedClassName = _selectedClassName.asStateFlow()
 
     init {
-        _lessonPlanName.update { sessionRepository.activeLessonPlan.name }
-
+        _lessonPlanName.update { sessionInfo.activeLessonPlan.name }
         watchClasses()
     }
 
-    fun watchClasses() {
+    fun deleteClass(classInfo: ClassInfo, onFinished: () -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            classInfoRepository.watchAll(sessionRepository.activeLessonPlan.id!!).flowOn(ioDispatcher).collect { classes ->
-                _classes.update { classes }
-                _screenState.update { BasicScreenState.Ready }
-            }
+            deleteClassUseCase.invoke(classInfo.id!!)
+        }.invokeOnCompletion {
+            _selectedClassName.update { classInfo.name }
+            onFinished.invoke()
         }
     }
 
-    fun setSelectedClassName(name: String) {
-        _selectedClassName.update { name }
-    }
-
-    fun deleteClass(classInfoId: Long, onFinished: () -> Unit) {
+    private fun watchClasses() {
         viewModelScope.launch(ioDispatcher) {
-            classInfoRepository.delete(classInfoId)
-        }.invokeOnCompletion {
-            onFinished.invoke()
+            loadClassListUseCase.invoke().flowOn(ioDispatcher).collect { classes ->
+                _classes.update { classes }
+                _screenState.update { BasicScreenState.Ready }
+            }
         }
     }
 }

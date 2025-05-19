@@ -2,22 +2,21 @@ package com.lczarny.lsnplanner.di
 
 import android.content.Context
 import androidx.room.Room
-import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
-import com.lczarny.lsnplanner.data.common.repository.ExamRepository
-import com.lczarny.lsnplanner.data.common.repository.HomeworkRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
-import com.lczarny.lsnplanner.data.local.RoomDb
-import com.lczarny.lsnplanner.data.local.dao.ClassInfoDao
-import com.lczarny.lsnplanner.data.local.dao.ClassScheduleDao
-import com.lczarny.lsnplanner.data.local.dao.ExamDao
-import com.lczarny.lsnplanner.data.local.dao.HomeworkDao
-import com.lczarny.lsnplanner.data.local.dao.LessonPlanDao
-import com.lczarny.lsnplanner.data.local.dao.NoteDao
-import com.lczarny.lsnplanner.data.local.dao.ProfileDao
+import com.lczarny.lsnplanner.database.RoomDb
+import com.lczarny.lsnplanner.database.dao.ClassInfoDao
+import com.lczarny.lsnplanner.database.dao.ClassScheduleDao
+import com.lczarny.lsnplanner.database.dao.ExamDao
+import com.lczarny.lsnplanner.database.dao.HomeworkDao
+import com.lczarny.lsnplanner.database.dao.LessonPlanDao
+import com.lczarny.lsnplanner.database.dao.NoteDao
+import com.lczarny.lsnplanner.database.dao.ProfileDao
+import com.lczarny.lsnplanner.database.repository.ClassInfoRepository
+import com.lczarny.lsnplanner.database.repository.ClassScheduleRepository
+import com.lczarny.lsnplanner.database.repository.ExamRepository
+import com.lczarny.lsnplanner.database.repository.HomeworkRepository
+import com.lczarny.lsnplanner.database.repository.LessonPlanRepository
+import com.lczarny.lsnplanner.database.repository.NoteRepository
+import com.lczarny.lsnplanner.database.repository.ProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,7 +26,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RoomModule {
+internal object RoomModule {
 
     @Provides
     @Singleton
@@ -88,6 +87,5 @@ object RoomModule {
 
     @Provides
     @Singleton
-    fun provideProfileRepository(profileDao: ProfileDao, sessionRepository: SessionRepository): ProfileRepository =
-        ProfileRepository(profileDao, sessionRepository)
+    fun provideProfileRepository(profileDao: ProfileDao): ProfileRepository = ProfileRepository(profileDao)
 }

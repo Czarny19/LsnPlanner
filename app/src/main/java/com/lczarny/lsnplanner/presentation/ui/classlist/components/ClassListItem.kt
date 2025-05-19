@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
+import com.lczarny.lsnplanner.database.model.ClassInfo
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
 import com.lczarny.lsnplanner.presentation.components.ColorIndicator
 import com.lczarny.lsnplanner.presentation.components.DeleteIcon
@@ -32,8 +32,8 @@ import com.lczarny.lsnplanner.presentation.components.InfoChip
 import com.lczarny.lsnplanner.presentation.components.ListItemTitle
 import com.lczarny.lsnplanner.presentation.components.OptionsMenuIcon
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
-import com.lczarny.lsnplanner.presentation.model.mapper.toLabel
-import com.lczarny.lsnplanner.presentation.model.mapper.toPlanClassTypeIcon
+import com.lczarny.lsnplanner.model.mapper.toLabel
+import com.lczarny.lsnplanner.model.mapper.toPlanClassTypeIcon
 import com.lczarny.lsnplanner.presentation.navigation.ClassDetailsRoute
 import com.lczarny.lsnplanner.presentation.ui.classlist.ClassListViewModel
 import kotlinx.coroutines.channels.Channel
@@ -44,7 +44,7 @@ fun ClassListItem(
     navController: NavController,
     viewModel: ClassListViewModel,
     snackbarChannel: Channel<ClassListScreenSnackbar>,
-    classInfo: ClassInfoModel,
+    classInfo: ClassInfo,
 ) {
     val context = LocalContext.current
 
@@ -69,7 +69,7 @@ fun ClassListItem(
 fun ClassListItemMenu(
     viewModel: ClassListViewModel,
     snackbarChannel: Channel<ClassListScreenSnackbar>,
-    classInfo: ClassInfoModel,
+    classInfo: ClassInfo,
 ) {
     var dropDownExpanded by remember { mutableStateOf(false) }
     var deleteConfirmationDialogOpen by remember { mutableStateOf(false) }
@@ -81,8 +81,8 @@ fun ClassListItemMenu(
             text = stringResource(R.string.class_delete_question),
             onConfirm = {
                 deleteConfirmationDialogOpen = false
-                viewModel.deleteClass(classInfo.id!!) {
-                    viewModel.setSelectedClassName(classInfo.name)
+
+                viewModel.deleteClass(classInfo) {
                     snackbarChannel.trySend(ClassListScreenSnackbar.Deleted)
                 }
             },

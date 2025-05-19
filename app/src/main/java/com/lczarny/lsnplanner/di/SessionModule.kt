@@ -1,6 +1,6 @@
 package com.lczarny.lsnplanner.di
 
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.model.SessionInfo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,5 +15,5 @@ object SessionModule {
 
     @Provides
     @Singleton
-    fun provideSessionRepository(client: SupabaseClient): SessionRepository = SessionRepository(client.auth)
+    fun provideSessionInfo(client: SupabaseClient): SessionInfo = SessionInfo(client.auth)
 }

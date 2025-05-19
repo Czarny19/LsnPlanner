@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.Importance
-import com.lczarny.lsnplanner.data.common.model.NoteModel
+import com.lczarny.lsnplanner.database.model.Importance
+import com.lczarny.lsnplanner.database.model.Note
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
 import com.lczarny.lsnplanner.presentation.components.ConfirmationDialog
@@ -33,15 +33,15 @@ import com.lczarny.lsnplanner.presentation.components.DraggableCard
 import com.lczarny.lsnplanner.presentation.components.DraggableCardAction
 import com.lczarny.lsnplanner.presentation.components.InfoChip
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
-import com.lczarny.lsnplanner.presentation.model.mapper.getColor
-import com.lczarny.lsnplanner.presentation.model.mapper.getIcon
-import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
+import com.lczarny.lsnplanner.model.mapper.getColor
+import com.lczarny.lsnplanner.model.mapper.getIcon
+import com.lczarny.lsnplanner.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.navigation.NoteRoute
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.utils.convertMillisToSystemDateTime
 
 @Composable
-fun NotesTabItem(navController: NavController, viewModel: HomeViewModel, note: NoteModel) {
+fun NotesTabItem(navController: NavController, viewModel: HomeViewModel, note: Note) {
     val context = LocalContext.current
 
     var confirmationDialogOpen by remember { mutableStateOf(false) }

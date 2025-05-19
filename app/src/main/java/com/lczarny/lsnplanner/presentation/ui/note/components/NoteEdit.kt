@@ -1,5 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.note.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -20,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,8 +35,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.Importance
-import com.lczarny.lsnplanner.data.common.model.NoteModel
+import com.lczarny.lsnplanner.database.model.Importance
+import com.lczarny.lsnplanner.database.model.Note
+import com.lczarny.lsnplanner.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.DropDownIcon
@@ -45,11 +48,10 @@ import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
 import com.lczarny.lsnplanner.presentation.components.SaveIcon
 import com.lczarny.lsnplanner.presentation.components.TutorialCard
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
-import com.lczarny.lsnplanner.presentation.model.mapper.getLabel
 import com.lczarny.lsnplanner.presentation.ui.note.NoteViewModel
-import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
 
 @Composable
+@Stable
 fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Boolean) {
     val note by viewModel.note.collectAsStateWithLifecycle()
 
@@ -62,16 +64,31 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
         label = stringResource(R.string.card_animation)
     )
 
-    var discardChangesDialogOpen = remember { mutableStateOf(false) }
+    var discardChangesDialogOpen by remember { mutableStateOf(false) }
 
-    DiscardChangesDialog(discardChangesDialogOpen, navController)
+    DiscardChangesDialog(
+        visible = discardChangesDialogOpen,
+        onConfirm = {
+            discardChangesDialogOpen = false
+            navController.popBackStack()
+        },
+        onDismiss = { discardChangesDialogOpen = false }
+    )
 
-    note?.let { noteData ->
+    BackHandler(dataChanged) { discardChangesDialogOpen = true }
+
+    note?.let { note ->
         Scaffold(
             topBar = {
                 AppNavBar(
                     title = stringResource(if (isNew) R.string.route_new_note else R.string.route_edit_note),
-                    onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
+                    onNavIconClick = {
+                        if (dataChanged) {
+                            discardChangesDialogOpen = true
+                        } else {
+                            navController.popBackStack()
+                        }
+                    },
                     actions = {
                         IconButton(
                             modifier = Modifier.rotate(rotationState),
@@ -94,7 +111,7 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top,
             ) {
-                if (detailsExpanded) NoteTopMenu(viewModel, noteData)
+                if (detailsExpanded) NoteTopMenu(viewModel, note)
 
                 Box(modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainer)) {
                     OutlinedInputField(
@@ -105,7 +122,7 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
                             bottom = AppPadding.MD_PADDING
                         ),
                         label = stringResource(R.string.note_title),
-                        initialValue = noteData.title,
+                        initialValue = note.title,
                         onValueChange = { title -> viewModel.updateTitle(title) },
                         maxLines = 5,
                         maxLength = 200
@@ -114,7 +131,7 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
 
                 FullScreenTextArea(
                     placeholder = stringResource(R.string.write_here),
-                    initialValue = noteData.content,
+                    initialValue = note.content,
                     onValueChange = { name -> viewModel.updateContent(name) },
                 )
             }
@@ -123,7 +140,7 @@ fun NoteEdit(navController: NavController, viewModel: NoteViewModel, isNew: Bool
 }
 
 @Composable
-private fun NoteTopMenu(viewModel: NoteViewModel, note: NoteModel) {
+private fun NoteTopMenu(viewModel: NoteViewModel, note: Note) {
     val context = LocalContext.current
 
     val tutorialDone by viewModel.noteImportanceTutorialDone.collectAsStateWithLifecycle()

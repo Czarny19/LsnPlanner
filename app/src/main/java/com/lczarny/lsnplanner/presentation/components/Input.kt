@@ -12,6 +12,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +38,8 @@ sealed class InputError {
 }
 
 @Composable
-fun OutlinedInputField(
+@Stable
+inline fun OutlinedInputField(
     modifier: Modifier = Modifier,
     label: String,
     initialValue: String = "",
@@ -46,11 +48,11 @@ fun OutlinedInputField(
     readOnly: Boolean = false,
     enabled: Boolean = true,
     obscured: Boolean = false,
-    onValueChange: (String) -> Unit,
+    crossinline onValueChange: (String) -> Unit,
     minLines: Int = 1,
     maxLines: Int = 1,
     maxLength: Int? = null,
-    supportingText: @Composable (() -> Unit)? = null
+    noinline supportingText: @Composable (() -> Unit)? = null
 ) {
     var fieldValue by remember { mutableStateOf(initialValue) }
     var obscureEnabled by remember { mutableStateOf(obscured) }
@@ -102,20 +104,21 @@ fun OutlinedInputField(
 }
 
 @Composable
-fun OutlinedNumberInputField(
+@Stable
+inline fun OutlinedNumberInputField(
     modifier: Modifier = Modifier,
     label: String,
-    value: Int,
+    initialValue: Int,
     error: InputError? = null,
     readOnly: Boolean = false,
     enabled: Boolean = true,
-    onValueChange: (Int) -> Unit,
+    crossinline onValueChange: (Int) -> Unit,
     minValue: Int,
     maxValue: Int
 ) {
     val composableScope = rememberCoroutineScope()
     var debounceJob: Job? by remember { mutableStateOf(null) }
-    var fieldValue by remember { mutableIntStateOf(value) }
+    var fieldValue by remember { mutableIntStateOf(initialValue) }
 
     OutlinedTextField(
         modifier = modifier
@@ -157,7 +160,8 @@ fun OutlinedNumberInputField(
 }
 
 @Composable
-fun FullScreenTextArea(placeholder: String, initialValue: String, onValueChange: (String) -> Unit) {
+@Stable
+inline fun FullScreenTextArea(placeholder: String, initialValue: String, crossinline onValueChange: (String) -> Unit) {
     var value by remember { mutableStateOf(initialValue) }
 
     OutlinedTextField(

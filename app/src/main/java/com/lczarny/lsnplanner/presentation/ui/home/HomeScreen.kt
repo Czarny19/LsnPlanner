@@ -31,12 +31,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.model.BasicScreenState
+import com.lczarny.lsnplanner.model.TabBarItemWithIcon
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
 import com.lczarny.lsnplanner.presentation.components.SuccessSnackbar
-import com.lczarny.lsnplanner.presentation.model.BasicScreenState
-import com.lczarny.lsnplanner.presentation.model.TabBarItemWithIcon
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
 import com.lczarny.lsnplanner.presentation.navigation.SignInRoute
 import com.lczarny.lsnplanner.presentation.ui.home.components.HomeScreenSnackbar
@@ -73,10 +73,12 @@ private fun HomeTabs(navController: NavController, viewModel: HomeViewModel) {
         return
     }
 
+    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
     val sessionActive by viewModel.sessionActive.collectAsStateWithLifecycle()
 
-    if (sessionActive.not()) {
+    if (sessionActive.not() || userProfile == null) {
         navigateToSignIn(navController)
+        return
     }
 
     val classesCurrentDate by viewModel.classesCurrentDate.collectAsStateWithLifecycle()
@@ -119,41 +121,40 @@ private fun HomeTabs(navController: NavController, viewModel: HomeViewModel) {
     val navBackStackEntry by bottomBarNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    lessonPlan?.let { lessonPlanData ->
-        Scaffold(
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
-            topBar = {
-                AppNavBar(
-                    title = when (currentRoute) {
-                        classesTab.id -> "${classesCurrentDate.month.getMonthName(context)} ${classesCurrentDate.year}"
-                        eventsTab.id -> stringResource(R.string.home_tab_events)
-                        notesTab.id -> stringResource(R.string.home_tab_notes)
-                        moreTab.id -> stringResource(R.string.home_tab_more)
-                        else -> ""
-                    },
-                    actions = {
-                        when (currentRoute) {
-                            classesTab.id -> ClassesTabActions(viewModel)
-                        }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) { SuccessSnackbar(it) } },
+        topBar = {
+            AppNavBar(
+                title = when (currentRoute) {
+                    classesTab.id -> "${classesCurrentDate.month.getMonthName(context)} ${classesCurrentDate.year}"
+                    eventsTab.id -> stringResource(R.string.home_tab_events)
+                    notesTab.id -> stringResource(R.string.home_tab_notes)
+                    moreTab.id -> stringResource(R.string.home_tab_more)
+                    else -> ""
+                },
+                navIconVisible = false,
+                actions = {
+                    when (currentRoute) {
+                        classesTab.id -> ClassesTabActions(viewModel)
                     }
-                )
-            },
-            bottomBar = { TabView(tabBarItems, bottomBarNavController) },
-            floatingActionButtonPosition = FabPosition.End,
-            floatingActionButton = {
-                when (currentRoute) {
-                    notesTab.id -> NotesTabFab(navController)
-                    classesTab.id -> ClassesTabFab(viewModel, navController, classesPagerState)
                 }
+            )
+        },
+        bottomBar = { TabView(tabBarItems, bottomBarNavController) },
+        floatingActionButtonPosition = FabPosition.End,
+        floatingActionButton = {
+            when (currentRoute) {
+                notesTab.id -> NotesTabFab(navController)
+                classesTab.id -> ClassesTabFab(viewModel, navController, classesPagerState)
             }
-        ) { padding ->
-            Surface(modifier = Modifier.fillMaxSize()) {
-                NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
-                    composable(classesTab.id) { ClassesTab(padding, viewModel, classesPagerState) }
-                    composable(eventsTab.id) { Text(eventsTab.id) }
-                    composable(notesTab.id) { NotesTab(padding, navController, viewModel) }
-                    composable(moreTab.id) { MoreTab(padding, navController, viewModel, snackbarChannel) }
-                }
+        }
+    ) { padding ->
+        Surface(modifier = Modifier.fillMaxSize()) {
+            NavHost(navController = bottomBarNavController, startDestination = classesTab.id) {
+                composable(classesTab.id) { ClassesTab(padding, viewModel, lessonPlan!!, classesPagerState) }
+                composable(eventsTab.id) { Text(eventsTab.id) }
+                composable(notesTab.id) { NotesTab(padding, navController, viewModel) }
+                composable(moreTab.id) { MoreTab(padding, navController, viewModel, lessonPlan!!, userProfile!!, snackbarChannel) }
             }
         }
     }

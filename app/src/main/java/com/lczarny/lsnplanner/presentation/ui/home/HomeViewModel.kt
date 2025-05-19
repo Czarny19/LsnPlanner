@@ -2,25 +2,29 @@ package com.lczarny.lsnplanner.presentation.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleWithInfoModel
-import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.common.model.NoteModel
-import com.lczarny.lsnplanner.data.common.model.ProfileModel
-import com.lczarny.lsnplanner.data.common.repository.AuthRepository
-import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
-import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.database.model.ClassScheduleType
+import com.lczarny.lsnplanner.database.model.ClassScheduleWithInfo
+import com.lczarny.lsnplanner.database.model.LessonPlan
+import com.lczarny.lsnplanner.database.model.Note
+import com.lczarny.lsnplanner.database.model.Profile
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.BasicScreenState
-import com.lczarny.lsnplanner.presentation.model.mapper.ClassViewType
+import com.lczarny.lsnplanner.domain.auth.SignOutUseCase
+import com.lczarny.lsnplanner.domain.cls.LoadClassesSchedulesUseCase
+import com.lczarny.lsnplanner.domain.datastore.GetAppSettingsUseCase
+import com.lczarny.lsnplanner.domain.datastore.ResetTutorialsUseCase
+import com.lczarny.lsnplanner.domain.datastore.SetAppSettingUseCase
+import com.lczarny.lsnplanner.domain.note.DeleteNoteUseCase
+import com.lczarny.lsnplanner.domain.note.LoadNoteListUseCase
+import com.lczarny.lsnplanner.domain.plan.LoadActiveLessonPlanUseCase
+import com.lczarny.lsnplanner.model.BasicScreenState
+import com.lczarny.lsnplanner.model.Pref
+import com.lczarny.lsnplanner.model.SessionInfo
+import com.lczarny.lsnplanner.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.utils.dateFromEpochMilis
 import com.lczarny.lsnplanner.utils.getWeekNumber
 import com.lczarny.lsnplanner.utils.isBetweenDates
 import com.lczarny.lsnplanner.utils.isSameDate
+import com.lczarny.lsnplanner.utils.updateIfChanged
 import com.lczarny.lsnplanner.utils.weekStartDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.auth.status.SessionStatus
@@ -29,9 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import java.time.LocalDate
@@ -40,31 +42,33 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val authRepository: AuthRepository,
-    private val dataStoreRepository: DataStoreRepository,
-    private val lessonPlanRepository: LessonPlanRepository,
-    private val classInfoRepository: ClassInfoRepository,
-    private val classScheduleRepository: ClassScheduleRepository,
-    private val noteRepository: NoteRepository
+    private val sessionInfo: SessionInfo,
+    private val loadActiveLessonPlanUseCase: LoadActiveLessonPlanUseCase,
+    private val loadClassesSchedulesUseCase: LoadClassesSchedulesUseCase,
+    private val loadNoteListUseCase: LoadNoteListUseCase,
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val signOutUseCase: SignOutUseCase,
+    private val getAppSettingsUseCase: GetAppSettingsUseCase,
+    private val resetTutorialsUseCase: ResetTutorialsUseCase,
+    private val setAppSettingUseCase: SetAppSettingUseCase,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(BasicScreenState.Loading)
 
     private val _sessionActive = MutableStateFlow(true)
-    private val _userProfile = MutableStateFlow<ProfileModel?>(null)
+    private val _userProfile = MutableStateFlow<Profile?>(null)
 
-    private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
+    private val _lessonPlan = MutableStateFlow<LessonPlan?>(null)
 
     private val _classesLoading = MutableStateFlow(true)
     private val _classesCurrentDate = MutableStateFlow(LocalDate.now())
     private val _classesDisplayType = MutableStateFlow(ClassViewType.List)
-    private val _classesSchedulesPerDay = MutableStateFlow<Map<DayOfWeek, List<ClassScheduleWithInfoModel>>>(emptyMap())
+    private val _classesSchedulesPerDay = MutableStateFlow<Map<DayOfWeek, List<ClassScheduleWithInfo>>>(emptyMap())
 
-    private val _notes = MutableStateFlow(emptyList<NoteModel>())
+    private val _notes = MutableStateFlow(emptyList<Note>())
     private val _noteListSwipeTutorialDone = MutableStateFlow(false)
 
-    private var _classesSchedulesWithInfo = emptyList<ClassScheduleWithInfoModel>()
+    private var _classesSchedulesWithInfo = emptyList<ClassScheduleWithInfo>()
     private var _classesCurrentWeek = LocalDate.now().getWeekNumber()
 
     val screenState = _screenState.asStateFlow()
@@ -97,62 +101,69 @@ class HomeViewModel @Inject constructor(
         _classesCurrentDate.update { _classesCurrentDate.value.plusWeeks(if (goForward) 1 else -1) }
     }
 
-    private fun watchLessonPlan() {
+    fun deleteNote(noteId: Long) {
         viewModelScope.launch(ioDispatcher) {
-            lessonPlanRepository.watchActive(sessionRepository.activeProfile.id).flowOn(ioDispatcher).collect { lessonPlan ->
-                if (lessonPlan != null) {
-                    sessionRepository.activeLessonPlan = lessonPlan
-                    _lessonPlan.update { lessonPlan }
+            deleteNoteUseCase.invoke(noteId)
+        }
+    }
 
-                    watchClasses()
-                    watchNotes()
-                }
+    fun changeClassesViewType(viewType: ClassViewType) {
+        viewModelScope.launch(ioDispatcher) {
+            delay(200)
+            _classesDisplayType.update { viewType }
+            setAppSettingUseCase.invoke(Pref.HomeClassesView(), viewType.raw)
+        }
+    }
 
-                _screenState.update { BasicScreenState.Ready }
-            }
+    fun markNoteListSwipeTutorialDone() {
+        viewModelScope.launch(ioDispatcher) {
+            _noteListSwipeTutorialDone.update { true }
+            setAppSettingUseCase.invoke(Pref.TutorialNoteListSwipe(), "true")
+        }
+    }
+
+    fun signOut() {
+        viewModelScope.launch(ioDispatcher) {
+            signOutUseCase.invoke()
+        }
+    }
+
+    fun resetTutorials(onComplete: () -> Unit) {
+        viewModelScope.launch(ioDispatcher) {
+            resetTutorialsUseCase.invoke()
+        }.invokeOnCompletion {
+            onComplete.invoke()
         }
     }
 
     private fun watchUserSession() {
         viewModelScope.launch(ioDispatcher) {
-            sessionRepository.status.collect { status ->
-                if (status is SessionStatus.Authenticated) {
-                    _sessionActive.update { true }
-                    _userProfile.update { sessionRepository.activeProfile }
-                } else {
-                    _sessionActive.update { false }
-                }
+            sessionInfo.status.collect { status ->
+                _sessionActive.updateIfChanged(status is SessionStatus.Authenticated)
+                _userProfile.update { sessionInfo.activeProfile }
             }
         }
     }
 
     private fun watchSettings() {
         viewModelScope.launch(ioDispatcher) {
-            dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
+            getAppSettingsUseCase.invoke().flowOn(ioDispatcher).collect { appSettings ->
                 _classesDisplayType.update { ClassViewType.from(appSettings.homeClassesViewType ?: "") }
-
                 _noteListSwipeTutorialDone.update { appSettings.tutorials.noteListSwipeDone }
             }
         }
     }
 
-    private fun watchClasses() {
-        val activePlanId = sessionRepository.activeLessonPlan.id!!
-
+    private fun watchLessonPlan() {
         viewModelScope.launch(ioDispatcher) {
-            classInfoRepository.watchAll(activePlanId)
-                .zip(classScheduleRepository.watchAll(activePlanId)) { infoList, scheduleList ->
-                    scheduleList.map { schedule ->
-                        ClassScheduleWithInfoModel(schedule, infoList.first { info -> info.id == schedule.classInfoId })
-                    }
-                }
-                .takeWhile { it.any { scheduleWithInfo -> scheduleWithInfo.info.lessonPlanId == activePlanId } }
-                .flowOn(ioDispatcher)
-                .collect { schedulesWithInfo ->
-                    _classesSchedulesWithInfo = schedulesWithInfo
-                    // todo nie odswieza na save classy
-                    createScheduleForThisWeek()
-                }
+            loadActiveLessonPlanUseCase.invoke().flowOn(ioDispatcher).collect { lessonPlan ->
+                _lessonPlan.update { lessonPlan }
+
+                watchClasses()
+                watchNotes()
+
+                _screenState.update { BasicScreenState.Ready }
+            }
         }
     }
 
@@ -167,12 +178,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun watchClasses() {
+        viewModelScope.launch(ioDispatcher) {
+            loadClassesSchedulesUseCase.invoke().flowOn(ioDispatcher).collect { schedulesWithInfo ->
+                _classesSchedulesWithInfo = schedulesWithInfo
+                // todo nie odswieza na save classy
+                createScheduleForThisWeek()
+            }
+        }
+    }
+
     private fun createScheduleForThisWeek() {
         _classesLoading.update { true }
 
         val currDate = _classesCurrentDate.value
         val weekStart = currDate.weekStartDate()
-        val schedulesPerDay = mutableMapOf<DayOfWeek, List<ClassScheduleWithInfoModel>>()
+        val schedulesPerDay = mutableMapOf<DayOfWeek, List<ClassScheduleWithInfo>>()
 
         for (i in 1..7) {
             schedulesPerDay[DayOfWeek(i)] = _classesSchedulesWithInfo.filter {
@@ -193,42 +214,7 @@ class HomeViewModel @Inject constructor(
 
     private fun watchNotes() {
         viewModelScope.launch(ioDispatcher) {
-            noteRepository.watchAll(sessionRepository.activeLessonPlan.id!!).flowOn(ioDispatcher).collect { notes -> _notes.update { notes } }
-        }
-    }
-
-    fun deleteNote(noteId: Long) {
-        viewModelScope.launch(ioDispatcher) {
-            noteRepository.delete(noteId)
-        }
-    }
-
-    fun changeClassesViewType(viewType: ClassViewType) {
-        viewModelScope.launch(ioDispatcher) {
-            delay(200)
-            _classesDisplayType.update { viewType }
-            dataStoreRepository.setHomeClassesViewType(viewType.raw)
-        }
-    }
-
-    fun markNoteListSwipeTutorialDone() {
-        viewModelScope.launch(ioDispatcher) {
-            _noteListSwipeTutorialDone.update { true }
-            dataStoreRepository.setTutorialNoteListSwipeDone()
-        }
-    }
-
-    fun signOut() {
-        viewModelScope.launch(ioDispatcher) {
-            authRepository.signOut()
-        }
-    }
-
-    fun resetTutorials(onComplete: () -> Unit) {
-        viewModelScope.launch(ioDispatcher) {
-            dataStoreRepository.resetTutorials()
-        }.invokeOnCompletion {
-            onComplete.invoke()
+            loadNoteListUseCase.invoke().flowOn(ioDispatcher).collect { notes -> _notes.update { notes } }
         }
     }
 }

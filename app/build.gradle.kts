@@ -56,8 +56,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":database"))
+    implementation(project(":online"))
+
     ksp(libs.hilt.compiler)
-    ksp(libs.room.compiler)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.datetime)
@@ -90,15 +92,8 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
 
-    implementation(libs.retrofit)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
-
     implementation(libs.supabase.postgres)
     implementation(libs.supabase.auth)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android)
-    implementation(libs.ktor.utils)
 
     kspTest(libs.hilt.compiler)
 

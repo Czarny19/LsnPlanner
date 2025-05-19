@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.database.model.LessonPlan
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
 import com.lczarny.lsnplanner.presentation.components.DeleteIcon
@@ -41,7 +41,7 @@ fun LessonPlanListItem(
     navController: NavController,
     viewModel: LessonPlanListViewModel,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,
-    lessonPlan: LessonPlanModel,
+    lessonPlan: LessonPlan,
 ) {
     Row(
         modifier = Modifier
@@ -68,7 +68,7 @@ fun LessonPlanListItem(
 private fun LessonPlanListItemMenu(
     viewModel: LessonPlanListViewModel,
     snackbarChannel: Channel<ListPickerScreenSnackbar>,
-    lessonPlan: LessonPlanModel,
+    lessonPlan: LessonPlan,
 ) {
     if (lessonPlan.isActive) {
         return IconButton(enabled = false, onClick = {}) {}
@@ -84,8 +84,8 @@ private fun LessonPlanListItemMenu(
             text = stringResource(R.string.plan_delete_question),
             onConfirm = {
                 deleteConfirmationDialogOpen = false
-                viewModel.deletePlan(lessonPlan.id!!) {
-                    viewModel.setSelectedPlanName(lessonPlan.name)
+
+                viewModel.deletePlan(lessonPlan) {
                     snackbarChannel.trySend(ListPickerScreenSnackbar.Deleted)
                 }
             },
@@ -104,7 +104,6 @@ private fun LessonPlanListItemMenu(
                     dropDownExpanded = false
 
                     viewModel.makePlanActive(lessonPlan) {
-                        viewModel.setSelectedPlanName(lessonPlan.name)
                         snackbarChannel.trySend(ListPickerScreenSnackbar.SetActive)
                     }
                 }

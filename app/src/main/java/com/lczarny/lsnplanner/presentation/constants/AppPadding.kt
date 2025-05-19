@@ -1,7 +1,9 @@
 package com.lczarny.lsnplanner.presentation.constants
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
 
+@Immutable
 object AppPadding {
     val LIST_ITEM_PADDING = 12.dp
     val INPUT_BOTTOM_PADDING = 8.dp

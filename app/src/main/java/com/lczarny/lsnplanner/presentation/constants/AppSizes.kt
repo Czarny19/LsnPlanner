@@ -1,7 +1,9 @@
 package com.lczarny.lsnplanner.presentation.constants
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
 
+@Immutable
 object AppSizes {
     val CARD_ELEVATION = 4.dp
     val CARD_BORDER_WIDTH = 2.dp

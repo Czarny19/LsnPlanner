@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,7 @@ private val colors = listOf<Long>(
 )
 
 @Composable
+@Stable
 fun ColorPicker(modifier: Modifier = Modifier, label: String, initialColorHex: Long, onColorSelect: (Long) -> Unit) {
     var colorPickerDialogOpen by remember { mutableStateOf(false) }
 
@@ -87,6 +89,7 @@ fun ColorPicker(modifier: Modifier = Modifier, label: String, initialColorHex: L
 }
 
 @Composable
+@Stable
 fun ColorIndicator(modifier: Modifier = Modifier, isLarge: Boolean = false, color: Color, isSelected: Boolean = false) {
     Box(
         modifier = modifier
@@ -104,7 +107,8 @@ fun ColorIndicator(modifier: Modifier = Modifier, isLarge: Boolean = false, colo
 }
 
 @Composable
-fun ColorPickerDialog(visible: Boolean, initialColorHex: Long, onDissmiss: () -> Unit, onColorSelect: (Long) -> Unit) {
+@Stable
+private fun ColorPickerDialog(visible: Boolean, initialColorHex: Long, onDissmiss: () -> Unit, onColorSelect: (Long) -> Unit) {
     if (visible.not()) {
         return
     }
@@ -119,12 +123,14 @@ fun ColorPickerDialog(visible: Boolean, initialColorHex: Long, onDissmiss: () ->
                 horizontalArrangement = Arrangement.spacedBy(AppPadding.SM_PADDING),
                 verticalArrangement = Arrangement.spacedBy(AppPadding.SM_PADDING)
             ) {
-                items(items = colors) { color ->
+                items(items = colors, key = { it }) { color ->
+                    val isSelected by lazy { selectedColor == color }
+
                     ColorIndicator(
                         modifier = Modifier.clickable { selectedColor = color },
                         isLarge = true,
                         color = Color(color),
-                        isSelected = selectedColor == color
+                        isSelected = isSelected
                     )
                 }
             }

@@ -2,13 +2,13 @@ package com.lczarny.lsnplanner.presentation.ui.lessonplan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.common.model.LessonPlanType
-import com.lczarny.lsnplanner.data.common.repository.LessonPlanRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.database.model.LessonPlan
+import com.lczarny.lsnplanner.database.model.LessonPlanType
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
-import com.lczarny.lsnplanner.utils.currentTimestamp
+import com.lczarny.lsnplanner.domain.plan.LoadLessonPlanUseCase
+import com.lczarny.lsnplanner.domain.plan.SaveLessonPlanUseCase
+import com.lczarny.lsnplanner.model.DetailsScreenState
+import com.lczarny.lsnplanner.utils.updateIfChanged
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,17 +20,17 @@ import javax.inject.Inject
 @HiltViewModel
 class LessonPlanViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val lessonPlanRepository: LessonPlanRepository
+    private val loadLessonPlanUseCase: LoadLessonPlanUseCase,
+    private val saveLessonPlanUseCase: SaveLessonPlanUseCase,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
 
-    private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
+    private val _lessonPlan = MutableStateFlow<LessonPlan?>(null)
     private val _dataChanged = MutableStateFlow(false)
     private val _saveEnabled = MutableStateFlow(false)
 
-    private lateinit var _initialData: LessonPlanModel
+    private lateinit var _initialData: LessonPlan
 
     val screenState = _screenState.asStateFlow()
 
@@ -59,29 +59,21 @@ class LessonPlanViewModel @Inject constructor(
         checkDataChanged()
     }
 
-    fun initializePlan(lessonPlanId: Long?) {
+    fun initializePlan(planId: Long?) {
         if (_lessonPlan.value != null) {
             return
         }
 
         _screenState.update { DetailsScreenState.Loading }
 
-        lessonPlanId?.let { id ->
-            viewModelScope.launch(ioDispatcher) {
-                lessonPlanRepository.getById(id).let { lessonPlan ->
-                    _lessonPlan.update { lessonPlan }
-                    _saveEnabled.update { lessonPlan.name.isNotEmpty() }
-                    _initialData = lessonPlan.copy()
-                }
-            }.invokeOnCompletion {
-                _screenState.update { DetailsScreenState.Edit }
-            }
-        } ?: run {
-            LessonPlanModel(isActive = true, profileId = sessionRepository.activeProfile.id, createDate = currentTimestamp()).let { lessonPlan ->
-                _initialData = lessonPlan.copy()
+        viewModelScope.launch(ioDispatcher) {
+            loadLessonPlanUseCase.invoke(planId).let { lessonPlan ->
                 _lessonPlan.update { lessonPlan }
-                _screenState.update { DetailsScreenState.Create }
+                _saveEnabled.update { lessonPlan.name.isNotEmpty() }
+                _initialData = lessonPlan.copy()
             }
+        }.invokeOnCompletion {
+            _screenState.update { if (planId == null) DetailsScreenState.Create else DetailsScreenState.Edit }
         }
     }
 
@@ -89,27 +81,13 @@ class LessonPlanViewModel @Inject constructor(
         _screenState.update { DetailsScreenState.Saving }
 
         viewModelScope.launch(ioDispatcher) {
-            _lessonPlan.value?.let { lessonPlan ->
-                lessonPlan.id?.let {
-                    lessonPlanRepository.update(lessonPlan)
-                    updateOtherPlans(lessonPlan, lessonPlan.isActive)
-                } ?: run {
-                    val newId = lessonPlanRepository.insert(lessonPlan.apply { isActive = true })
-                    updateOtherPlans(lessonPlanRepository.getById(newId), lessonPlan.isActive)
-                }
-            }
+            saveLessonPlanUseCase.invoke(_lessonPlan.value!!)
         }.invokeOnCompletion {
             _screenState.update { DetailsScreenState.Finished }
         }
     }
 
-    private suspend fun updateOtherPlans(lessonPlan: LessonPlanModel, isActive: Boolean) {
-        if (isActive) {
-            lessonPlanRepository.makeOtherPlansNotActive(lessonPlan)
-        }
-    }
-
     private fun checkDataChanged() {
-        _dataChanged.update { _initialData != lessonPlan.value }
+        _dataChanged.updateIfChanged(_initialData != lessonPlan.value)
     }
 }

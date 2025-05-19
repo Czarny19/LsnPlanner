@@ -8,12 +8,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.lczarny.lsnplanner.presentation.constants.AppPadding
 import com.lczarny.lsnplanner.presentation.constants.AppSizes
 
 @Composable
+@Stable
 fun FullScreenLoading(label: String? = null) {
     Column(
         modifier = Modifier.padding(AppPadding.MD_PADDING),

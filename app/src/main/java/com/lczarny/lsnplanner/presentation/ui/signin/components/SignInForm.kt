@@ -28,7 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.repository.AuthError
+import com.lczarny.lsnplanner.online.model.AuthError
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.InputError
 import com.lczarny.lsnplanner.presentation.components.OutlinedInputField
@@ -68,36 +68,7 @@ fun SignInForm(viewModel: SignInViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING),
         ) {
-            Card(modifier = Modifier.padding(bottom = AppPadding.LG_PADDING)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(vertical = AppPadding.LG_PADDING, horizontal = AppPadding.MD_PADDING),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING)
-                ) {
-                    Icon(
-                        AppIcons.WELCOME,
-                        modifier = Modifier
-                            .padding(bottom = AppPadding.MD_PADDING)
-                            .size(AppSizes.XL_ICON),
-                        contentDescription = stringResource(R.string.signin_welcome),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-
-                    Text(
-                        stringResource(R.string.signin_welcome),
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center,
-                    )
-
-                    Text(
-                        stringResource(R.string.signin_info),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
+            SignInWelcome()
 
             OutlinedInputField(
                 label = stringResource(R.string.user_email),
@@ -160,6 +131,40 @@ fun SignInForm(viewModel: SignInViewModel) {
 
                     viewModel.signUp(onError = { error -> errorSnackbarChannel.trySend(error) })
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun SignInWelcome() {
+    Card(modifier = Modifier.padding(bottom = AppPadding.LG_PADDING)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = AppPadding.LG_PADDING, horizontal = AppPadding.MD_PADDING),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(AppPadding.MD_PADDING)
+        ) {
+            Icon(
+                AppIcons.WELCOME,
+                modifier = Modifier
+                    .padding(bottom = AppPadding.MD_PADDING)
+                    .size(AppSizes.XL_ICON),
+                contentDescription = stringResource(R.string.signin_welcome),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+
+            Text(
+                stringResource(R.string.signin_welcome),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+            )
+
+            Text(
+                stringResource(R.string.signin_info),
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
             )
         }
     }

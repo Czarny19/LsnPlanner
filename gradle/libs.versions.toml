@@ -1,7 +1,7 @@
 [versions]
 kotlin = "2.0.21"
 kotlinSerialization = "1.9.24"
-androidGradlePlugin = "8.9.2"
+androidGradlePlugin = "8.10.0"
 kotlinxCoroutines = "1.10.1"
 kotlinxDatetime = "0.6.1"
 kotlinxSerializationJson = "1.8.0"
@@ -29,6 +29,7 @@ testRunner = "1.6.2"
 mockito = "5.15.2"
 mockitoInline = "5.2.0"
 mockk = "1.13.17"
+espressoCore = "3.5.1"
 
 [libraries]
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
@@ -90,6 +91,7 @@ mockk = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -98,6 +100,7 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinAndroidKsp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 
 [bundles]
 compose = [

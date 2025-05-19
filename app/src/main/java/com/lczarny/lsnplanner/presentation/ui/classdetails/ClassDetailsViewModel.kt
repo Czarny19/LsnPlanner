@@ -2,21 +2,23 @@ package com.lczarny.lsnplanner.presentation.ui.classdetails
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.ClassInfoModel
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleModel
-import com.lczarny.lsnplanner.data.common.model.ClassScheduleType
-import com.lczarny.lsnplanner.data.common.model.ClassType
-import com.lczarny.lsnplanner.data.common.model.ExamModel
-import com.lczarny.lsnplanner.data.common.model.HomeworkModel
-import com.lczarny.lsnplanner.data.common.model.ItemState
-import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
-import com.lczarny.lsnplanner.data.common.model.defaultClassType
-import com.lczarny.lsnplanner.data.common.repository.ClassInfoRepository
-import com.lczarny.lsnplanner.data.common.repository.ClassScheduleRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.database.model.ClassInfo
+import com.lczarny.lsnplanner.database.model.ClassSchedule
+import com.lczarny.lsnplanner.database.model.ClassScheduleType
+import com.lczarny.lsnplanner.database.model.ClassType
+import com.lczarny.lsnplanner.database.model.Exam
+import com.lczarny.lsnplanner.database.model.Homework
+import com.lczarny.lsnplanner.database.model.ItemState
+import com.lczarny.lsnplanner.database.model.LessonPlan
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
+import com.lczarny.lsnplanner.model.SessionInfo
+import com.lczarny.lsnplanner.domain.cls.LoadClassUseCase
+import com.lczarny.lsnplanner.domain.cls.SaveClassUseCase
+import com.lczarny.lsnplanner.model.DetailsScreenState
+import com.lczarny.lsnplanner.utils.deleteItem
 import com.lczarny.lsnplanner.utils.isDurationOverMidnight
+import com.lczarny.lsnplanner.utils.updateIfChanged
+import com.lczarny.lsnplanner.utils.updateItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,28 +30,28 @@ import javax.inject.Inject
 @HiltViewModel
 class ClassDetailsViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val classInfoRepository: ClassInfoRepository,
-    private val classTimeRepository: ClassScheduleRepository
+    private val loadClassUseCase: LoadClassUseCase,
+    private val saveClassUseCase: SaveClassUseCase,
+    private val sessionInfo: SessionInfo,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
 
-    private val _lessonPlan = MutableStateFlow<LessonPlanModel?>(null)
-    private val _info = MutableStateFlow<ClassInfoModel?>(null)
-    private val _schedules = MutableStateFlow<List<ClassScheduleModel>>(emptyList())
-    private val _exams = MutableStateFlow<List<ExamModel>>(emptyList())
-    private val _homeworks = MutableStateFlow<List<HomeworkModel>>(emptyList())
+    private val _lessonPlan = MutableStateFlow<LessonPlan?>(null)
+    private val _info = MutableStateFlow<ClassInfo?>(null)
+    private val _schedules = MutableStateFlow<List<ClassSchedule>>(emptyList())
+    private val _exams = MutableStateFlow<List<Exam>>(emptyList())
+    private val _homeworks = MutableStateFlow<List<Homework>>(emptyList())
 
     private val _dataChanged = MutableStateFlow(false)
     private val _saveEnabled = MutableStateFlow(false)
 
-    private lateinit var _initialData: ClassInfoModel
+    private lateinit var _initialData: ClassInfo
     private var _anyListChange = false
 
     private var _defaultWeekDay = 0
 
-    private var _classTimeTempId = 0L
+    private var _classScheduleTempId = 0L
 
     val screenState = _screenState.asStateFlow()
 
@@ -63,7 +65,29 @@ class ClassDetailsViewModel @Inject constructor(
     val saveEnabled = _saveEnabled.asStateFlow()
 
     init {
-        _lessonPlan.update { sessionRepository.activeLessonPlan }
+        _lessonPlan.update { sessionInfo.activeLessonPlan }
+    }
+
+    fun initializeClass(defaultWeekDay: Int, classInfoId: Long?) {
+        if (_info.value != null) {
+            return
+        }
+
+        _screenState.update { DetailsScreenState.Loading }
+        _defaultWeekDay = defaultWeekDay
+
+        viewModelScope.launch(ioDispatcher) {
+            loadClassUseCase.invoke(classInfoId).let { fullClassDataModel ->
+                _initialData = fullClassDataModel.info
+
+                _info.update { fullClassDataModel.info }
+                _schedules.update { fullClassDataModel.schedules }
+                _exams.update { fullClassDataModel.exams }
+                _homeworks.update { fullClassDataModel.homeworks }
+            }
+        }.invokeOnCompletion {
+            _screenState.update { if (classInfoId == null) DetailsScreenState.Create else DetailsScreenState.Edit }
+        }
     }
 
     fun updateName(value: String) {
@@ -86,124 +110,68 @@ class ClassDetailsViewModel @Inject constructor(
         checkDataChanged()
     }
 
-    fun initializeClass(defaultWeekDay: Int, classInfoId: Long?) {
-        if (_info.value != null) {
-            return
-        }
-
-        _screenState.update { DetailsScreenState.Loading }
-        _defaultWeekDay = defaultWeekDay
-
-        classInfoId?.let { id ->
-            viewModelScope.launch(ioDispatcher) {
-                classInfoRepository.getFullDataById(id).let { fullClass ->
-                    _initialData = fullClass.info
-
-                    _info.update { fullClass.info }
-                    _schedules.update { fullClass.schedules }
-                    _exams.update { fullClass.exams }
-                    _homeworks.update { fullClass.homeworks }
-
-                    _screenState.update { DetailsScreenState.Edit }
-                }
-            }
-        } ?: run {
-            sessionRepository.activeLessonPlan.let {
-                ClassInfoModel(lessonPlanId = it.id!!, type = it.type.defaultClassType()).let { classInfo ->
-                    _initialData = classInfo
-
-                    _info.update { classInfo }
-                    _schedules.update { emptyList() }
-                    _exams.update { emptyList() }
-                    _homeworks.update { emptyList() }
-
-                    _screenState.update { DetailsScreenState.Create }
-                }
-            }
-        }
-    }
-
     fun addClassSchedule() {
-        ClassScheduleModel(localTempId = _classTimeTempId++, state = ItemState.New, classInfoId = 0L, weekDay = _defaultWeekDay).let { schedule ->
+        ClassSchedule(localTempId = _classScheduleTempId++, state = ItemState.New, weekDay = _defaultWeekDay).let { schedule ->
             _schedules.update { _schedules.value.toMutableList() + schedule }
-            _saveEnabled.update { false }
             _anyListChange = true
             checkDataChanged()
         }
     }
 
-    fun deleteClassSchedule(classSchedule: ClassScheduleModel) {
-        _schedules.value.indexOf(classSchedule).let {
-            if (it >= 0) {
-                val newList = _schedules.value.toMutableList()
-
-                newList[it].let { item ->
-                    if (item.state == ItemState.New) newList.removeAt(it)
-                    else item.apply { state = ItemState.ToBeDeleted }
-                }
-
-                _schedules.update { newList }
-                _anyListChange = true
-                checkDataChanged()
-            }
+    private fun updateClassSchedule(oldVal: ClassSchedule, newVal: ClassSchedule) {
+        _schedules.updateItem(oldVal, newVal) {
+            _anyListChange = true
+            checkDataChanged()
         }
     }
 
-    private fun updateClassSchedule(oldVal: ClassScheduleModel, newVal: ClassScheduleModel) {
-        _schedules.value.indexOf(oldVal).let {
-            if (it >= 0) {
-                val newList = _schedules.value.toMutableList()
-                newList[it] = newVal
-
-                _schedules.update { newList }
+    fun deleteClassSchedule(classSchedule: ClassSchedule) {
+        if (classSchedule.state == ItemState.New) {
+            _schedules.deleteItem(classSchedule) {
                 _anyListChange = true
-                checkDataChanged()
             }
+        } else {
+            updateClassSchedule(classSchedule, classSchedule.copy(state = ItemState.ToBeDeleted))
         }
     }
 
-    fun updateClassScheduleType(classSchedule: ClassScheduleModel, value: ClassScheduleType) {
+    fun updateClassScheduleType(classSchedule: ClassSchedule, value: ClassScheduleType) {
         updateClassSchedule(
             classSchedule,
-            classSchedule.copy(
-                type = value,
-                weekDay = _defaultWeekDay,
-                startDate = null,
-                endDate = null
-            )
+            classSchedule.copy(type = value, weekDay = _defaultWeekDay, startDate = null, endDate = null)
         )
     }
 
-    fun updateClassScheduleAddress(classSchedule: ClassScheduleModel, value: String) {
+    fun updateClassScheduleAddress(classSchedule: ClassSchedule, value: String) {
         updateClassSchedule(classSchedule, classSchedule.copy(address = value))
     }
 
-    fun updateClassScheduleClassroom(classSchedule: ClassScheduleModel, value: String) {
+    fun updateClassScheduleClassroom(classSchedule: ClassSchedule, value: String) {
         updateClassSchedule(classSchedule, classSchedule.copy(classroom = value))
     }
 
-    fun updateClassScheduleDuration(classSchedule: ClassScheduleModel, value: Int) {
+    fun updateClassScheduleDuration(classSchedule: ClassSchedule, value: Int) {
         updateClassSchedule(classSchedule, classSchedule.copy(durationMinutes = value))
     }
 
-    fun updateClassScheduleWeekday(classSchedule: ClassScheduleModel, value: Int) {
+    fun updateClassScheduleWeekday(classSchedule: ClassSchedule, value: Int) {
         updateClassSchedule(classSchedule, classSchedule.copy(weekDay = value))
     }
 
-    fun updateClassScheduleStartTime(classSchedule: ClassScheduleModel, hour: Int, minute: Int) {
+    fun updateClassScheduleStartTime(classSchedule: ClassSchedule, hour: Int, minute: Int) {
         updateClassSchedule(classSchedule, classSchedule.copy(startHour = hour, startMinute = minute))
     }
 
-    fun updateClassScheduleStartDate(classSchedule: ClassScheduleModel, value: Long) {
+    fun updateClassScheduleStartDate(classSchedule: ClassSchedule, value: Long) {
         updateClassSchedule(classSchedule, classSchedule.copy(startDate = value, endDate = null))
     }
 
-    fun updateClassScheduleEndDate(classSchedule: ClassScheduleModel, value: Long) {
+    fun updateClassScheduleEndDate(classSchedule: ClassSchedule, value: Long) {
         updateClassSchedule(classSchedule, classSchedule.copy(endDate = value))
     }
 
-    fun isClassScheduleNotValid(classTime: ClassScheduleModel): Boolean {
-        classTime.let {
+    fun isClassScheduleNotValid(classSchedule: ClassSchedule): Boolean {
+        classSchedule.let {
             val classroomError = it.classroom.isEmpty()
             val addressError = _lessonPlan.value?.addressEnabled == true && (it.address?.isEmpty() == true)
             val durationOverMidnight = isDurationOverMidnight(it.durationMinutes, it.startHour, it.startMinute)
@@ -218,45 +186,21 @@ class ClassDetailsViewModel @Inject constructor(
     }
 
     fun saveClass() {
-        _info.value?.let { classInfo ->
-            _screenState.update { DetailsScreenState.Saving }
+        _screenState.update { DetailsScreenState.Saving }
 
-            viewModelScope.launch(ioDispatcher) {
-                classInfo.id?.let { classInfoId ->
-                    classInfoRepository.update(classInfo)
-                    saveClassSchedule(classInfoId)
-                } ?: run {
-                    saveClassSchedule(classInfoRepository.insert(classInfo))
-                }
-            }.invokeOnCompletion {
-                _screenState.update { DetailsScreenState.Finished }
-            }
-        }
-    }
-
-    private suspend fun saveClassSchedule(classInfoId: Long) {
-        _schedules.value.forEach {
-            when (it.state) {
-                ItemState.New -> classTimeRepository.insert(it.apply { this.classInfoId = classInfoId })
-                ItemState.Existing -> classTimeRepository.update(it)
-                ItemState.ToBeDeleted -> classTimeRepository.delete(it.id!!)
-            }
+        viewModelScope.launch(ioDispatcher) {
+            saveClassUseCase.invoke(_info.value!!, _schedules.value)
+        }.invokeOnCompletion {
+            _screenState.update { DetailsScreenState.Finished }
         }
     }
 
     private fun checkDataChanged() {
-        _dataChanged.update { _initialData != _info.value || _anyListChange }
+        val dataChanged = _initialData != _info.value || _anyListChange
+        val nameNotEmpty = _info.value?.name?.isNotEmpty() != false
+        val schedulesValid = _schedules.value.firstOrNull { isClassScheduleNotValid(it) } == null
 
-        if (_info.value?.name?.isEmpty() != false) {
-            _saveEnabled.update { false }
-            return
-        }
-
-        if (_schedules.value.firstOrNull { isClassScheduleNotValid(it) } != null) {
-            _saveEnabled.update { false }
-            return
-        }
-
-        _saveEnabled.update { true }
+        _dataChanged.updateIfChanged(dataChanged)
+        _saveEnabled.updateIfChanged(dataChanged && nameNotEmpty && schedulesValid)
     }
 }

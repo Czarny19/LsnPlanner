@@ -4,7 +4,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoMode
+import androidx.compose.material.icons.outlined.DarkMode
+import androidx.compose.material.icons.outlined.LightMode
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,13 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.model.LessonPlanModel
+import com.lczarny.lsnplanner.database.model.LessonPlan
+import com.lczarny.lsnplanner.database.model.Profile
+import com.lczarny.lsnplanner.model.ThemeType
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.BasicDialogState
 import com.lczarny.lsnplanner.presentation.components.ConfirmationDialog
+import com.lczarny.lsnplanner.presentation.components.MultiStateSwitchButton
+import com.lczarny.lsnplanner.presentation.components.MultiStateSwitchButtonItem
 import com.lczarny.lsnplanner.presentation.navigation.ClassListRoute
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanListRoute
 import com.lczarny.lsnplanner.presentation.navigation.LessonPlanRoute
@@ -31,44 +42,46 @@ import com.lczarny.lsnplanner.utils.convertMillisToSystemDate
 import kotlinx.coroutines.channels.Channel
 
 @Composable
-fun MoreTab(padding: PaddingValues, navController: NavController, viewModel: HomeViewModel, snackbarChannel: Channel<HomeScreenSnackbar>) {
-    val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
-
+fun MoreTab(
+    padding: PaddingValues,
+    navController: NavController,
+    viewModel: HomeViewModel,
+    lessonPlan: LessonPlan,
+    userProfile: Profile,
+    snackbarChannel: Channel<HomeScreenSnackbar>
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding),
+            .padding(padding)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start
     ) {
-        UserItem(viewModel)
-
-        lessonPlan?.let { lessonPlanData ->
-            ActivePlanItem(navController, lessonPlanData)
-            ManagePlansItem(navController)
-            ManageClassesItem(navController)
-        }
-
-        TutorialsItem(viewModel, snackbarChannel)
+        UserItem(userProfile)
+        ActivePlanItem(navController, lessonPlan)
+        ManagePlansItem(navController)
+        ManageClassesItem(navController)
+        ThemeItem()
+        TutorialsResetItem(viewModel, snackbarChannel)
         SignOutItem(viewModel)
+        // TODO setting item (move tutorial reset there)
     }
 }
 
-
 @Composable
-private fun UserItem(viewModel: HomeViewModel) {
+private fun UserItem(userProfile: Profile) {
     val context = LocalContext.current
-    val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
 
     MoreTabItem(
         icon = { Icon(AppIcons.USER, contentDescription = stringResource(R.string.user)) },
-        label = userProfile?.email ?: "",
-        subtitle = stringResource(R.string.user_joined, userProfile?.joined?.convertMillisToSystemDate(context) ?: "")
+        label = userProfile.email,
+        subtitle = stringResource(R.string.user_joined, userProfile.joined.convertMillisToSystemDate(context))
     )
 }
 
 @Composable
-private fun ActivePlanItem(navController: NavController, lessonPlan: LessonPlanModel) {
+private fun ActivePlanItem(navController: NavController, lessonPlan: LessonPlan) {
     MoreTabItem(
         icon = { Icon(AppIcons.PLAN, contentDescription = stringResource(R.string.plan_type)) },
         label = lessonPlan.name,
@@ -101,7 +114,7 @@ private fun ManageClassesItem(navController: NavController) {
 }
 
 @Composable
-private fun TutorialsItem(viewModel: HomeViewModel, snackbarChannel: Channel<HomeScreenSnackbar>) {
+private fun TutorialsResetItem(viewModel: HomeViewModel, snackbarChannel: Channel<HomeScreenSnackbar>) {
     var confirmationDialogOpen by remember { mutableStateOf(false) }
 
     ConfirmationDialog(
@@ -121,6 +134,38 @@ private fun TutorialsItem(viewModel: HomeViewModel, snackbarChannel: Channel<Hom
         label = stringResource(R.string.reset_tutorials),
         onClick = { confirmationDialogOpen = true }
     )
+}
+
+@Composable
+private fun ThemeItem() {
+    Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+        MultiStateSwitchButton<ThemeType>(
+            modifier = Modifier.fillMaxWidth(),
+            items = listOf(
+                MultiStateSwitchButtonItem<ThemeType>(
+                    id = ThemeType.Light,
+                    imageVector = Icons.Outlined.LightMode,
+                    label = "light",
+                    onClick = {}
+                ),
+                MultiStateSwitchButtonItem<ThemeType>(
+                    id = ThemeType.Dark,
+                    imageVector = Icons.Outlined.DarkMode,
+                    label = "dart",
+                    onClick = {}
+                ),
+                MultiStateSwitchButtonItem<ThemeType>(
+                    id = ThemeType.System,
+                    imageVector = Icons.Outlined.AutoMode,
+                    label = "system",
+                    onClick = {}
+                )
+            ),
+            initialStateId = ThemeType.System
+        )
+
+        HorizontalDivider()
+    }
 }
 
 @Composable

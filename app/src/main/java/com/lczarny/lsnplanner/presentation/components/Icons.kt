@@ -33,7 +33,7 @@ import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.SettingsBackupRestore
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.ArrowDropDownCircle
 import androidx.compose.material.icons.outlined.CalendarToday
 import androidx.compose.material.icons.outlined.Class
 import androidx.compose.material.icons.outlined.Delete
@@ -86,7 +86,7 @@ object AppIcons {
 
     val LIST = Icons.AutoMirrored.Filled.List
     val FAB_MENU = Icons.Filled.MoreHoriz
-    val DROP_DOWN = Icons.Outlined.ArrowDropDown
+    val DROP_DOWN = Icons.Outlined.ArrowDropDownCircle
     val DROP_DOWN_NOT_EXPANDED = Icons.Filled.KeyboardArrowDown
     val DROP_DOWN_EXPANDED = Icons.Filled.KeyboardArrowUp
 

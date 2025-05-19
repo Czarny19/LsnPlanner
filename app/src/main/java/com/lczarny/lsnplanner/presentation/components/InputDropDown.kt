@@ -34,13 +34,13 @@ data class DropDownItem(
 )
 
 @Composable
-fun OutlinedDropDown(
+inline fun OutlinedDropDown(
     modifier: Modifier = Modifier,
     label: String,
     items: List<DropDownItem>,
     initialValue: DropDownItem,
     readOnly: Boolean = false,
-    onValueChange: (DropDownItem) -> Unit
+    crossinline onValueChange: (DropDownItem) -> Unit
 ) {
     var fieldSize by remember { mutableStateOf(Size.Zero) }
     var seleced by remember { mutableStateOf(initialValue) }

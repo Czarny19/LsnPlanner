@@ -11,12 +11,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.lczarny.lsnplanner.database.model.LessonPlan
+import com.lczarny.lsnplanner.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
-import com.lczarny.lsnplanner.presentation.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 
 @Composable
-fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: PagerState) {
+fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, lessonPlan: LessonPlan, pagerState: PagerState) {
+    val classesSchedulesPerDay by viewModel.classesSchedulesPerDay.collectAsStateWithLifecycle()
     val classesDisplayType by viewModel.classesDisplayType.collectAsStateWithLifecycle()
     val classesLoading by viewModel.classesLoading.collectAsStateWithLifecycle()
 
@@ -35,7 +37,7 @@ fun ClassesTab(padding: PaddingValues, viewModel: HomeViewModel, pagerState: Pag
         ClassesTabTopNav(viewModel, pagerState)
 
         when (classesDisplayType) {
-            ClassViewType.List -> ClassesTabList(viewModel, pagerState)
+            ClassViewType.List -> ClassesTabList(lessonPlan, classesSchedulesPerDay, pagerState)
             ClassViewType.Timeline -> ClassesTabTimeline()
         }
     }

@@ -2,18 +2,17 @@ package com.lczarny.lsnplanner.presentation.ui.signin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.toProfile
-import com.lczarny.lsnplanner.data.common.repository.AuthError
-import com.lczarny.lsnplanner.data.common.repository.AuthRepository
-import com.lczarny.lsnplanner.data.common.repository.ProfileRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.SignInScreenState
+import com.lczarny.lsnplanner.domain.auth.LoadUserProfileUseCase
+import com.lczarny.lsnplanner.domain.auth.ResetPasswordUseCase
+import com.lczarny.lsnplanner.domain.auth.SignInUseCase
+import com.lczarny.lsnplanner.domain.auth.SignUpUseCase
+import com.lczarny.lsnplanner.model.SignInScreenState
+import com.lczarny.lsnplanner.online.model.AuthError
 import com.lczarny.lsnplanner.utils.isValidEmail
 import com.lczarny.lsnplanner.utils.isValidPassword
+import com.lczarny.lsnplanner.utils.updateIfChanged
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.jan.supabase.auth.status.SessionStatus
-import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,9 +23,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val authRepository: AuthRepository,
-    private val profileRepository: ProfileRepository,
+    private val loadUserProfileUseCase: LoadUserProfileUseCase,
+    private val signInUseCase: SignInUseCase,
+    private val signUpUseCase: SignUpUseCase,
+    private val resetPasswordUseCase: ResetPasswordUseCase,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(SignInScreenState.Loading)
@@ -56,20 +56,20 @@ class SignInViewModel @Inject constructor(
 
     fun updateEmail(email: String) {
         _email = email
-        _signInEnabled.update { _email.isNotEmpty() && _password.isNotEmpty() }
-        _resetPasswordEnabled.update { email.isNotEmpty() }
+        _signInEnabled.updateIfChanged(_email.isNotEmpty() && _password.isNotEmpty())
+        _resetPasswordEnabled.updateIfChanged(email.isNotEmpty())
     }
 
     fun updatePassword(password: String) {
         _password = password
-        _signInEnabled.update { _email.isNotEmpty() && _password.isNotEmpty() }
+        _signInEnabled.updateIfChanged(_email.isNotEmpty() && _password.isNotEmpty())
     }
 
     fun signIn(onError: (AuthError) -> Unit) {
         _formEnabled.update { false }
 
         viewModelScope.launch(ioDispatcher) {
-            authRepository.signIn(_email, _password)?.let { error ->
+            signInUseCase.invoke(_email, _password)?.let { error ->
                 _formEnabled.update { true }
                 onError.invoke(error)
             }
@@ -79,15 +79,15 @@ class SignInViewModel @Inject constructor(
     fun signUp(onError: (AuthError) -> Unit) {
         _formEnabled.update { false }
 
-        _emailInvalid.update { _email.isValidEmail().not() }
-        _passwordInvalid.update { _password.isValidPassword().not() }
+        _emailInvalid.updateIfChanged(_email.isValidEmail().not())
+        _passwordInvalid.updateIfChanged(_password.isValidPassword().not())
 
         if (_emailInvalid.value || _passwordInvalid.value) {
             return
         }
 
         viewModelScope.launch(ioDispatcher) {
-            authRepository.signUp(_email, _password)?.let { error ->
+            signUpUseCase.invoke(_email, _password)?.let { error ->
                 _formEnabled.update { true }
                 onError.invoke(error)
             }
@@ -96,7 +96,7 @@ class SignInViewModel @Inject constructor(
 
     fun resetPassword(onFinished: () -> Unit, onError: (AuthError) -> Unit) {
         viewModelScope.launch(ioDispatcher) {
-            authRepository.resetPassword(_email)
+            resetPasswordUseCase.invoke(_email)
                 ?.let { error -> onError.invoke(error) }
                 ?: run { onFinished.invoke() }
         }
@@ -104,29 +104,10 @@ class SignInViewModel @Inject constructor(
 
     private fun watchUserInfo() {
         viewModelScope.launch(ioDispatcher) {
-            sessionRepository.status.collect { status ->
-                val currentUser = sessionRepository.user()
-
-                if (status is SessionStatus.Authenticated && currentUser != null) {
-                    if (profileRepository.loadActiveProfile(currentUser.email!!)) {
-                        _screenState.update { SignInScreenState.Done }
-                    } else {
-                        createNewProfile(currentUser)
-                    }
-                } else {
-                    _screenState.update { SignInScreenState.SignIn }
-                }
-            }
-        }
-    }
-
-    private fun createNewProfile(user: UserInfo) {
-        viewModelScope.launch(ioDispatcher) {
-            profileRepository.insert(user.toProfile()).let { newProfileId ->
-                profileRepository.loadActiveProfile(user.email!!).run {
-                    _screenState.update { SignInScreenState.Done }
-                }
-            }
+            loadUserProfileUseCase.invoke(
+                onSignIn = { _screenState.update { SignInScreenState.Done } },
+                onNoSession = { _screenState.update { SignInScreenState.SignIn } }
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.lczarny.lsnplanner.presentation.ui.classdetails.components
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,13 +31,12 @@ import com.lczarny.lsnplanner.presentation.components.AddIcon
 import com.lczarny.lsnplanner.presentation.components.AppNavBar
 import com.lczarny.lsnplanner.presentation.components.DiscardChangesDialog
 import com.lczarny.lsnplanner.presentation.components.SaveIcon
-import com.lczarny.lsnplanner.presentation.model.TabBarItem
+import com.lczarny.lsnplanner.model.TabBarItem
 import com.lczarny.lsnplanner.presentation.ui.classdetails.ClassDetailsViewModel
-import com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs.ClassHomeworkTab
-import com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs.ClassInfoTab
-import com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs.ClassSchedulesTab
-import com.lczarny.lsnplanner.presentation.ui.classdetails.components.tabs.ClassTestsTab
-import com.lczarny.lsnplanner.utils.navigateBackWithDataCheck
+import com.lczarny.lsnplanner.presentation.ui.classdetails.tab.ClassHomeworkTab
+import com.lczarny.lsnplanner.presentation.ui.classdetails.tab.ClassInfoTab
+import com.lczarny.lsnplanner.presentation.ui.classdetails.tab.ClassSchedulesTab
+import com.lczarny.lsnplanner.presentation.ui.classdetails.tab.ClassTestsTab
 import kotlinx.coroutines.launch
 
 @Composable
@@ -52,19 +53,34 @@ fun ClassDetailsPager(navController: NavController, viewModel: ClassDetailsViewM
     val testsTab = TabBarItem(id = "Exams", label = stringResource(R.string.class_exams_info))
     val homeworkTab = TabBarItem(id = "Homework", label = stringResource(R.string.class_homework_info))
 
-    val topBarItems = if (newClass) listOf(infoTab, scheduleTab) else listOf(infoTab, scheduleTab, testsTab, homeworkTab)
+    val topBarItems by lazy { if (newClass) listOf(infoTab, scheduleTab) else listOf(infoTab, scheduleTab, testsTab, homeworkTab) }
 
-    var discardChangesDialogOpen = remember { mutableStateOf(false) }
+    var discardChangesDialogOpen by remember { mutableStateOf(false) }
 
-    DiscardChangesDialog(discardChangesDialogOpen, navController)
+    DiscardChangesDialog(
+        visible = discardChangesDialogOpen,
+        onConfirm = {
+            discardChangesDialogOpen = false
+            navController.popBackStack()
+        },
+        onDismiss = { discardChangesDialogOpen = false }
+    )
 
-    classInfo?.let { classInfoData ->
+    BackHandler(dataChanged) { discardChangesDialogOpen = true }
+
+    classInfo?.let { classInfo ->
         Scaffold(
             topBar = {
                 Column {
                     AppNavBar(
-                        title = if (newClass) stringResource(R.string.route_new_plan_class) else classInfoData.name,
-                        onNavIconClick = { navController.navigateBackWithDataCheck(dataChanged, discardChangesDialogOpen) },
+                        title = if (newClass) stringResource(R.string.route_new_plan_class) else classInfo.name,
+                        onNavIconClick = {
+                            if (dataChanged) {
+                                discardChangesDialogOpen = true
+                            } else {
+                                navController.popBackStack()
+                            }
+                        },
                         actions = {
                             IconButton(
                                 onClick = { viewModel.saveClass() },

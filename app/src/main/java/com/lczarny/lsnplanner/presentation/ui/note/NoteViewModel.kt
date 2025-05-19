@@ -2,14 +2,16 @@ package com.lczarny.lsnplanner.presentation.ui.note
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lczarny.lsnplanner.data.common.model.Importance
-import com.lczarny.lsnplanner.data.common.model.NoteModel
-import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
-import com.lczarny.lsnplanner.data.common.repository.NoteRepository
-import com.lczarny.lsnplanner.data.common.repository.SessionRepository
+import com.lczarny.lsnplanner.database.model.Importance
+import com.lczarny.lsnplanner.database.model.Note
 import com.lczarny.lsnplanner.di.IoDispatcher
-import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
-import com.lczarny.lsnplanner.utils.currentTimestamp
+import com.lczarny.lsnplanner.domain.datastore.GetAppSettingsUseCase
+import com.lczarny.lsnplanner.domain.datastore.SetAppSettingUseCase
+import com.lczarny.lsnplanner.domain.note.LoadNoteUseCase
+import com.lczarny.lsnplanner.domain.note.SaveNoteUseCase
+import com.lczarny.lsnplanner.model.DetailsScreenState
+import com.lczarny.lsnplanner.model.Pref
+import com.lczarny.lsnplanner.utils.updateIfChanged
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,20 +24,21 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
-    private val sessionRepository: SessionRepository,
-    private val noteRepository: NoteRepository,
-    private val dataStoreRepository: DataStoreRepository
+    private val getAppSettingsUseCase: GetAppSettingsUseCase,
+    private val setAppSettingUseCase: SetAppSettingUseCase,
+    private val loadNoteUseCase: LoadNoteUseCase,
+    private val saveNoteUseCase: SaveNoteUseCase,
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(DetailsScreenState.Loading)
 
-    private val _note = MutableStateFlow<NoteModel?>(null)
+    private val _note = MutableStateFlow<Note?>(null)
     private val _dataChanged = MutableStateFlow(false)
     private val _saveEnabled = MutableStateFlow(false)
 
     private val _noteImportanceTutorialDone = MutableStateFlow(false)
 
-    private lateinit var _initialData: NoteModel
+    private lateinit var _initialData: Note
 
     val screenState = _screenState.asStateFlow()
 
@@ -74,20 +77,13 @@ class NoteViewModel @Inject constructor(
 
         _screenState.update { DetailsScreenState.Loading }
 
-        noteId?.let { id ->
-            viewModelScope.launch(ioDispatcher) {
-                noteRepository.getById(id).let { note ->
-                    _note.update { note }
-                    _initialData = note.copy()
-                    _screenState.update { DetailsScreenState.Edit }
-                }
-            }
-        } ?: run {
-            NoteModel(lessonPlanId = sessionRepository.activeLessonPlan.id!!).let { note ->
+        viewModelScope.launch(ioDispatcher) {
+            loadNoteUseCase.invoke(noteId).let { note ->
                 _note.update { note }
                 _initialData = note.copy()
-                _screenState.update { DetailsScreenState.Create }
             }
+        }.invokeOnCompletion {
+            _screenState.update { if (noteId == null) DetailsScreenState.Create else DetailsScreenState.Edit }
         }
     }
 
@@ -95,13 +91,7 @@ class NoteViewModel @Inject constructor(
         _screenState.update { DetailsScreenState.Saving }
 
         viewModelScope.launch(ioDispatcher) {
-            _note.value?.let { note ->
-                note.id?.let {
-                    noteRepository.update(note.apply { modifyDate = currentTimestamp() })
-                } ?: run {
-                    noteRepository.insert(note)
-                }
-            }
+            saveNoteUseCase.invoke(_note.value!!)
         }.invokeOnCompletion {
             _screenState.update { DetailsScreenState.Finished }
         }
@@ -110,13 +100,13 @@ class NoteViewModel @Inject constructor(
     fun markNoteImportanceTutorialDone() {
         viewModelScope.launch(ioDispatcher) {
             _noteImportanceTutorialDone.update { true }
-            dataStoreRepository.setTutorialNoteImportanceDone()
+            setAppSettingUseCase.invoke(Pref.TutorialNoteImportance(), "true")
         }
     }
 
     private fun watchSettings() {
         viewModelScope.launch(ioDispatcher) {
-            dataStoreRepository.getAppSettings().flowOn(ioDispatcher).collect { appSettings ->
+            getAppSettingsUseCase.invoke().flowOn(ioDispatcher).collect { appSettings ->
                 _noteImportanceTutorialDone.update { appSettings.tutorials.noteImportanceDone }
             }
         }
@@ -125,10 +115,10 @@ class NoteViewModel @Inject constructor(
     private fun checkSaveEnabled() {
         val titleNotEmpty = _note.value?.title?.isNotEmpty() == true
         val contentNotEmpty = _note.value?.content?.isNotEmpty() == true
-        _saveEnabled.update { titleNotEmpty && contentNotEmpty }
+        _saveEnabled.updateIfChanged(titleNotEmpty && contentNotEmpty)
     }
 
     private fun checkDataChanged() {
-        _dataChanged.update { _initialData != note.value }
+        _dataChanged.updateIfChanged(_initialData != note.value)
     }
 }

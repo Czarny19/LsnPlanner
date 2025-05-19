@@ -1,7 +1,6 @@
 package com.lczarny.lsnplanner.di
 
 import com.lczarny.lsnplanner.BuildConfig
-import com.lczarny.lsnplanner.data.common.repository.AuthRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -39,8 +38,4 @@ object SupabaseModule {
     @Provides
     @Singleton
     fun provideSupabaseAuth(client: SupabaseClient): Auth = client.auth
-
-    @Provides
-    @Singleton
-    fun provideAuthRepository(auth: Auth): AuthRepository = AuthRepository(auth)
 }

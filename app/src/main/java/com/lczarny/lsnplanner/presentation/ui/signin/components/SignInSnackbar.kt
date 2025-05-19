@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.lczarny.lsnplanner.R
-import com.lczarny.lsnplanner.data.common.repository.AuthError
+import com.lczarny.lsnplanner.online.model.AuthError
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 

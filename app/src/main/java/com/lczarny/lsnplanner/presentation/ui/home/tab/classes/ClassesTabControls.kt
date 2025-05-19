@@ -14,13 +14,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
+import com.lczarny.lsnplanner.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.presentation.components.AppDatePickerDialog
 import com.lczarny.lsnplanner.presentation.components.AppIcons
 import com.lczarny.lsnplanner.presentation.components.BackIcon
 import com.lczarny.lsnplanner.presentation.components.FabMenu
 import com.lczarny.lsnplanner.presentation.components.FabMenuItem
 import com.lczarny.lsnplanner.presentation.components.NextIcon
-import com.lczarny.lsnplanner.presentation.model.mapper.ClassViewType
 import com.lczarny.lsnplanner.presentation.navigation.ClassDetailsRoute
 import com.lczarny.lsnplanner.presentation.ui.home.HomeViewModel
 import com.lczarny.lsnplanner.utils.dateTimeFromEpochMilis
@@ -48,7 +48,6 @@ fun ClassesTabFab(
     navController: NavController,
     classesPagerState: PagerState
 ) {
-    val lessonPlan by viewModel.lessonPlan.collectAsStateWithLifecycle()
     val classesCurrentDate by viewModel.classesCurrentDate.collectAsStateWithLifecycle()
     val classesDisplayType by viewModel.classesDisplayType.collectAsStateWithLifecycle()
 
@@ -71,32 +70,30 @@ fun ClassesTabFab(
         )
     }
 
-    lessonPlan?.let {
-        FabMenu(
-            items = listOf(
-                FabMenuItem(
-                    imageVector = AppIcons.DATE,
-                    label = stringResource(R.string.class_select_date),
-                    onClick = { showClassesDateDialog = true }
-                ),
-                FabMenuItem(
-                    visible = classesDisplayType != ClassViewType.List,
-                    imageVector = AppIcons.LIST,
-                    label = stringResource(R.string.home_tab_classes_list_view),
-                    onClick = { viewModel.changeClassesViewType(ClassViewType.List) }
-                ),
-                FabMenuItem(
-                    visible = classesDisplayType != ClassViewType.Timeline,
-                    imageVector = AppIcons.TIMELINE,
-                    label = stringResource(R.string.home_tab_classes_timeline_view),
-                    onClick = { viewModel.changeClassesViewType(ClassViewType.Timeline) }
-                ),
-                FabMenuItem(
-                    imageVector = AppIcons.ADD,
-                    label = stringResource(R.string.class_new),
-                    onClick = { navController.navigate(ClassDetailsRoute(defaultWeekDay = classesPagerState.currentPage + 1)) },
-                )
+    FabMenu(
+        items = listOf(
+            FabMenuItem(
+                imageVector = AppIcons.DATE,
+                label = stringResource(R.string.class_select_date),
+                onClick = { showClassesDateDialog = true }
+            ),
+            FabMenuItem(
+                visible = classesDisplayType != ClassViewType.List,
+                imageVector = AppIcons.LIST,
+                label = stringResource(R.string.home_tab_classes_list_view),
+                onClick = { viewModel.changeClassesViewType(ClassViewType.List) }
+            ),
+            FabMenuItem(
+                visible = classesDisplayType != ClassViewType.Timeline,
+                imageVector = AppIcons.TIMELINE,
+                label = stringResource(R.string.home_tab_classes_timeline_view),
+                onClick = { viewModel.changeClassesViewType(ClassViewType.Timeline) }
+            ),
+            FabMenuItem(
+                imageVector = AppIcons.ADD,
+                label = stringResource(R.string.class_new),
+                onClick = { navController.navigate(ClassDetailsRoute(defaultWeekDay = classesPagerState.currentPage + 1)) },
             )
         )
-    }
+    )
 }

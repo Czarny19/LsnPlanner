@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "LsnPlanner"
 include(":app")
- 
+include(":database")
+include(":online")

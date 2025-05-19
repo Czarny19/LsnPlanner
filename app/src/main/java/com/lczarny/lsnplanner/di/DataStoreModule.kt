@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.lczarny.lsnplanner.data.common.repository.DataStoreRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,14 +18,11 @@ import kotlinx.coroutines.CoroutineScope
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-private const val USER_PREFERENCES = "user"
-private const val TUTORIAL_PREFERENCES = "tutorial"
-
-@Retention()
+@Retention(AnnotationRetention.BINARY)
 @Qualifier
 annotation class UserDataStore
 
-@Retention()
+@Retention(AnnotationRetention.BINARY)
 @Qualifier
 annotation class TutorialDataStore
 
@@ -40,9 +36,9 @@ object DataStoreModule {
     fun provideUserDataStore(@ApplicationContext context: Context, @IoDispatcher ioDispatcher: CoroutineDispatcher): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-            migrations = listOf(SharedPreferencesMigration(context, USER_PREFERENCES)),
+            migrations = listOf(SharedPreferencesMigration(context, "user")),
             scope = CoroutineScope(ioDispatcher),
-            produceFile = { context.preferencesDataStoreFile(USER_PREFERENCES) }
+            produceFile = { context.preferencesDataStoreFile("user") }
         )
 
     @Provides
@@ -51,15 +47,8 @@ object DataStoreModule {
     fun provideTutorialDataStore(@ApplicationContext context: Context, @IoDispatcher ioDispatcher: CoroutineDispatcher): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-            migrations = listOf(SharedPreferencesMigration(context, TUTORIAL_PREFERENCES)),
+            migrations = listOf(SharedPreferencesMigration(context, "tutorial")),
             scope = CoroutineScope(ioDispatcher),
-            produceFile = { context.preferencesDataStoreFile(TUTORIAL_PREFERENCES) }
+            produceFile = { context.preferencesDataStoreFile("tutorial") }
         )
-
-    @Provides
-    @Singleton
-    fun provideDataStoreRepository(
-        @UserDataStore userDataStore: DataStore<Preferences>,
-        @TutorialDataStore tutorialDataStore: DataStore<Preferences>
-    ): DataStoreRepository = DataStoreRepository(userDataStore, tutorialDataStore)
 }

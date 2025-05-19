@@ -11,7 +11,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.lczarny.lsnplanner.R
 import com.lczarny.lsnplanner.presentation.components.FullScreenLoading
-import com.lczarny.lsnplanner.presentation.model.DetailsScreenState
+import com.lczarny.lsnplanner.model.DetailsScreenState
 import com.lczarny.lsnplanner.presentation.ui.classdetails.components.ClassDetailsPager
 
 @Composable
